@@ -1,0 +1,116 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace ConsoleApp1.Models
+{
+
+    public class UploadResult
+    {
+        public string Originalfilename { get; set; } = string.Empty;
+        public string ETag { get; set; } = string.Empty;
+        public long Size { get; set; }
+        public string Bucketname { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+    }
+
+
+
+    public class FileInfoModel
+    {
+        public int Id { get; set; }
+        public string StoredFileName { get; set; } = string.Empty;
+        public string OriginalFileName { get; set; } = string.Empty;
+        public string Bucketname { get; set; } = string.Empty;
+        public string RelativePath { get; set; } = string.Empty;
+        public string AbsolutePath { get; set; } = string.Empty;
+        public long FileSize { get; set; }
+        public string MimeType { get; set; } = string.Empty;
+        public DateTime UploadTime { get; set; }
+        public string Uploader { get; set; } = string.Empty;
+        public string ETag { get; set; } = string.Empty;
+    }
+
+
+    public class MultipartUploadRequest
+    {
+        public string bucket { get; set; } = string.Empty;
+        public string originalFileName { get; set; } = string.Empty;
+        public string storedFileName { get; set; } = string.Empty;
+        public string filePath { get; set; } = string.Empty;
+        public string contentType { get; set; } = string.Empty;
+        public string username { get; set; } = string.Empty;
+
+         public List<string> Tags { get; set; } = new List<string>(); // 标签名
+    }
+
+    public class FileQueryResult
+    {
+        public List<FileInfoModel> Items { get; set; } = new();
+        public int TotalCount { get; set; }
+    }
+
+    [Table("file_info")]
+    public class FileRecord
+    {
+        [Key]
+        [Column("id")]
+        public int Id { get; set; }
+
+        [Column("stored_file_name")]
+        public string StoredFileName { get; set; }
+
+        [Column("original_file_name")]
+        public string OriginalFileName { get; set; }
+
+        [Column("bucketname")]
+        public string BucketName { get; set; }
+
+        [Column("relative_path")]
+        public string RelativePath { get; set; }
+
+        [Column("absolute_path")]
+        public string AbsolutePath { get; set; }
+
+        [Column("file_size")]
+        public long FileSize { get; set; }
+
+        [Column("mime_type")]
+        public string MimeType { get; set; }
+
+        [Column("upload_time")]
+        public DateTime UploadTime { get; set; }
+
+        [Column("uploader")]
+        public string Uploader { get; set; }
+
+        public ICollection<FileTag> FileTags { get; set; }
+    }
+
+    [Table("tags")]
+    public class Tag
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public ICollection<FileTag> FileTags { get; set; }
+    }
+
+    [Table("file_tags")]
+    public class FileTag
+    {
+        public int FileId { get; set; }
+        public FileRecord FileRecord { get; set; }
+
+        public int TagId { get; set; }
+        public Tag Tag { get; set; }
+    }
+    
+
+    public class CreateTagDto
+{
+    public string Name { get; set; }
+}
+
+
+
+
+}
