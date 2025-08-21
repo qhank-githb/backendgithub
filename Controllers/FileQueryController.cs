@@ -20,7 +20,6 @@ namespace ConsoleApp1.Controllers
 
         // GET: /api/FileInfo
         [HttpGet]
-         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<List<FileInfoModel>>> GetAllFiles()
         {
             var files = await _iQueryService.GetAllFilesAsync();
@@ -29,7 +28,6 @@ namespace ConsoleApp1.Controllers
 
         // GET: /api/FileInfo/5
         [HttpGet("{id}")]
-         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<FileInfoModel>> GetFileById(int id)
         {
             var file = await _iQueryService.GetFileByIdAsync(id);
