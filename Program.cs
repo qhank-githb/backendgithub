@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http.Features;
 using ConsoleApp1.Interfaces;
-using ConsoleApp1.Options; 
-using ConsoleApp1.Service; 
+using ConsoleApp1.Options;
+using ConsoleApp1.Service;
 using Microsoft.Extensions.Options;
 using Amazon.S3;
 using Amazon.Runtime;
@@ -11,15 +11,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-
-
-
-
 var builder = WebApplication.CreateBuilder(args);
 
+// 允许外部访问
 builder.WebHost.UseUrls("http://0.0.0.0:5000");
 
-
+// 读取数据库连接字符串
 var dbConnectionString = builder.Configuration.GetSection("Minio:DbConnectionString").Value;
 
 // 注入 DbContext
@@ -30,7 +27,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 
-// 添加 CORS 服务
+// 添加 CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -39,27 +36,29 @@ builder.Services.AddCors(options =>
             .AllowAnyOrigin()
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .WithExposedHeaders("Content-Disposition"); 
+            .WithExposedHeaders("Content-Disposition");
     });
 });
 
+// 注册 MinIO 服务
+builder.Services.Configure<MinioOptions>(builder.Configuration.GetSection("Minio"));
 
-// 在 Program.cs 中注册
 builder.Services.AddSingleton<IAmazonS3>(sp => {
     var minioOptions = sp.GetRequiredService<IOptions<MinioOptions>>().Value;
     var creds = new BasicAWSCredentials(minioOptions.AccessKey, minioOptions.SecretKey);
-    var config = new AmazonS3Config {
+    var config = new AmazonS3Config
+    {
         ServiceURL = $"http://{minioOptions.Endpoint}",
         ForcePathStyle = true
     };
     return new AmazonS3Client(creds, config);
 });
-builder.Services.AddSingleton<TransferUtility>(sp => 
+
+builder.Services.AddSingleton<TransferUtility>(sp =>
     new TransferUtility(sp.GetRequiredService<IAmazonS3>())
 );
 
-
-// 1️⃣ 允许上传大文件（500MB）
+// 上传大文件限制 500MB
 builder.WebHost.ConfigureKestrel(opts =>
 {
     opts.Limits.MaxRequestBodySize = 524_288_000; // 500MB
@@ -67,29 +66,22 @@ builder.WebHost.ConfigureKestrel(opts =>
 
 builder.Services.Configure<FormOptions>(opts =>
 {
-    opts.MultipartBodyLengthLimit = 524_288_000;
+    opts.MultipartBodyLengthLimit = 524_288_000; // 500MB
 });
 
+// 注册业务服务
 builder.Services.AddScoped<IBucketService, BucketService>();
-
-
-// 2️⃣ 绑定 appsettings.json 中的 Minio 节配置
-builder.Services.Configure<MinioOptions>(builder.Configuration.GetSection("Minio"));
-
-// 3️⃣ 注册你自己的服务
-builder.Services.AddScoped<IQueryService, QueryService>(); 
+builder.Services.AddScoped<IQueryService, QueryService>();
 builder.Services.AddScoped<IUploadService, UploadService>();
 builder.Services.AddScoped<IDownloadService, DownloadService>();
 builder.Services.AddScoped<IDownloadByIDService, DownloadByIDService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IFileTagService, FileTagService>();
 
-
-builder.Services.AddAuthorization();
+// 添加控制器
 builder.Services.AddControllers();
 
-
-//JWT
+// 添加 JWT 认证
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -109,10 +101,12 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// 添加授权
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
-///////
-// 测试数据库
+// 确保数据库表存在
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -120,12 +114,14 @@ using (var scope = app.Services.CreateScope())
     Console.WriteLine("数据库连接成功并确保表存在");
 }
 
-
-//////
-
+// 中间件顺序：Cors → Authentication → Authorization → Routing → Endpoints
 app.UseCors("AllowAll");
-app.UseRouting();
-app.UseAuthorization();
-app.MapControllers();
-app.Run();
 
+app.UseRouting();
+
+app.UseAuthentication(); // ✅ 必须在 UseAuthorization 之前
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
