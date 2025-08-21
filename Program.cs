@@ -81,7 +81,11 @@ builder.Services.AddScoped<IFileTagService, FileTagService>();
 // 添加控制器
 builder.Services.AddControllers();
 
-// 添加 JWT 认证
+// ✅ 设置 JWT 认证
+var jwtSecretKey = "MySuperSecretKeyForJWTToken_32BytesOrMore!"; // ⚠️ 必须 32+ 字节
+var issuer = "my_app_issuer";
+var audience = "my_app_audience";
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -95,9 +99,9 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = "your_issuer",
-        ValidAudience = "your_audience",
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your_secret_key_here"))
+        ValidIssuer = issuer,
+        ValidAudience = audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
     };
 });
 
