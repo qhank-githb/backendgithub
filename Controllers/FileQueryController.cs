@@ -42,6 +42,7 @@ namespace ConsoleApp1.Controllers
 
 
         [HttpGet("query")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<FileQueryResult>> QueryFiles(
                 // 原有查询参数
                 [FromQuery] int? id,
