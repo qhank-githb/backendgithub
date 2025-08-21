@@ -11,7 +11,7 @@ public class AuthController : ControllerBase
     public IActionResult Login([FromBody] LoginRequest request)
     {
         // 1. 校验用户名密码（这里用示例，实际可查数据库）
-        if(request.Username != "admin" || request.Password != "123456")
+        if(request.Username != "bolo-vue-test" || request.Password != "123456")
             return Unauthorized(new { message = "用户名或密码错误" });
 
         // 2. 生成 JWT
