@@ -180,7 +180,8 @@ private async Task<int> InsertFileInfoAsync(
         ETag = completeResponse.ETag,
         Size = fileLength,
         Bucketname = request.bucket,
-        Username = request.username
+        Username = request.username,
+        Tags = request.Tags
     };
 
             // 写入 file_info 并返回自增ID

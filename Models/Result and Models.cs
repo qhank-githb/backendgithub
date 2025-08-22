@@ -11,6 +11,7 @@ namespace ConsoleApp1.Models
         public long Size { get; set; }
         public string Bucketname { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
+        public List<string> Tags { get; set; } = new List<string>();
     }
 
 
