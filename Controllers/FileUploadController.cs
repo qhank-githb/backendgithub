@@ -81,7 +81,8 @@ namespace MinioWebApi.Controllers
                     StoredFileName = request.storedFileName,
                     Size = result.Size,
                     ETag = result.ETag,
-                    Tags = tagList
+                    Tags = tagList,
+                    Uploadtime = DateTime.Now
                 });
             }
             catch (Exception ex)
