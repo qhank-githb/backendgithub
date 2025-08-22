@@ -77,6 +77,8 @@ builder.Services.AddScoped<IDownloadService, DownloadService>();
 builder.Services.AddScoped<IDownloadByIDService, DownloadByIDService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IFileTagService, FileTagService>();
+builder.Services.AddScoped<IOperationLogService, OperationLogService>();
+
 
 // 添加控制器
 builder.Services.AddControllers();

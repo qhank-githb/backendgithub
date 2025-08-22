@@ -1,4 +1,6 @@
-public interface IDownloadService
+namespace ConsoleApp1.Interfaces
+{
+       public interface IDownloadService
 {
         Task<Stream> DownloadObjectAsStreamAsync(string bucketName, string objectName);
 
@@ -6,4 +8,7 @@ public interface IDownloadService
 
         Task<(Stream ZipStream, string? Error)> BatchDownloadByIdsAsync(List<int> ids);
 
+} 
 }
+
+

@@ -16,17 +16,21 @@ namespace ConsoleApp1.Service
         private readonly TransferUtility _transferUtility;
         private readonly string _dbConnectionString;
 
+        private readonly IOperationLogService _iOperationLogService;
+
         public UploadService(
             IOptions<MinioOptions> options,
             IQueryService iQueryService,
             IAmazonS3 s3Client,
-            TransferUtility transferUtility)
+            TransferUtility transferUtility,
+            IOperationLogService iOperationLogService)
         {
             var minioOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
             _s3Client = s3Client;
             _transferUtility = transferUtility;
             _dbConnectionString = minioOptions.DbConnectionString;
             _iQueryService = iQueryService ?? throw new ArgumentNullException(nameof(iQueryService));
+            _iOperationLogService = iOperationLogService;
         }
 
 
@@ -179,57 +183,68 @@ private async Task<int> InsertFileInfoAsync(
         Username = request.username
     };
 
-    // 写入 file_info 并返回自增ID
-    // 写入 file_info 并返回自增ID
-var fileId = await InsertFileInfoAsync(
-    result,
-    request.originalFileName,
-    request.storedFileName,
-    request.bucket,
-    request.originalFileName,
-    $"/{request.bucket}/{request.originalFileName}",
-    request.contentType,
-    request.username
-);
+            // 写入 file_info 并返回自增ID
+            // 写入 file_info 并返回自增ID
+            var fileId = await InsertFileInfoAsync(
+                result,
+                request.originalFileName,
+                request.storedFileName,
+                request.bucket,
+                request.originalFileName,
+                $"/{request.bucket}/{request.originalFileName}",
+                request.contentType,
+                request.username
+            );
 
-// 写入标签关联
-if (request.Tags != null && request.Tags.Count > 0)
-{
-    await using var conn = new MySqlConnection(_dbConnectionString);
-    await conn.OpenAsync();
-    await using var cmd = conn.CreateCommand();
-
-    foreach (var tagName in request.Tags)
+        await _iOperationLogService.LogAsync(new OperationLog
     {
-        int tagId;
+        UserName = request.username,
+        OperationType = "Upload",
+        FileName = request.originalFileName,
+        Bucket = request.bucket,
+        Timestamp = DateTime.UtcNow,
+        Status = "Success",
+        Message = "文件上传成功"
+    });
 
-        // 查询标签是否存在
-        cmd.CommandText = "SELECT Id FROM tags WHERE Name = @tagName LIMIT 1;";
-        cmd.Parameters.Clear();
-        cmd.Parameters.AddWithValue("@tagName", tagName);
-        var tagIdObj = await cmd.ExecuteScalarAsync();
+            // 写入标签关联
+            if (request.Tags != null && request.Tags.Count > 0)
+            {
+                await using var conn = new MySqlConnection(_dbConnectionString);
+                await conn.OpenAsync();
+                await using var cmd = conn.CreateCommand();
 
-        if (tagIdObj == null)
-        {
-            // 不存在就插入
-            cmd.CommandText = "INSERT INTO tags (Name) VALUES (@tagName); SELECT LAST_INSERT_ID();";
-            cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("@tagName", tagName);
-            tagId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
-        }
-        else
-        {
-            tagId = Convert.ToInt32(tagIdObj);
-        }
+                foreach (var tagName in request.Tags)
+                {
+                    int tagId;
 
-        // 插入 file_tags
-        cmd.CommandText = "INSERT IGNORE INTO file_tags (FileId, TagId) VALUES (@fileId, @tagId);";
-        cmd.Parameters.Clear();
-        cmd.Parameters.AddWithValue("@fileId", fileId);
-        cmd.Parameters.AddWithValue("@tagId", tagId);
-        await cmd.ExecuteNonQueryAsync();
-    }
-}
+                    // 查询标签是否存在
+                    cmd.CommandText = "SELECT Id FROM tags WHERE Name = @tagName LIMIT 1;";
+                    cmd.Parameters.Clear();
+                    cmd.Parameters.AddWithValue("@tagName", tagName);
+                    var tagIdObj = await cmd.ExecuteScalarAsync();
+
+                    if (tagIdObj == null)
+                    {
+                        // 不存在就插入
+                        cmd.CommandText = "INSERT INTO tags (Name) VALUES (@tagName); SELECT LAST_INSERT_ID();";
+                        cmd.Parameters.Clear();
+                        cmd.Parameters.AddWithValue("@tagName", tagName);
+                        tagId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                    }
+                    else
+                    {
+                        tagId = Convert.ToInt32(tagIdObj);
+                    }
+
+                    // 插入 file_tags
+                    cmd.CommandText = "INSERT IGNORE INTO file_tags (FileId, TagId) VALUES (@fileId, @tagId);";
+                    cmd.Parameters.Clear();
+                    cmd.Parameters.AddWithValue("@fileId", fileId);
+                    cmd.Parameters.AddWithValue("@tagId", tagId);
+                    await cmd.ExecuteNonQueryAsync();
+                }
+            }
 
 
     Console.WriteLine($"上传完成：文件名: {request.originalFileName}, ETag: {completeResponse.ETag}, 大小: {fileLength} 字节, Tags: {string.Join(",", request.Tags ?? new List<string>())}");

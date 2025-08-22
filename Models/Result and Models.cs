@@ -40,7 +40,7 @@ namespace ConsoleApp1.Models
         public string contentType { get; set; } = string.Empty;
         public string username { get; set; } = string.Empty;
 
-         public List<string> Tags { get; set; } = new List<string>(); // 标签名
+        public List<string> Tags { get; set; } = new List<string>(); // 标签名
     }
 
     public class FileQueryResult
@@ -103,12 +103,27 @@ namespace ConsoleApp1.Models
         public int TagId { get; set; }
         public Tag Tag { get; set; }
     }
-    
+
 
     public class CreateTagDto
+    {
+        public string Name { get; set; }
+    }
+
+
+public class OperationLog
 {
-    public string Name { get; set; }
+    public long Id { get; set; }
+    public string UserName { get; set; } = string.Empty;   // 只保留用户名
+    public string OperationType { get; set; } = string.Empty; // Upload/Delete/Download
+    public string FileName { get; set; } = string.Empty;
+    public string Bucket { get; set; } = string.Empty;
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+    public string Status { get; set; } = "Success"; // Success/Fail
+    public string Message { get; set; } = string.Empty;
 }
+
+
 
 
 

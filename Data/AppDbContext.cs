@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using ConsoleApp1.Models;
 
 // Data/AppDbContext.cs
-
 public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
@@ -10,6 +9,9 @@ public class AppDbContext : DbContext
     public DbSet<FileRecord> FileRecords { get; set; }
     public DbSet<Tag> Tags { get; set; }
     public DbSet<FileTag> FileTags { get; set; }
+
+    // ✅ 新增日志表
+    public DbSet<OperationLog> OperationLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,5 +30,9 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Tag>()
             .HasIndex(t => t.Name).IsUnique();
+
+        // ✅ 可选：给日志表加索引（便于查询）
+        modelBuilder.Entity<OperationLog>()
+            .HasIndex(l => l.Timestamp);
     }
 }
