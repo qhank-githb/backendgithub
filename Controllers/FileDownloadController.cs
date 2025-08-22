@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ConsoleApp1.Interfaces;
 
 
 namespace MinioWebApi.Controllers
