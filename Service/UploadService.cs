@@ -49,31 +49,32 @@ private async Task<int> InsertFileInfoAsync(
     await conn.OpenAsync();
     await using var cmd = conn.CreateCommand();
 
-    cmd.CommandText = @"
-        INSERT INTO file_info (
-            stored_file_name,
-            original_file_name,
-            bucketname,
-            relative_path,
-            absolute_path,
-            file_size,
-            mime_type,
-            upload_time,
-            uploader,
-            etag
-        ) VALUES (
-            @storedFileName,
-            @originalFileName,
-            @bucketName,
-            @relativePath,
-            @absolutePath,
-            @fileSize,
-            @mimeType,
-            NOW(),
-            @uploader,
-            @etag
-        );
-        SELECT LAST_INSERT_ID();"; // 返回自增ID
+cmd.CommandText = @"
+    INSERT INTO file_info (
+        stored_file_name,
+        original_file_name,
+        bucketname,
+        relative_path,
+        absolute_path,
+        file_size,
+        mime_type,
+        upload_time,
+        uploader,
+        etag
+    ) VALUES (
+        @storedFileName,
+        @originalFileName,
+        @bucketName,
+        @relativePath,
+        @absolutePath,
+        @fileSize,
+        @mimeType,
+        @uploadTime,
+        @uploader,
+        @etag
+    );
+    SELECT LAST_INSERT_ID();";
+ // 返回自增ID
 
     cmd.Parameters.AddWithValue("@storedFileName", storedFileName);
     cmd.Parameters.AddWithValue("@originalFileName", originalFileName);
@@ -82,6 +83,7 @@ private async Task<int> InsertFileInfoAsync(
     cmd.Parameters.AddWithValue("@absolutePath", absolutePath);
     cmd.Parameters.AddWithValue("@fileSize", result.Size);
     cmd.Parameters.AddWithValue("@mimeType", mimeType);
+     cmd.Parameters.AddWithValue("@uploadTime", result.Uploadtime); 
     cmd.Parameters.AddWithValue("@uploader", uploader);
     cmd.Parameters.AddWithValue("@etag", result.ETag);
 
@@ -174,6 +176,7 @@ private async Task<int> InsertFileInfoAsync(
 
     var completeResponse = await _s3Client.CompleteMultipartUploadAsync(completeRequest);
 
+    var uploadTime = DateTime.Now;
     var result = new UploadResult
     {
         Originalfilename = request.originalFileName,
@@ -182,7 +185,7 @@ private async Task<int> InsertFileInfoAsync(
         Bucketname = request.bucket,
         Username = request.username,
         Tags = request.Tags,
-        Uploadtime = DateTime.Now,
+        Uploadtime = uploadTime,
     };
 
             // 写入 file_info 并返回自增ID
