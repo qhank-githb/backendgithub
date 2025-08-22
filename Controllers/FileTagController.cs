@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ConsoleApp1.Interfaces;
+using ConsoleApp1.Models;
 
 [ApiController]
 [Route("api/files")]
@@ -32,5 +33,17 @@ public class FileTagController : ControllerBase
         var files = await _fileTagService.GetFilesByTagsAsync(tagNames.ToList(), matchAll);
         return Ok(files);
     }
+
+    [HttpGet("file/{fileId}")]
+        public async Task<ActionResult<List<Tag>>> GetTagsByFile(int fileId)
+        {
+            var tags = await  _fileTagService.GetTagsByFileAsync(fileId);
+            if (tags == null || tags.Count == 0)
+            {
+                return NotFound($"No tags found for fileId {fileId}.");
+            }
+
+            return Ok(tags);
+        }
 
 }

@@ -89,7 +89,6 @@ namespace ConsoleApp1.Service
     {
         if (matchAllTags)
         {
-            // ✅ 必须匹配所有标签（子查询方式）
             tagCondition = $@"
                 f.id IN (
                     SELECT ft.FileId
@@ -104,13 +103,12 @@ namespace ConsoleApp1.Service
         }
         else
         {
-            // ✅ 任意一个标签即可（JOIN）
             tagJoin = "JOIN file_tags ft ON f.id = ft.FileId JOIN tags t ON ft.TagId = t.Id";
             tagCondition = $"t.Name IN ({string.Join(",", tags.Select((t,i)=> $"@tag{i}"))})";
             conditions.Add(tagCondition);
         }
 
-        for (int i=0;i<tags.Count;i++)
+        for (int i = 0; i < tags.Count; i++)
             cmd.Parameters.AddWithValue($"@tag{i}", tags[i]);
     }
 
@@ -137,15 +135,43 @@ namespace ConsoleApp1.Service
     cmd.Parameters.AddWithValue("@offset", offset);
 
     var reader = await cmd.ExecuteReaderAsync();
+    var fileList = new List<FileInfoModel>();
     while (await reader.ReadAsync())
     {
-        files.Add(MapReaderToFileInfo(reader));
+        fileList.Add(MapReaderToFileInfo(reader));
+    }
+    await reader.CloseAsync();
+
+    // 为每个文件查询标签
+    if (fileList.Count > 0)
+    {
+        var fileIds = fileList.Select(f => f.Id).ToList();
+        var tagCmd = conn.CreateCommand();
+        tagCmd.CommandText = $@"
+            SELECT ft.FileId, t.Name
+            FROM file_tags ft
+            JOIN tags t ON ft.TagId = t.Id
+            WHERE ft.FileId IN ({string.Join(",", fileIds)})
+        ";
+        var tagReader = await tagCmd.ExecuteReaderAsync();
+        var tagDict = new Dictionary<int, List<string>>();
+        while (await tagReader.ReadAsync())
+        {
+            int fileId = tagReader.GetInt32("FileId");
+            string tagName = tagReader.GetString("Name");
+            if (!tagDict.ContainsKey(fileId)) tagDict[fileId] = new List<string>();
+            tagDict[fileId].Add(tagName);
+        }
+        await tagReader.CloseAsync();
+
+        // 给文件模型赋值标签
+        foreach (var file in fileList)
+        {
+            file.Tags = tagDict.ContainsKey(file.Id) ? tagDict[file.Id] : new List<string>();
+        }
     }
 
-    Console.WriteLine("SQL => " + cmd.CommandText);
-
-
-    return (files, totalCount);
+    return (fileList, totalCount);
 }
 
 
