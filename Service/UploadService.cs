@@ -181,7 +181,8 @@ private async Task<int> InsertFileInfoAsync(
         Size = fileLength,
         Bucketname = request.bucket,
         Username = request.username,
-        Tags = request.Tags
+        Tags = request.Tags,
+        Uploadtime = DateTime.Now,
     };
 
             // 写入 file_info 并返回自增ID

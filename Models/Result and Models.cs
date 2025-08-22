@@ -4,15 +4,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace ConsoleApp1.Models
 {
 
-    public class UploadResult
-    {
-        public string Originalfilename { get; set; } = string.Empty;
-        public string ETag { get; set; } = string.Empty;
-        public long Size { get; set; }
-        public string Bucketname { get; set; } = string.Empty;
-        public string Username { get; set; } = string.Empty;
-        public List<string> Tags { get; set; } = new List<string>();
-    }
+        public class UploadResult
+        {
+            public string Originalfilename { get; set; } = string.Empty;
+            public string ETag { get; set; } = string.Empty;
+            public long Size { get; set; }
+            public string Bucketname { get; set; } = string.Empty;
+            public string Username { get; set; } = string.Empty;
+            public List<string> Tags { get; set; } = new List<string>();
+            public DateTime Uploadtime { get; set; }
+        }
 
 
 
