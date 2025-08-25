@@ -200,7 +200,13 @@ cmd.CommandText = @"
             );
 
 
-            Log.Information("{request.username} 于 {DateTime.Now} 成功上传 {request.originalFileName}");
+           Log.Information("用户 {Username} 于 {UploadTime} 成功上传文件 {OriginalFileName}, 存储名 {StoredFileName}, 大小 {FileSize} 字节",
+            request.username,
+            uploadTime,
+            request.originalFileName,
+            request.storedFileName,
+            fileLength);
+
 
             // 写入标签关联
             if (request.Tags != null && request.Tags.Count > 0)
