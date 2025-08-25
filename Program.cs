@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +59,17 @@ builder.Services.AddSingleton<TransferUtility>(sp =>
     new TransferUtility(sp.GetRequiredService<IAmazonS3>())
 );
 
+
+
+// 配置 Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()                   // 日志最小级别
+    .WriteTo.Console()                      // 输出到控制台
+    .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day) // 输出到文件，按天滚动
+    .CreateLogger();
+
+builder.Host.UseSerilog(); // 将 Serilog 集成到 ASP.NET Core
+
 // 上传大文件限制 500MB
 builder.WebHost.ConfigureKestrel(opts =>
 {
@@ -77,7 +89,6 @@ builder.Services.AddScoped<IDownloadService, DownloadService>();
 builder.Services.AddScoped<IDownloadByIDService, DownloadByIDService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IFileTagService, FileTagService>();
-builder.Services.AddScoped<IOperationLogService, OperationLogService>();
 
 
 // 添加控制器

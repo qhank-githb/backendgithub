@@ -6,6 +6,7 @@ using ConsoleApp1.Interfaces;
 using MySqlConnector;
 using Microsoft.Extensions.Options;
 using ConsoleApp1.Options;
+using Serilog;
 
 namespace ConsoleApp1.Service
 {
@@ -16,21 +17,18 @@ namespace ConsoleApp1.Service
         private readonly TransferUtility _transferUtility;
         private readonly string _dbConnectionString;
 
-        private readonly IOperationLogService _iOperationLogService;
 
         public UploadService(
             IOptions<MinioOptions> options,
             IQueryService iQueryService,
             IAmazonS3 s3Client,
-            TransferUtility transferUtility,
-            IOperationLogService iOperationLogService)
+            TransferUtility transferUtility)
         {
             var minioOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
             _s3Client = s3Client;
             _transferUtility = transferUtility;
             _dbConnectionString = minioOptions.DbConnectionString;
             _iQueryService = iQueryService ?? throw new ArgumentNullException(nameof(iQueryService));
-            _iOperationLogService = iOperationLogService;
         }
 
 
@@ -201,16 +199,8 @@ cmd.CommandText = @"
                 request.username
             );
 
-        await _iOperationLogService.LogAsync(new OperationLog
-    {
-        UserName = request.username,
-        OperationType = "Upload",
-        FileName = request.originalFileName,
-        Bucket = request.bucket,
-        Timestamp = DateTime.UtcNow,
-        Status = "Success",
-        Message = "文件上传成功"
-    });
+
+            Log.Information("{request.username} 于 {DateTime.Now} 成功上传 {request.originalFileName}");
 
             // 写入标签关联
             if (request.Tags != null && request.Tags.Count > 0)

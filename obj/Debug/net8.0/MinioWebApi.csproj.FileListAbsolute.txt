@@ -176,3 +176,17 @@ D:\bolo_backend\MinioWebApi\obj\Debug\net8.0\refint\MinioWebApi.dll
 D:\bolo_backend\MinioWebApi\obj\Debug\net8.0\MinioWebApi.pdb
 D:\bolo_backend\MinioWebApi\obj\Debug\net8.0\MinioWebApi.genruntimeconfig.cache
 D:\bolo_backend\MinioWebApi\obj\Debug\net8.0\ref\MinioWebApi.dll
+D:\bolo_backend\MinioWebApi\bin\Debug\net8.0\Microsoft.Extensions.Configuration.Binder.dll
+D:\bolo_backend\MinioWebApi\bin\Debug\net8.0\Microsoft.Extensions.Diagnostics.Abstractions.dll
+D:\bolo_backend\MinioWebApi\bin\Debug\net8.0\Microsoft.Extensions.FileProviders.Abstractions.dll
+D:\bolo_backend\MinioWebApi\bin\Debug\net8.0\Microsoft.Extensions.Hosting.Abstractions.dll
+D:\bolo_backend\MinioWebApi\bin\Debug\net8.0\Serilog.dll
+D:\bolo_backend\MinioWebApi\bin\Debug\net8.0\Serilog.AspNetCore.dll
+D:\bolo_backend\MinioWebApi\bin\Debug\net8.0\Serilog.Extensions.Hosting.dll
+D:\bolo_backend\MinioWebApi\bin\Debug\net8.0\Serilog.Extensions.Logging.dll
+D:\bolo_backend\MinioWebApi\bin\Debug\net8.0\Serilog.Formatting.Compact.dll
+D:\bolo_backend\MinioWebApi\bin\Debug\net8.0\Serilog.Settings.Configuration.dll
+D:\bolo_backend\MinioWebApi\bin\Debug\net8.0\Serilog.Sinks.Console.dll
+D:\bolo_backend\MinioWebApi\bin\Debug\net8.0\Serilog.Sinks.Debug.dll
+D:\bolo_backend\MinioWebApi\bin\Debug\net8.0\Serilog.Sinks.File.dll
+D:\bolo_backend\MinioWebApi\bin\Debug\net8.0\Serilog.Sinks.MSSqlServer.dll
