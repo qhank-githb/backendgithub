@@ -32,38 +32,47 @@ namespace ConsoleApp1.Service
         private readonly AppDbContext _dbContext;
 
 
-    public async Task EditFileAsync(EditFileDto dto)
-    {
-        // 1. 查找文件
-        var file = await _dbContext.FileRecords
-            .Include(f => f.FileTags)  // 包含标签关联
-            .FirstOrDefaultAsync(f => f.Id == dto.Id);
+public async Task EditFileAsync(EditFileDto dto)
+{
+    if (dto == null) throw new ArgumentNullException(nameof(dto));
 
-        if (file == null)
-            throw new FileNotFoundException("文件不存在");
+    // 1. 查找文件
+    var file = await _dbContext.FileRecords
+        .Include(f => f.FileTags)
+        .FirstOrDefaultAsync(f => f.Id == dto.Id);
 
-        // 2. 更新文件名
-        file.OriginalFileName = dto.FileName;
+    if (file == null)
+        throw new FileNotFoundException("文件不存在");
 
-        // 3. 更新标签
-        // 删除旧标签
+    // 2. 更新文件名
+    file.OriginalFileName = dto.FileName;
+
+    // 3. 更新标签
+    if (file.FileTags != null)
         _dbContext.FileTags.RemoveRange(file.FileTags);
 
-        // 插入新标签
-        var newTags = dto.Tags.Select(tagName => new FileTag
+    if (dto.Tags == null)
+        dto.Tags = new List<string>();
+
+    var newTags = new List<FileTag>();
+    foreach (var tagName in dto.Tags)
+    {
+        var tag = await _dbContext.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
+        if (tag == null)
         {
-            FileId = file.Id,
-            TagId = _dbContext.Tags
-                .Where(t => t.Name == tagName)
-                .Select(t => t.Id)
-                .FirstOrDefault() // 假设 tag 已存在
-        }).ToList();
-
-        await _dbContext.FileTags.AddRangeAsync(newTags);
-
-        // 4. 保存事务
-        await _dbContext.SaveChangesAsync();
+            tag = new Tag { Name = tagName };
+            await _dbContext.Tags.AddAsync(tag);
+            await _dbContext.SaveChangesAsync(); // 保存后才有 Id
+        }
+        newTags.Add(new FileTag { FileId = file.Id, TagId = tag.Id });
     }
+
+    await _dbContext.FileTags.AddRangeAsync(newTags);
+
+    // 4. 保存事务
+    await _dbContext.SaveChangesAsync();
+}
+
 }
 
 }
