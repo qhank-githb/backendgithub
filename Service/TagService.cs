@@ -37,7 +37,7 @@ public async Task EditFileAsync(EditFileDto dto)
     if (dto == null) throw new ArgumentNullException(nameof(dto));
 
     // 1. 查找文件
-    var file = await _dbContext.FileRecords
+    var file = await _context.FileRecords
         .Include(f => f.FileTags)
         .FirstOrDefaultAsync(f => f.Id == dto.Id);
 
@@ -49,7 +49,7 @@ public async Task EditFileAsync(EditFileDto dto)
 
     // 3. 更新标签
     if (file.FileTags != null)
-        _dbContext.FileTags.RemoveRange(file.FileTags);
+        _context.FileTags.RemoveRange(file.FileTags);
 
     if (dto.Tags == null)
         dto.Tags = new List<string>();
@@ -57,21 +57,22 @@ public async Task EditFileAsync(EditFileDto dto)
     var newTags = new List<FileTag>();
     foreach (var tagName in dto.Tags)
     {
-        var tag = await _dbContext.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
+        var tag = await _context.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
         if (tag == null)
         {
             tag = new Tag { Name = tagName };
-            await _dbContext.Tags.AddAsync(tag);
-            await _dbContext.SaveChangesAsync(); // 保存后才有 Id
+            await _context.Tags.AddAsync(tag);
+            await _context.SaveChangesAsync(); // 保存后才有 Id
         }
         newTags.Add(new FileTag { FileId = file.Id, TagId = tag.Id });
     }
 
-    await _dbContext.FileTags.AddRangeAsync(newTags);
+    await _context.FileTags.AddRangeAsync(newTags);
 
     // 4. 保存事务
-    await _dbContext.SaveChangesAsync();
+    await _context.SaveChangesAsync();
 }
+
 
 }
 
