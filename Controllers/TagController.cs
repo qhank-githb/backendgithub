@@ -15,7 +15,7 @@ public class TagController : ControllerBase
         try
         {
             var tag = await _tagService.CreateTagAsync(dto.Name);
-    return CreatedAtAction(nameof(GetAll), new { id = tag.Id }, tag);
+            return CreatedAtAction(nameof(GetAll), new { id = tag.Id }, tag);
         }
         catch (Exception ex)
         {
@@ -29,6 +29,14 @@ public class TagController : ControllerBase
         var tags = await _tagService.GetAllTagsAsync();
         return Ok(tags);
     }
+    
+     [HttpPost("edit")]
+    public async Task<IActionResult> EditFile([FromBody] EditFileDto dto)
+    {
+        await _tagService.EditFileAsync(dto);
+        return Ok(new { message = "文件信息修改成功" });
+    }
+
 }
 
 

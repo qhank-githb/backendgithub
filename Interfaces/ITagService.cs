@@ -8,6 +8,8 @@ namespace ConsoleApp1.Interfaces
         Task<Tag> CreateTagAsync(string name);
 
         Task<List<Tag>> GetAllTagsAsync();
+
+        Task EditFileAsync(EditFileDto dto);
     }
 
 }

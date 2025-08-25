@@ -129,6 +129,13 @@ public class OperationLog
     public string Message { get; set; } = string.Empty;
 }
 
+// 前端传过来的数据格式
+public class EditFileDto
+{
+    public int Id { get; set; }              // 文件ID
+    public string FileName { get; set; }     // 新的文件名
+    public List<string> Tags { get; set; }   // 新的标签列表
+}
 
 
 

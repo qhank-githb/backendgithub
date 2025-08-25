@@ -1,16 +1,19 @@
 using Microsoft.AspNetCore.Mvc;
 using ConsoleApp1.Interfaces;
 using ConsoleApp1.Models;
+using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("api/files")]
 public class FileTagController : ControllerBase
 {
     private readonly IFileTagService _fileTagService;
+    private readonly AppDbContext _dbContext;
 
-    public FileTagController(IFileTagService fileTagService)
+    public FileTagController(IFileTagService fileTagService, AppDbContext dbcontext)
     {
         _fileTagService = fileTagService;
+        _dbContext = dbcontext;
     }
 
     [HttpPost("{fileId}/tags")]
@@ -35,15 +38,17 @@ public class FileTagController : ControllerBase
     }
 
     [HttpGet("file/{fileId}")]
-        public async Task<ActionResult<List<Tag>>> GetTagsByFile(int fileId)
+    public async Task<ActionResult<List<Tag>>> GetTagsByFile(int fileId)
+    {
+        var tags = await _fileTagService.GetTagsByFileAsync(fileId);
+        if (tags == null || tags.Count == 0)
         {
-            var tags = await  _fileTagService.GetTagsByFileAsync(fileId);
-            if (tags == null || tags.Count == 0)
-            {
-                return NotFound($"No tags found for fileId {fileId}.");
-            }
-
-            return Ok(tags);
+            return NotFound($"No tags found for fileId {fileId}.");
         }
+
+        return Ok(tags);
+    }
+        
+
 
 }
