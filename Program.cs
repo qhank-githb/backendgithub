@@ -63,7 +63,7 @@ builder.Services.AddSingleton<TransferUtility>(sp =>
 
 // 配置 Serilog
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()                   // 日志最小级别
+    .MinimumLevel.Information()
     .WriteTo.Console()                      // 输出到控制台
     .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day) // 输出到文件，按天滚动
     .CreateLogger();
