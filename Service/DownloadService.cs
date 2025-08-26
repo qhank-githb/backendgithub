@@ -37,70 +37,91 @@ namespace ConsoleApp1.Service
 
     
     
-    /// 从 MinIO/S3 桶里下载对象并以 MemoryStream 返回，方便在 Web API 中做 FileResult。
-    /// 基于AWS SDK的 GetObject 方法 ，所有下载行为的基础方法
-    /// https://docs.aws.amazon.com/zh_cn/sdk-for-net/v3/developer-guide/csharp_s3_code_examples.html
-    public async Task<Stream> DownloadObjectAsStreamAsync(string bucketName, string objectName)
-    {
-        Console.WriteLine($"[DownloadObject] Bucket: {bucketName}, Key: {objectName}");
-
-        try
+ 
+        /// 从 MinIO/S3 桶里下载对象并以 MemoryStream 返回，方便在 Web API 中做 FileResult。
+        /// 基于AWS SDK的 GetObject 方法 ，所有下载行为的基础方法
+        /// https://docs.aws.amazon.com/zh_cn/sdk-for-net/v3/developer-guide/csharp_s3_code_examples.html
+        /// </summary>
+        public async Task<Stream> DownloadObjectAsStreamAsync(string bucketName, string objectName)
         {
-            var request = new GetObjectRequest
-            {
-                BucketName = bucketName,
-                Key = objectName
-            };
+            // 先查数据库里的原始文件名
+            var originalFileName = await _iQueryService.GetOriginalFileNameAsync(objectName, bucketName);
 
-            var response = await _s3Client.GetObjectAsync(request);
-            Console.WriteLine($"[DownloadObject] Found object {objectName}, length: {response.ContentLength}");
-             var userName = _httpContextAccessor.HttpContext?.User.Claims
-            .FirstOrDefault(c => c.Type == "username")?.Value
-            ?? _httpContextAccessor.HttpContext?.User.Identity?.Name;
-                Log.Information("用户 {username} 于 {Datetime.Now} 下载 {objectName}",userName,DateTime.Now,objectName);
-
-            // 推荐复制一份内容进内存中再返回
-                var memoryStream = new MemoryStream();
-            await response.ResponseStream.CopyToAsync(memoryStream);
-            memoryStream.Position = 0;
-
-            return memoryStream;
-        }
-        catch (AmazonS3Exception ex)
-        {
-            Console.WriteLine($"[DownloadObject] Error: {ex.Message}");
-            throw;
-        }
-    }
-    
-
-    //通过“原始文件名”和“桶名”在数据库中查找对应的“存储文件名”，然后下载文件
-        public async Task<(Stream? FileStream, string? Error)> DownloadFileAsync(string bucket, string originalFileName)
-        {
             try
             {
-                var key = await _iQueryService.GetStoredFileNameAsync(originalFileName, bucket);
-                if (string.IsNullOrEmpty(key))
-                    return (null, $"在桶 {bucket} 中找不到原始文件名为 {originalFileName} 的文件");
+                var request = new GetObjectRequest
+                {
+                    BucketName = bucketName,
+                    Key = objectName
+                };
 
-                var stream = await DownloadObjectAsStreamAsync(bucket, key);
-                if (stream == null)
-                    return (null, $"在桶 {bucket} 中找不到文件 {key}");
+                var response = await _s3Client.GetObjectAsync(request);
 
-                return (stream, null);
+                // 打印控制台日志
+                Console.WriteLine($"[DownloadObject] Bucket: {bucketName}, StoredName: {objectName}, OriginalName: {originalFileName}, Length: {response.ContentLength}");
+
+                // Serilog 日志
+                Log.Information("用户 {username} 下载文件 成功。桶: {bucket}, 原始名: {original}, 存储名: {stored}, 大小: {size} 字节",
+                    _httpContextAccessor.HttpContext?.User?.Identity?.Name ?? "匿名用户",
+                    bucketName,
+                    originalFileName ?? "(未知)",
+                    objectName,
+                    response.ContentLength);
+
+                // 推荐复制一份内容进内存中再返回
+                var memoryStream = new MemoryStream();
+                await response.ResponseStream.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+
+                return memoryStream;
             }
             catch (AmazonS3Exception ex)
             {
-                return (null, $"MinIO访问异常: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                return (null, $"未知错误: {ex.Message}");
+                Log.Error(ex, "下载文件失败。桶: {bucket}, 存储名: {stored}, 原始名: {original}", 
+                    bucketName, objectName, originalFileName ?? "(未知)");
+                throw;
             }
         }
 
+    
 
-    //  ！待补充！
+    //通过“原始文件名”和“桶名”在数据库中查找对应的“存储文件名”，然后下载文件
+public async Task<(Stream? FileStream, string? Error)> DownloadFileAsync(string bucket, string originalFileName)
+{
+    // 提前获取用户名，避免 try/catch 里作用域问题
+    var userName = _httpContextAccessor.HttpContext?.User.Claims
+        .FirstOrDefault(c => c.Type == "username")?.Value
+        ?? _httpContextAccessor.HttpContext?.User.Identity?.Name
+        ?? "未知用户";
+
+    string? key = null;
+
+    try
+    {
+        key = await _iQueryService.GetStoredFileNameAsync(originalFileName, bucket);
+        if (string.IsNullOrEmpty(key))
+            return (null, $"在桶 {bucket} 中找不到原始文件名为 {originalFileName} 的文件");
+
+        var stream = await DownloadObjectAsStreamAsync(bucket, key);
+        if (stream == null)
+            return (null, $"在桶 {bucket} 中找不到文件 {key}");
+
+
+        return (stream, null);
+    }
+    catch (AmazonS3Exception ex)
+    {
+        return (null, $"MinIO访问异常: {ex.Message}");
+    }
+    catch (Exception ex)
+    {
+
+        return (null, $"未知错误: {ex.Message}");
+    }
+}
+
+
+   
     //根据数据库中存储的多个文件 ID，批量下载对应文件，压缩为 Zip，返回 Stream
     public async Task<(Stream ZipStream, string? Error)> BatchDownloadByIdsAsync(List<int> ids)
         {

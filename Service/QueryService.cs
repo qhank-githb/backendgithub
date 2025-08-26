@@ -31,6 +31,22 @@ namespace ConsoleApp1.Service
             return result?.ToString();
         }
 
+                public async Task<string?> GetOriginalFileNameAsync(string storedFileName, string bucketName)
+        {
+            await using var connection = new MySqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            var query = "SELECT original_file_name FROM file_info WHERE stored_file_name = @storedFileName AND bucketname = @bucketname";
+
+            using var command = new MySqlCommand(query, connection);
+            command.Parameters.AddWithValue("@storedFileName", storedFileName);
+            command.Parameters.AddWithValue("@bucketname", bucketName);
+
+            var result = await command.ExecuteScalarAsync();
+            return result?.ToString();
+        }
+
+
         public async Task<List<FileInfoModel>> GetAllFilesAsync()
         {
             var files = new List<FileInfoModel>();
