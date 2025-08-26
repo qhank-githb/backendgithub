@@ -9,6 +9,7 @@ namespace ConsoleApp1.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] 
     public class FileQueryController : ControllerBase
     {
         private readonly IQueryService _iQueryService;
@@ -71,23 +72,23 @@ namespace ConsoleApp1.Controllers
             });
         }
 
-            
 
-    [HttpGet("query-ids")]
-    public async Task<IActionResult> QueryFileIds(
-       [FromQuery] int? id,
-       [FromQuery] string? uploader,
-       [FromQuery] string? fileName,
-       [FromQuery] string? bucket,
-       [FromQuery] DateTime? start,
-       [FromQuery] DateTime? end)
-    {
-        var ids = await _iQueryService.QueryFileIdsAsync(
-            id, uploader, fileName, bucket, start, end
-        );
 
-        return Ok(new { items = ids, total = ids.Count });
-}
+        [HttpGet("query-ids")]
+        public async Task<IActionResult> QueryFileIds(
+           [FromQuery] int? id,
+           [FromQuery] string? uploader,
+           [FromQuery] string? fileName,
+           [FromQuery] string? bucket,
+           [FromQuery] DateTime? start,
+           [FromQuery] DateTime? end)
+        {
+            var ids = await _iQueryService.QueryFileIdsAsync(
+                id, uploader, fileName, bucket, start, end
+            );
+
+            return Ok(new { items = ids, total = ids.Count });
+        }
 
 
 

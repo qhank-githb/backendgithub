@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using ConsoleApp1.Interfaces;
 using ConsoleApp1.Models;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MinioWebApi.Controllers
 {
     [ApiController]
     [Route("api/{bucketName}/[controller]")]
+    [Authorize] 
     public class FileUploadController : ControllerBase
     {
         private readonly IUploadService _iUploadService;

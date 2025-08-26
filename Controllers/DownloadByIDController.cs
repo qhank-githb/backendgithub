@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using ConsoleApp1.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MinioWebApi.Controllers
 {
     [ApiController]
     [Route("api/file")] // ✅ 只以固定路径访问，无需 bucket 参数
+    [Authorize] 
     public class DownloadByIDController : ControllerBase
     {
         private readonly IDownloadByIDService _downloadByIdService;
@@ -38,7 +40,7 @@ namespace MinioWebApi.Controllers
 
             return File(stream, fileInfo.MimeType ?? "application/octet-stream");
         }
-    
+
 
         [HttpGet("preview-by-id")]
         public async Task<IActionResult> PreviewById([FromQuery] int id)
@@ -55,7 +57,7 @@ namespace MinioWebApi.Controllers
 
             // 设置 inline，而不是 attachment
             Response.Headers.Remove("Content-Disposition");
-            Response.Headers["Content-Disposition"] = 
+            Response.Headers["Content-Disposition"] =
                 $"inline; filename=\"{fileName}\"; filename*=UTF-8''{escapedFileName}";
 
             // 返回正确的 MIME 类型
@@ -67,6 +69,6 @@ namespace MinioWebApi.Controllers
 
 
 
-        
+
     }
 }

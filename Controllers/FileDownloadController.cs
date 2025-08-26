@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using ConsoleApp1.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace MinioWebApi.Controllers
 {
     [ApiController]
     [Route("api/file")]
+    [Authorize] 
     public class FileDownloadController : ControllerBase
     {
         private readonly IDownloadService _idownloadService;
@@ -37,11 +39,11 @@ namespace MinioWebApi.Controllers
 
             return File(zipStream, "application/zip", $"batch_{DateTime.Now:yyyyMMddHHmmss}.zip");
         }
-        
 
 
 
-        
+
+
 
 
     }

@@ -1,4 +1,5 @@
 using ConsoleApp1.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -6,6 +7,7 @@ namespace ConsoleApp1.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] 
     public class BucketsController : ControllerBase
     {
         private readonly IBucketService _bucketService;

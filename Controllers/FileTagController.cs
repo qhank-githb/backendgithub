@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using ConsoleApp1.Interfaces;
 using ConsoleApp1.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/files")]
+[Authorize] 
 public class FileTagController : ControllerBase
 {
     private readonly IFileTagService _fileTagService;

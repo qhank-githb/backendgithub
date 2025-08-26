@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using ConsoleApp1.Interfaces;
 using ConsoleApp1.Models;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/tags")]
+[Authorize] 
 public class TagController : ControllerBase
 {
     private readonly ITagService _tagService;
