@@ -1,6 +1,8 @@
 using ConsoleApp1.Interfaces;
 using ConsoleApp1.Models;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using ConsoleApp1.Options;
 
 
 namespace ConsoleApp1.Service
@@ -8,21 +10,38 @@ namespace ConsoleApp1.Service
     public class TagService : ITagService
     {
         private readonly AppDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         public TagService(AppDbContext context) => _context = context;
 
         public async Task<Tag> CreateTagAsync(string name)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("标签名不能为空");
+            var username = _httpContextAccessor.HttpContext?.User?.Identity?.Name 
+               ?? _httpContextAccessor.HttpContext?.User?.FindFirst("username")?.Value
+               ?? "匿名用户";
 
-            var exists = await _context.Tags.AnyAsync(t => t.Name == name);
-            if (exists) throw new InvalidOperationException("标签已存在");
+            try
+            {
+                // 业务操作
+                Log.Information("用户 {Username} 尝试创建标签 {TagName}", username ?? "匿名用户", name);
 
-            var tag = new Tag { Name = name };
-            _context.Tags.Add(tag);
-            await _context.SaveChangesAsync();
-            return tag;
+                var exists = await _context.Tags.AnyAsync(t => t.Name == name);
+                if (exists)
+                    throw new InvalidOperationException("标签已存在");
+
+                var tag = new Tag { Name = name };
+                _context.Tags.Add(tag);
+                await _context.SaveChangesAsync();
+
+                Log.Information("用户 {Username} 成功创建标签 {TagName}", username ?? "匿名用户", name);
+                return tag;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "用户 {Username} 创建标签 {TagName} 出错", username ?? "匿名用户", name);
+                throw;
+            }
         }
+
 
         public async Task<List<Tag>> GetAllTagsAsync()
         {
