@@ -14,6 +14,9 @@ using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.UseUrls("http://0.0.0.0:5000");
+
+
 // ---------------------- Serilog ----------------------
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -75,6 +78,7 @@ builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IFileTagService, FileTagService>();
 builder.Services.AddHttpContextAccessor();
 
+
 // ---------------------- 心跳服务 ----------------------
 builder.Services.AddSingleton<OnlineUserService>();
 builder.Services.AddHostedService<OfflineChecker>();
@@ -107,6 +111,7 @@ builder.Services.AddAuthorization();
 
 // ---------------------- 控制器 ----------------------
 builder.Services.AddControllers();
+
 
 var app = builder.Build();
 
