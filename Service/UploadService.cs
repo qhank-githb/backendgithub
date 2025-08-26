@@ -202,12 +202,7 @@ cmd.CommandText = @"
                 );
 
 
-                Log.Information("用户 {Username} 于 {UploadTime} 成功上传文件 {OriginalFileName}, 存储名 {StoredFileName}, 大小 {FileSize} 字节",
-                 request.username,
-                 uploadTime,
-                 request.originalFileName,
-                 request.storedFileName,
-                 fileLength);
+
 
 
                 // 写入标签关联
@@ -252,6 +247,13 @@ cmd.CommandText = @"
 
                 Console.WriteLine($"上传完成：文件名: {request.originalFileName}, ETag: {completeResponse.ETag}, 大小: {fileLength} 字节, Tags: {string.Join(",", request.Tags ?? new List<string>())}");
 
+                Log.Information("用户 {Username} 于 {UploadTime} 成功上传文件 {OriginalFileName}, 存储名 {StoredFileName}, 标签：{tags} , 大小 {FileSize} 字节",
+                 request.username,
+                 uploadTime,
+                 request.originalFileName,
+                 request.storedFileName,
+                 string.Join(",", request.Tags ?? new List<string>()),
+                 fileLength);
                 return result;
 
             }
