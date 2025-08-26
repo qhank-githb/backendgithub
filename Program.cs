@@ -120,7 +120,9 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = issuer,
         ValidAudience = audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)),
+        // ⚠️ 默认允许 5 分钟误差
+        ClockSkew = TimeSpan.Zero // 立即过期
     };
      options.Events = new JwtBearerEvents
     {
