@@ -64,9 +64,11 @@ builder.Services.AddSingleton<TransferUtility>(sp =>
 // 配置 Serilog
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
-    .WriteTo.Console()                      // 输出到控制台
-    .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day) // 输出到文件，按天滚动
+    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+    .WriteTo.Console()
+    .WriteTo.File("logs/app.log", rollingInterval: RollingInterval.Day)
     .CreateLogger();
+
 
 builder.Host.UseSerilog(); // 将 Serilog 集成到 ASP.NET Core
 
@@ -89,6 +91,8 @@ builder.Services.AddScoped<IDownloadService, DownloadService>();
 builder.Services.AddScoped<IDownloadByIDService, DownloadByIDService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IFileTagService, FileTagService>();
+builder.Services.AddHttpContextAccessor();
+
 
 
 // 添加控制器

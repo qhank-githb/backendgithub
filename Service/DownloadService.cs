@@ -5,6 +5,8 @@ using ConsoleApp1.Interfaces;
 using System.IO.Compression;
 using Microsoft.Extensions.Options;
 using ConsoleApp1.Options;
+using System;
+using Serilog;
 
 
 namespace ConsoleApp1.Service
@@ -15,20 +17,22 @@ namespace ConsoleApp1.Service
     private readonly IAmazonS3 _s3Client;
     private readonly TransferUtility _transferUtility;
     private readonly string _dbConnectionString;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public DownloadService(
-        IOptions<MinioOptions> options,
-        IQueryService iQueryService,
-        IAmazonS3 s3Client,
-        TransferUtility transferUtility)
-    {
-        var minioOptions = options.Value ?? throw new ArgumentNullException(nameof(options));//为什么要校验null
+        public DownloadService(
+                IOptions<MinioOptions> options,
+                IQueryService iQueryService,
+                IAmazonS3 s3Client,
+                TransferUtility transferUtility, IHttpContextAccessor httpContextAccessor)
+        {
+            var minioOptions = options.Value ?? throw new ArgumentNullException(nameof(options));//为什么要校验null
 
-        _s3Client = s3Client;
-        _transferUtility = transferUtility;
-        _dbConnectionString = minioOptions.DbConnectionString;
-        _iQueryService = iQueryService ?? throw new ArgumentNullException(nameof(IQueryService));
-    }
+            _s3Client = s3Client;
+            _transferUtility = transferUtility;
+            _dbConnectionString = minioOptions.DbConnectionString;
+            _iQueryService = iQueryService ?? throw new ArgumentNullException(nameof(IQueryService));
+            _httpContextAccessor = httpContextAccessor;
+        }
 
 
     
@@ -50,9 +54,13 @@ namespace ConsoleApp1.Service
 
             var response = await _s3Client.GetObjectAsync(request);
             Console.WriteLine($"[DownloadObject] Found object {objectName}, length: {response.ContentLength}");
+             var userName = _httpContextAccessor.HttpContext?.User.Claims
+            .FirstOrDefault(c => c.Type == "username")?.Value
+            ?? _httpContextAccessor.HttpContext?.User.Identity?.Name;
+                Log.Information("用户 {username} 于 {Datetime.Now} 下载 {objectName}",userName,DateTime.Now,objectName);
 
             // 推荐复制一份内容进内存中再返回
-            var memoryStream = new MemoryStream();
+                var memoryStream = new MemoryStream();
             await response.ResponseStream.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
 
