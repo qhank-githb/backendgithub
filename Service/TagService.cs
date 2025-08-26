@@ -2,7 +2,6 @@ using ConsoleApp1.Interfaces;
 using ConsoleApp1.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using ConsoleApp1.Options;
 
 
 namespace ConsoleApp1.Service
@@ -10,15 +9,20 @@ namespace ConsoleApp1.Service
     public class TagService : ITagService
     {
         private readonly AppDbContext _context;
+        
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public TagService(AppDbContext context) => _context = context;
 
-        public async Task<Tag> CreateTagAsync(string name)
+        public TagService(AppDbContext context, IHttpContextAccessor httpContextAccessor)
+        {
+            _context = context;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+                public async Task<Tag> CreateTagAsync(string name)
         {
             var username = _httpContextAccessor.HttpContext?.User?.Identity?.Name 
                ?? _httpContextAccessor.HttpContext?.User?.FindFirst("username")?.Value
                ?? "匿名用户";
-
             try
             {
                 // 业务操作
@@ -48,7 +52,6 @@ namespace ConsoleApp1.Service
             return await _context.Tags.ToListAsync();
         }
 
-        private readonly AppDbContext _dbContext;
 
 
 public async Task EditFileAsync(EditFileDto dto)
