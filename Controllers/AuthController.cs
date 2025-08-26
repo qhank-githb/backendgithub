@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -27,9 +28,18 @@ public class AuthController : ControllerBase
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
+        // 加上用户身份的 claim
+    var claims = new[]
+    {
+        new Claim(ClaimTypes.Name, username), // 这样 HttpContext.User.Identity.Name 就有值了
+        new Claim("username", username),      // 额外放一个自定义字段
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+    };
+
         var token = new JwtSecurityToken(
             issuer: "my_app_issuer",   // 与 Program.cs 中一致
             audience: "my_app_audience", // 与 Program.cs 中一致
+            claims: claims,   
             expires: DateTime.Now.AddHours(1),
             signingCredentials: credentials
         );
