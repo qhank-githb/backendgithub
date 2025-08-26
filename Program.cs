@@ -122,21 +122,15 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = audience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
     };
-    options.Events = new JwtBearerEvents
+     options.Events = new JwtBearerEvents
     {
         OnAuthenticationFailed = ctx =>
         {
-            Console.WriteLine("JWT Authentication Failed: " + ctx.Exception.Message);
-            return Task.CompletedTask;
-        },
-        OnMessageReceived = ctx =>
-        {
-            Console.WriteLine("JWT Received: " + ctx.Request.Headers["Authorization"]);
-            return Task.CompletedTask;
-        },
-        OnTokenValidated = ctx =>
-        {
-            Console.WriteLine("JWT Token Validated for: " + ctx.Principal?.Identity?.Name);
+            if (ctx.Exception is SecurityTokenExpiredException)
+            {
+                var token = ctx.Request.Headers["Authorization"].ToString();
+                Log.Warning("JWT Token 已过期: {Token}", token);
+            }
             return Task.CompletedTask;
         }
     };
