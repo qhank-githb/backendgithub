@@ -120,7 +120,26 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = audience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
     };
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = ctx =>
+        {
+            Console.WriteLine("JWT Authentication Failed: " + ctx.Exception.Message);
+            return Task.CompletedTask;
+        },
+        OnMessageReceived = ctx =>
+        {
+            Console.WriteLine("JWT Received: " + ctx.Request.Headers["Authorization"]);
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = ctx =>
+        {
+            Console.WriteLine("JWT Token Validated for: " + ctx.Principal?.Identity?.Name);
+            return Task.CompletedTask;
+        }
+    };
 });
+
 
 // 添加授权
 builder.Services.AddAuthorization();
