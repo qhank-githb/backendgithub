@@ -60,6 +60,10 @@ namespace ConsoleApp1.Service
                 // 打印控制台日志
                 Console.WriteLine($"[DownloadObject] Bucket: {bucketName}, StoredName: {objectName}, OriginalName: {originalFileName}, Length: {response.ContentLength}");
 
+            var username = _httpContextAccessor.HttpContext?.User?.Identity?.Name 
+               ?? _httpContextAccessor.HttpContext?.User?.FindFirst("username")?.Value
+               ?? "匿名用户";
+
                 // Serilog 日志
                 Log.Information("用户 {username} 下载文件 成功。桶: {bucket}, 原始名: {original}, 存储名: {stored}, 大小: {size} 字节",
                     _httpContextAccessor.HttpContext?.User?.Identity?.Name ?? "匿名用户",
