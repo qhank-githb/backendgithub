@@ -58,7 +58,7 @@ public class AuthController : ControllerBase
             issuer: "my_app_issuer",   // 与 Program.cs 中一致
             audience: "my_app_audience", // 与 Program.cs 中一致
             claims: claims,
-            expires: DateTime.Now.AddSeconds(10),
+            expires: DateTime.Now.AddHours(2),
             signingCredentials: credentials
         );
 
