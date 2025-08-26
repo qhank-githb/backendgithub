@@ -7,7 +7,6 @@ namespace ConsoleApp1.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] 
     public class BucketsController : ControllerBase
     {
         private readonly IBucketService _bucketService;
