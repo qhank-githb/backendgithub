@@ -92,8 +92,8 @@ builder.Services.AddScoped<IDownloadByIDService, DownloadByIDService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IFileTagService, FileTagService>();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddSingleton<OnlineUserService>();
-builder.Services.AddHostedService<OfflineChecker>();
+// builder.Services.AddSingleton<OnlineUserService>();
+// builder.Services.AddHostedService<OfflineChecker>();
 
 
 
