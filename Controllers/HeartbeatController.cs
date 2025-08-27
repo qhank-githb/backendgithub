@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+
 [ApiController]
 [Route("api/[controller]")]
 public class HeartbeatController : ControllerBase
@@ -12,7 +13,6 @@ public class HeartbeatController : ControllerBase
         _onlineUserService = onlineUserService;
     }
 
-    // POST api/heartbeat/ping
     [HttpPost("ping")]
     [Authorize]
     public IActionResult Ping()
@@ -21,16 +21,13 @@ public class HeartbeatController : ControllerBase
         if (string.IsNullOrEmpty(username))
             return Unauthorized();
 
-        _onlineUserService.UpdateHeartbeat(username);
-        Console.WriteLine($"{username} PING", username);
+        if (_onlineUserService.SetOnline(username))
+        {
+            Console.WriteLine($"User {username} connected");
+        }
+
         return Ok(new { message = "pong" });
     }
-
-    // GET api/heartbeat/online-users
-    [HttpGet("online-users")]
-    public IActionResult GetOnlineUsers()
-    {
-        var users = _onlineUserService.GetOnlineUsers();
-        return Ok(users);
-    }
 }
+
+
