@@ -22,6 +22,7 @@ public class HeartbeatController : ControllerBase
             return Unauthorized();
 
         _onlineUserService.UpdateHeartbeat(username);
+        Console.WriteLine($"{username} PING", username);
         return Ok(new { message = "pong" });
     }
 
