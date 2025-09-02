@@ -7,6 +7,7 @@ using MySqlConnector;
 using Microsoft.Extensions.Options;
 using ConsoleApp1.Options;
 using Serilog;
+using Microsoft.EntityFrameworkCore;
 
 namespace ConsoleApp1.Service
 {
@@ -16,14 +17,18 @@ namespace ConsoleApp1.Service
         private readonly IAmazonS3 _s3Client;
         private readonly TransferUtility _transferUtility;
         private readonly string _dbConnectionString;
+        private readonly AppDbContext _dbContext;
+
 
 
         public UploadService(
+            AppDbContext dbContext,
             IOptions<MinioOptions> options,
             IQueryService iQueryService,
             IAmazonS3 s3Client,
             TransferUtility transferUtility)
         {
+            _dbContext = dbContext;
             var minioOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
             _s3Client = s3Client;
             _transferUtility = transferUtility;
@@ -33,62 +38,77 @@ namespace ConsoleApp1.Service
 
 
 
-private async Task<int> InsertFileInfoAsync(
-    UploadResult result,
-    string originalFileName,
-    string storedFileName,
-    string bucketName,
-    string relativePath,
-    string absolutePath,
-    string mimeType,
-    string uploader)
-{
-    await using var conn = new MySqlConnection(_dbConnectionString);
-    await conn.OpenAsync();
-    await using var cmd = conn.CreateCommand();
+        private async Task<int> InsertFileInfoAsync(FileInfoModel fileInfo)
+        {
+            var entity = new FileRecord
+            {
+                StoredFileName = fileInfo.StoredFileName,
+                OriginalFileName = fileInfo.OriginalFileName,
+                BucketName     = fileInfo.Bucketname,   // 注意模型字段名大小写不一致
+                RelativePath   = fileInfo.RelativePath,
+                AbsolutePath   = fileInfo.AbsolutePath,
+                FileSize       = fileInfo.FileSize,
+                MimeType       = fileInfo.MimeType,
+                UploadTime     = fileInfo.UploadTime,
+                Uploader       = fileInfo.Uploader,
+                ETag           = fileInfo.ETag
+            };
 
-cmd.CommandText = @"
-    INSERT INTO file_info (
-        stored_file_name,
-        original_file_name,
-        bucketname,
-        relative_path,
-        absolute_path,
-        file_size,
-        mime_type,
-        upload_time,
-        uploader,
-        etag
-    ) VALUES (
-        @storedFileName,
-        @originalFileName,
-        @bucketName,
-        @relativePath,
-        @absolutePath,
-        @fileSize,
-        @mimeType,
-        @uploadTime,
-        @uploader,
-        @etag
-    );
-    SELECT LAST_INSERT_ID();";
- // 返回自增ID
+            _dbContext.FileRecords.Add(entity);
+            await _dbContext.SaveChangesAsync();
+            return entity.Id;  // EF 自动回填自增主键
+            }
+            
 
-    cmd.Parameters.AddWithValue("@storedFileName", storedFileName);
-    cmd.Parameters.AddWithValue("@originalFileName", originalFileName);
-    cmd.Parameters.AddWithValue("@bucketName", bucketName);
-    cmd.Parameters.AddWithValue("@relativePath", relativePath);
-    cmd.Parameters.AddWithValue("@absolutePath", absolutePath);
-    cmd.Parameters.AddWithValue("@fileSize", result.Size);
-    cmd.Parameters.AddWithValue("@mimeType", mimeType);
-     cmd.Parameters.AddWithValue("@uploadTime", result.Uploadtime); 
-    cmd.Parameters.AddWithValue("@uploader", uploader);
-    cmd.Parameters.AddWithValue("@etag", result.ETag);
+            private async Task UpsertFileTagsAsync(int fileId, IEnumerable<string> tagNames)
+            {
+                if (tagNames == null) return;
 
-    // 返回自增ID
-    var fileId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
-    return fileId;
-}
+                var names = tagNames
+                    .Where(s => !string.IsNullOrWhiteSpace(s))
+                    .Select(s => s.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                if (names.Count == 0) return;
+
+                // 先查已有标签
+                var existing = await _dbContext.Tags
+                    .Where(t => names.Contains(t.Name))
+                    .ToListAsync();
+
+                var existingNames = existing.Select(t => t.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var toCreateNames = names.Where(n => !existingNames.Contains(n)).ToList();
+
+                // 批量创建新的标签
+                foreach (var n in toCreateNames)
+                    _dbContext.Tags.Add(new Models.Tag { Name = n });
+
+                if (toCreateNames.Count > 0)
+                    await _dbContext.SaveChangesAsync(); // 确保新标签拿到 Id
+
+                // 取所有需要的标签（新旧合并）
+                var allTagIds = await _dbContext.Tags
+                    .Where(t => names.Contains(t.Name))
+                    .Select(t => t.Id)
+                    .ToListAsync();
+
+                // 已有关联
+                var existingFileTagIds = await _dbContext.FileTags
+                    .Where(ft => ft.FileId == fileId)
+                    .Select(ft => ft.TagId)
+                    .ToListAsync();
+
+                var needRelate = allTagIds.Except(existingFileTagIds).ToList();
+
+                foreach (var tagId in needRelate)
+                    _dbContext.FileTags.Add(new FileTag { FileId = fileId, TagId = tagId });
+
+                if (needRelate.Count > 0)
+                    await _dbContext.SaveChangesAsync();
+            }
+
+
 
 
         /// <summary>
@@ -99,8 +119,8 @@ cmd.CommandText = @"
         /// <param name="filePath">上传文件的路径。</param>
         /// <param name="contentType">文件类型</param>
         /// <returns>文件的ETAG：string ETag，和文件的大小Long Size。</returns>
-       public async Task<UploadResult> MultipartUploadAsync(MultipartUploadRequest request)
-{
+        public async Task<UploadResult> MultipartUploadAsync(MultipartUploadRequest request)
+        {
             try
             {
                 // 生成唯一文件名，避免数据库 unique 冲突
@@ -187,62 +207,31 @@ cmd.CommandText = @"
                     Tags = request.Tags,
                     Uploadtime = uploadTime,
                 };
+            
+            // 1) 组装 FileInfoModel（业务模型）
+            var fileInfo = new FileInfoModel
+            {
+                StoredFileName  = request.storedFileName,
+                OriginalFileName= request.originalFileName,
+                Bucketname      = request.bucket,
+                RelativePath = request.storedFileName,
+                AbsolutePath = $"/{request.bucket}/{request.storedFileName}",
+                FileSize        = fileLength,
+                MimeType        = request.contentType,
+                UploadTime      = uploadTime,
+                Uploader        = request.username,
+                ETag            = completeResponse.ETag,
+                Tags            = request.Tags ?? new List<string>()
+            };
 
-                // 写入 file_info 并返回自增ID
-                // 写入 file_info 并返回自增ID
-                var fileId = await InsertFileInfoAsync(
-                    result,
-                    request.originalFileName,
-                    request.storedFileName,
-                    request.bucket,
-                    request.originalFileName,
-                    $"/{request.bucket}/{request.originalFileName}",
-                    request.contentType,
-                    request.username
-                );
+            // 2) 用事务保证“文件 + 标签关联”一致
+            await using var tx = await _dbContext.Database.BeginTransactionAsync();
 
+            var fileId = await InsertFileInfoAsync(fileInfo);
+            await UpsertFileTagsAsync(fileId, fileInfo.Tags);
 
+            await tx.CommitAsync();
 
-
-
-                // 写入标签关联
-                if (request.Tags != null && request.Tags.Count > 0)
-                {
-                    await using var conn = new MySqlConnection(_dbConnectionString);
-                    await conn.OpenAsync();
-                    await using var cmd = conn.CreateCommand();
-
-                    foreach (var tagName in request.Tags)
-                    {
-                        int tagId;
-
-                        // 查询标签是否存在
-                        cmd.CommandText = "SELECT Id FROM tags WHERE Name = @tagName LIMIT 1;";
-                        cmd.Parameters.Clear();
-                        cmd.Parameters.AddWithValue("@tagName", tagName);
-                        var tagIdObj = await cmd.ExecuteScalarAsync();
-
-                        if (tagIdObj == null)
-                        {
-                            // 不存在就插入
-                            cmd.CommandText = "INSERT INTO tags (Name) VALUES (@tagName); SELECT LAST_INSERT_ID();";
-                            cmd.Parameters.Clear();
-                            cmd.Parameters.AddWithValue("@tagName", tagName);
-                            tagId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
-                        }
-                        else
-                        {
-                            tagId = Convert.ToInt32(tagIdObj);
-                        }
-
-                        // 插入 file_tags
-                        cmd.CommandText = "INSERT IGNORE INTO file_tags (FileId, TagId) VALUES (@fileId, @tagId);";
-                        cmd.Parameters.Clear();
-                        cmd.Parameters.AddWithValue("@fileId", fileId);
-                        cmd.Parameters.AddWithValue("@tagId", tagId);
-                        await cmd.ExecuteNonQueryAsync();
-                    }
-                }
 
 
                 Console.WriteLine($"上传完成：文件名: {request.originalFileName}, ETag: {completeResponse.ETag}, 大小: {fileLength} 字节, Tags: {string.Join(",", request.Tags ?? new List<string>())}");
@@ -257,14 +246,14 @@ cmd.CommandText = @"
                 return result;
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.Error(ex, "用户 {Username} 上传文件 {OriginalFileName} 失败，存储名 {StoredFileName}",
             request.username, request.originalFileName, request.storedFileName ?? "未生成");
                 throw; // 继续抛出，交给全局异常过滤器处理
             }
-   
-}
+
+        }
 
 
 

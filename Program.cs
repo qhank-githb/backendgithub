@@ -22,11 +22,18 @@ var dbConnectionString = builder.Configuration.GetSection("Minio:DbConnectionStr
 
 // 注入 DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(
-        dbConnectionString,
-        new MySqlServerVersion(new Version(8, 0, 33))
-    )
-);
+{
+    var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
+
+    // 用 MySQL
+    options.UseMySql(connStr, ServerVersion.AutoDetect(connStr));
+
+    // 如要换数据库，只需要改这一行：
+    // options.UseSqlServer(connStr);
+    // options.UseNpgsql(connStr);
+    // options.UseSqlite("Data Source=app.db");
+});
+
 
 // 添加 CORS
 builder.Services.AddCors(options =>

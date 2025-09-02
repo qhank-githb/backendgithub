@@ -89,6 +89,8 @@ public class FileInfoModel
         [Column("uploader")]
         public string Uploader { get; set; }
 
+        [Column("etag")]
+        public string ETag { get; set; }
         public ICollection<FileTag> FileTags { get; set; }
     }
 

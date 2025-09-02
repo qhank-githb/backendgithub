@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "RQJBvSn83LM=",
+  "dgSpecHash": "IRrUdlBM+2U=",
   "success": true,
-  "projectFilePath": "D:\\bolo_backend\\MinioWebApi\\MinioWebApi.csproj",
+  "projectFilePath": "D:\\bolo_backend\\minio-web-backend\\MinioWebApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\qhanlin177\\.nuget\\packages\\awssdk.core\\3.7.3.18\\awssdk.core.3.7.3.18.nupkg.sha512",
     "C:\\Users\\qhanlin177\\.nuget\\packages\\awssdk.s3\\3.7.3.11\\awssdk.s3.3.7.3.11.nupkg.sha512",
@@ -28,6 +28,7 @@
     "C:\\Users\\qhanlin177\\.nuget\\packages\\microsoft.entityframeworkcore.analyzers\\9.0.8\\microsoft.entityframeworkcore.analyzers.9.0.8.nupkg.sha512",
     "C:\\Users\\qhanlin177\\.nuget\\packages\\microsoft.entityframeworkcore.design\\9.0.8\\microsoft.entityframeworkcore.design.9.0.8.nupkg.sha512",
     "C:\\Users\\qhanlin177\\.nuget\\packages\\microsoft.entityframeworkcore.relational\\9.0.8\\microsoft.entityframeworkcore.relational.9.0.8.nupkg.sha512",
+    "C:\\Users\\qhanlin177\\.nuget\\packages\\microsoft.entityframeworkcore.tools\\9.0.8\\microsoft.entityframeworkcore.tools.9.0.8.nupkg.sha512",
     "C:\\Users\\qhanlin177\\.nuget\\packages\\microsoft.extensions.apidescription.server\\8.0.0\\microsoft.extensions.apidescription.server.8.0.0.nupkg.sha512",
     "C:\\Users\\qhanlin177\\.nuget\\packages\\microsoft.extensions.caching.abstractions\\9.0.8\\microsoft.extensions.caching.abstractions.9.0.8.nupkg.sha512",
     "C:\\Users\\qhanlin177\\.nuget\\packages\\microsoft.extensions.caching.memory\\9.0.8\\microsoft.extensions.caching.memory.9.0.8.nupkg.sha512",
