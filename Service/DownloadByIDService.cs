@@ -6,13 +6,11 @@ namespace ConsoleApp1.Service
 {
     public class DownloadByIDService : IDownloadByIDService
 {
-    private readonly IAmazonS3 _s3Client;
     private readonly IQueryService _iQueryService;
     private readonly IDownloadService _downloadService;
 
     public DownloadByIDService(IAmazonS3 s3Client, IQueryService iQueryService, IDownloadService downloadService)
     {
-        _s3Client = s3Client;
         _iQueryService = iQueryService ?? throw new ArgumentNullException(nameof(iQueryService));
         _downloadService = downloadService;
     }

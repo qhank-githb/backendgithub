@@ -13,10 +13,7 @@ namespace ConsoleApp1.Service
 {
     public class UploadService : IUploadService
     {
-        private readonly IQueryService _iQueryService;
         private readonly IAmazonS3 _s3Client;
-        private readonly TransferUtility _transferUtility;
-        private readonly string _dbConnectionString;
         private readonly AppDbContext _dbContext;
 
 
@@ -24,16 +21,10 @@ namespace ConsoleApp1.Service
         public UploadService(
             AppDbContext dbContext,
             IOptions<MinioOptions> options,
-            IQueryService iQueryService,
-            IAmazonS3 s3Client,
-            TransferUtility transferUtility)
+            IAmazonS3 s3Client)
         {
             _dbContext = dbContext;
-            var minioOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
             _s3Client = s3Client;
-            _transferUtility = transferUtility;
-            _dbConnectionString = minioOptions.DbConnectionString;
-            _iQueryService = iQueryService ?? throw new ArgumentNullException(nameof(iQueryService));
         }
 
 

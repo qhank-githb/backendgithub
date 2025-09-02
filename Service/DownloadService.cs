@@ -15,21 +15,17 @@ namespace ConsoleApp1.Service
 {
     private readonly IQueryService _iQueryService;
     private readonly IAmazonS3 _s3Client;
-    private readonly TransferUtility _transferUtility;
-    private readonly string _dbConnectionString;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
         public DownloadService(
                 IOptions<MinioOptions> options,
                 IQueryService iQueryService,
                 IAmazonS3 s3Client,
-                TransferUtility transferUtility, IHttpContextAccessor httpContextAccessor)
+                IHttpContextAccessor httpContextAccessor)
         {
             var minioOptions = options.Value ?? throw new ArgumentNullException(nameof(options));//为什么要校验null
 
             _s3Client = s3Client;
-            _transferUtility = transferUtility;
-            _dbConnectionString = minioOptions.DbConnectionString;
             _iQueryService = iQueryService ?? throw new ArgumentNullException(nameof(IQueryService));
             _httpContextAccessor = httpContextAccessor;
         }
