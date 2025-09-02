@@ -34,5 +34,16 @@ public class AppDbContext : DbContext
         // ✅ 可选：给日志表加索引（便于查询）
         modelBuilder.Entity<OperationLog>()
             .HasIndex(l => l.Timestamp);
+            modelBuilder.Entity<FileInfoModel>(entity =>
+    {
+        entity.Property(e => e.StoredFileName).HasColumnType("longtext");
+        entity.Property(e => e.OriginalFileName).HasColumnType("longtext");
+        entity.Property(e => e.Bucketname).HasColumnType("varchar(255)");
+        entity.Property(e => e.RelativePath).HasColumnType("longtext");
+        entity.Property(e => e.AbsolutePath).HasColumnType("longtext");
+        entity.Property(e => e.MimeType).HasColumnType("varchar(255)");
+        entity.Property(e => e.Uploader).HasColumnType("varchar(255)");
+        entity.Property(e => e.ETag).HasColumnType("varchar(255)");
+    });
     }
 }
