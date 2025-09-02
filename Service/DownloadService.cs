@@ -1,11 +1,9 @@
 using Amazon.S3;
 using Amazon.S3.Model;
-using Amazon.S3.Transfer;
 using ConsoleApp1.Interfaces;
 using System.IO.Compression;
 using Microsoft.Extensions.Options;
 using ConsoleApp1.Options;
-using System;
 using Serilog;
 
 

@@ -383,3 +383,5 @@ D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\refint\MinioWebApi.dll
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.pdb
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.genruntimeconfig.cache
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\ref\MinioWebApi.dll
+D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.SqlServer.dll
+D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\System.Formats.Asn1.dll

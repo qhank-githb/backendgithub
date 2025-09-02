@@ -17,25 +17,27 @@ var builder = WebApplication.CreateBuilder(args);
 // 允许外部访问
 builder.WebHost.UseUrls("http://0.0.0.0:5000");
 
-// 读取数据库连接字符串
-var dbConnectionString = builder.Configuration.GetSection("Minio:DbConnectionString").Value;
+// ==================== 数据库配置 ====================
+var provider = builder.Configuration["DatabaseProvider"]; // appsettings.json 里指定
+var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// 注入 DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
-
-    // 用 MySQL
-    options.UseMySql(connStr, ServerVersion.AutoDetect(connStr));
-
-    // 如要换数据库，只需要改这一行：
-    // options.UseSqlServer(connStr);
-    // options.UseNpgsql(connStr);
-    // options.UseSqlite("Data Source=app.db");
+    if (string.Equals(provider, "MySQL", StringComparison.OrdinalIgnoreCase))
+    {
+        options.UseMySql(connStr, ServerVersion.AutoDetect(connStr));
+    }
+    else if (string.Equals(provider, "SqlServer", StringComparison.OrdinalIgnoreCase))
+    {
+        options.UseSqlServer(connStr);
+    }
+    else
+    {
+        throw new Exception($"不支持的数据库类型: {provider}");
+    }
 });
 
-
-// 添加 CORS
+// ==================== CORS ====================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -48,7 +50,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// 注册 MinIO 服务
+// ==================== MinIO ====================
 builder.Services.Configure<MinioOptions>(builder.Configuration.GetSection("Minio"));
 
 builder.Services.AddSingleton<IAmazonS3>(sp => {
@@ -66,9 +68,7 @@ builder.Services.AddSingleton<TransferUtility>(sp =>
     new TransferUtility(sp.GetRequiredService<IAmazonS3>())
 );
 
-
-
-// 配置 Serilog
+// ==================== Serilog ====================
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
@@ -76,10 +76,9 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.File("logs/app.log", rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
+builder.Host.UseSerilog();
 
-builder.Host.UseSerilog(); // 将 Serilog 集成到 ASP.NET Core
-
-// 上传大文件限制 500MB
+// ==================== 上传限制 ====================
 builder.WebHost.ConfigureKestrel(opts =>
 {
     opts.Limits.MaxRequestBodySize = 524_288_000; // 500MB
@@ -90,7 +89,7 @@ builder.Services.Configure<FormOptions>(opts =>
     opts.MultipartBodyLengthLimit = 524_288_000; // 500MB
 });
 
-// 注册业务服务
+// ==================== 注册业务服务 ====================
 builder.Services.AddScoped<IBucketService, BucketService>();
 builder.Services.AddScoped<IQueryService, QueryService>();
 builder.Services.AddScoped<IUploadService, UploadService>();
@@ -99,16 +98,12 @@ builder.Services.AddScoped<IDownloadByIDService, DownloadByIDService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IFileTagService, FileTagService>();
 builder.Services.AddHttpContextAccessor();
-// builder.Services.AddSingleton<OnlineUserService>();
-// builder.Services.AddHostedService<OfflineChecker>();
 
-
-
-// 添加控制器
+// ==================== 控制器 ====================
 builder.Services.AddControllers();
 
-// ✅ 设置 JWT 认证
-var jwtSecretKey = "MySuperSecretKeyForJWTToken_32BytesOrMore!"; // ⚠️ 必须 32+ 字节
+// ==================== JWT ====================
+var jwtSecretKey = "MySuperSecretKeyForJWTToken_32BytesOrMore!";
 var issuer = "my_app_issuer";
 var audience = "my_app_audience";
 
@@ -128,10 +123,9 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = issuer,
         ValidAudience = audience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)),
-        // ⚠️ 默认允许 5 分钟误差
-        ClockSkew = TimeSpan.Zero // 立即过期
+        ClockSkew = TimeSpan.Zero
     };
-     options.Events = new JwtBearerEvents
+    options.Events = new JwtBearerEvents
     {
         OnAuthenticationFailed = ctx =>
         {
@@ -145,28 +139,22 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-
-// 添加授权
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// 确保数据库表存在
+// ==================== 确保数据库存在 ====================
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
-    Console.WriteLine("数据库连接成功并确保表存在");
+    db.Database.Migrate();  // 没有表就建表
+    Console.WriteLine("数据库已迁移到最新版本");
 }
 
-// 中间件顺序：Cors → Authentication → Authorization → Routing → Endpoints
+// ==================== 中间件顺序 ====================
 app.UseCors("AllowAll");
-
 app.UseRouting();
-
-app.UseAuthentication(); // ✅ 必须在 UseAuthorization 之前
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

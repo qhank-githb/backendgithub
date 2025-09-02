@@ -1,9 +1,7 @@
 using Amazon.S3;
 using Amazon.S3.Model;
-using Amazon.S3.Transfer;
 using ConsoleApp1.Models;
 using ConsoleApp1.Interfaces;
-using MySqlConnector;
 using Microsoft.Extensions.Options;
 using ConsoleApp1.Options;
 using Serilog;
