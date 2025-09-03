@@ -1,4 +1,4 @@
-namespace ConsoleApp1.Options
+namespace MinioWebBackend.Options
 {
     public class MinioOptions
     {

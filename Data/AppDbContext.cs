@@ -1,44 +1,39 @@
 using Microsoft.EntityFrameworkCore;
-using ConsoleApp1.Models;
 using MinioWebBackend.Models;
 
-// Data/AppDbContext.cs
-        public class AppDbContext : DbContext
-{
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-    public DbSet<FileRecord> FileRecords { get; set; }
-    public DbSet<Tag> Tags { get; set; }
-    public DbSet<FileTag> FileTags { get; set; }
-
-    // ✅ 新增日志表
-
-    public DbSet<SerilogLog> SerilogLogs { get; set; }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public class AppDbContext : DbContext
     {
-        modelBuilder.Entity<FileTag>()
-            .HasKey(ft => new { ft.FileId, ft.TagId });
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        modelBuilder.Entity<FileTag>()
-            .HasOne(ft => ft.FileRecord)
-            .WithMany(f => f.FileTags)
-            .HasForeignKey(ft => ft.FileId);
+        // 业务实体（确保这些模型的命名空间也是 MinioWebBackend.Models）
+        public DbSet<FileRecord> FileRecords { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<FileTag> FileTags { get; set; }
 
-        modelBuilder.Entity<FileTag>()
-            .HasOne(ft => ft.Tag)
-            .WithMany(t => t.FileTags)
-            .HasForeignKey(ft => ft.TagId);
+        // 日志实体（SerilogLog 在 MinioWebBackend.Models 中）
+        public DbSet<SerilogLog> SerilogLogs { get; set; }
 
-        modelBuilder.Entity<Tag>()
-            .HasIndex(t => t.Name).IsUnique();
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // 业务模型配置（不变）
+            modelBuilder.Entity<FileTag>()
+                .HasKey(ft => new { ft.FileId, ft.TagId });
+            modelBuilder.Entity<FileTag>()
+                .HasOne(ft => ft.FileRecord)
+                .WithMany(f => f.FileTags)
+                .HasForeignKey(ft => ft.FileId);
+            modelBuilder.Entity<FileTag>()
+                .HasOne(ft => ft.Tag)
+                .WithMany(t => t.FileTags)
+                .HasForeignKey(ft => ft.TagId);
+            modelBuilder.Entity<Tag>()
+                .HasIndex(t => t.Name).IsUnique();
 
-        // 为SerilogLogs的Timestamp添加索引（与OperationLogs保持一致）
-        modelBuilder.Entity<SerilogLog>()
-            .HasIndex(l => l.Timestamp)
-            .HasDatabaseName("IX_SerilogLogs_Timestamp"); // 索引命名风格一致
-
-
+            // 日志表索引（不变）
+            modelBuilder.Entity<SerilogLog>()
+                .HasIndex(l => l.Timestamp)
+                .HasDatabaseName("IX_SerilogLogs_Timestamp");
+        }
     }
-}
 

@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using ConsoleApp1.Interfaces;
-using ConsoleApp1.Models;
+using MinioWebBackend.Interfaces;
+using MinioWebBackend.Models;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 
-namespace MinioWebApi.Controllers
+namespace MinioWebBackend.Controllers
 {
     [ApiController]
     [Route("api/{bucketName}/[controller]")]

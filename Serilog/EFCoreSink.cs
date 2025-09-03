@@ -1,8 +1,8 @@
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
-using Microsoft.EntityFrameworkCore;
-using MinioWebBackend.Models;
+using Microsoft.Extensions.DependencyInjection;
+using MinioWebBackend.Models; // 你的 SerilogLog 模型所在命名空间
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -13,87 +13,80 @@ using Serilog.Configuration;
 namespace MinioWebBackend.Serilog
 {
     /// <summary>
-    /// 自定义Serilog Sink：通过EF Core写入日志到数据库
+    /// 依赖 IServiceScopeFactory 的 Serilog Sink（复用已注册的 AppDbContext）
     /// </summary>
     public class EFCoreSink : ILogEventSink, IDisposable
     {
-        private readonly IDbContextFactory<AppDbContext> _dbContextFactory;
+        // 改为依赖 IServiceScopeFactory（不再用 IDbContextFactory）
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly ConcurrentQueue<SerilogLog> _logQueue = new ConcurrentQueue<SerilogLog>();
         private readonly Timer _flushTimer;
         private const int BatchSize = 100; // 批量写入阈值
-        private const int FlushIntervalSeconds = 5; // 定时刷新间隔（秒）
+        private const int FlushIntervalSeconds = 5; // 定时刷新间隔
         private bool _isDisposed;
 
-        public EFCoreSink(IDbContextFactory<AppDbContext> dbContextFactory)
+        // 构造函数：注入 IServiceScopeFactory（与扩展方法参数匹配）
+        public EFCoreSink(IServiceScopeFactory scopeFactory)
         {
-            _dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
-            // 定时刷新队列（避免日志堆积）
-            _flushTimer = new Timer(FlushQueue, null, 
-                TimeSpan.FromSeconds(FlushIntervalSeconds), 
+            _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
+            _flushTimer = new Timer(FlushQueue, null,
+                TimeSpan.FromSeconds(FlushIntervalSeconds),
                 TimeSpan.FromSeconds(FlushIntervalSeconds));
         }
 
-        /// <summary>
-        /// 处理Serilog日志事件（核心方法）
-        /// </summary>
+        // 处理日志事件（不变）
         public void Emit(LogEvent logEvent)
         {
             if (logEvent == null) return;
 
-            // 1. 转换LogEvent为SerilogLog实体
             var logEntry = new SerilogLog
             {
                 Timestamp = logEvent.Timestamp.UtcDateTime,
                 Level = logEvent.Level.ToString(),
-                Message = logEvent.RenderMessage(), // 渲染带参数的消息
+                Message = logEvent.RenderMessage(),
                 Exception = logEvent.Exception?.ToString(),
-                // 序列化结构化参数（保留{username}, {bucket}等键值对）
-                Properties = JsonConvert.SerializeObject(logEvent.Properties, 
+                Properties = JsonConvert.SerializeObject(logEvent.Properties,
                     new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
             };
 
-            // 2. 加入队列（避免阻塞主线程）
             _logQueue.Enqueue(logEntry);
-
-            // 3. 达到批量阈值时立即刷新
-            if (_logQueue.Count >= BatchSize)
-            {
-                FlushQueue(null);
-            }
+            if (_logQueue.Count >= BatchSize) FlushQueue(null);
         }
 
-        /// <summary>
-        /// 批量写入队列中的日志到数据库
-        /// </summary>
+        // 批量写入：通过 IServiceScopeFactory 创建临时 Scope 获取 AppDbContext
         private void FlushQueue(object? state)
         {
             if (_logQueue.IsEmpty || _isDisposed) return;
 
             try
             {
-                using var dbContext = _dbContextFactory.CreateDbContext();
-                var batch = new List<SerilogLog>();
+                // 1. 创建临时服务作用域（自动释放，避免内存泄漏）
+                using var scope = _scopeFactory.CreateScope();
+                // 2. 从 Scope 中获取你已注册的 AppDbContext（复用原有注册）
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-                // 从队列取数据（最多BatchSize条）
+                // 3. 批量读取队列中的日志
+                var batch = new List<SerilogLog>();
                 while (batch.Count < BatchSize && _logQueue.TryDequeue(out var log))
                 {
                     batch.Add(log);
                 }
 
-                if (batch.Count == 0) return;
-
-                // 批量插入
-                dbContext.SerilogLogs.AddRange(batch);
-                dbContext.SaveChanges();
+                // 4. 写入数据库
+                if (batch.Count > 0)
+                {
+                    dbContext.SerilogLogs.AddRange(batch);
+                    dbContext.SaveChanges();
+                }
             }
             catch (Exception ex)
             {
-                // 日志写入失败时，可降级到控制台或文件（避免死循环）
-                Console.WriteLine($"EF Core日志写入失败: {ex.Message}");
+                // 日志写入失败时降级到控制台（避免影响主程序）
+                Console.WriteLine($"EF Core 日志写入失败: {ex.Message}");
             }
         }
 
-        // 释放资源时确保队列中所有日志被写入
+        // 释放资源（不变）
         public void Dispose()
         {
             Dispose(true);
@@ -103,36 +96,29 @@ namespace MinioWebBackend.Serilog
         protected virtual void Dispose(bool disposing)
         {
             if (_isDisposed) return;
-
             if (disposing)
             {
                 _flushTimer.Dispose();
-                FlushQueue(null); // 程序退出前强制刷新
+                FlushQueue(null); // 程序退出前强制刷新剩余日志
             }
-
             _isDisposed = true;
         }
     }
 
     /// <summary>
-    /// Serilog扩展方法：简化配置
+    /// 扩展方法：接收 IServiceScopeFactory（与 Sink 构造函数匹配）
     /// </summary>
     public static class EFCoreSinkExtensions
     {
-        /// <summary>
-        /// 添加EF Core作为Serilog的日志输出目标
-        /// </summary>
-        /// <param name="sinkConfiguration">Serilog的Sink配置</param>
-        /// <param name="dbContextFactory">EF Core的DbContext工厂</param>
-        /// <returns>日志配置对象</returns>
         public static LoggerConfiguration EFCore(
-            this LoggerSinkConfiguration sinkConfiguration,
-            IDbContextFactory<AppDbContext> dbContextFactory)
+            this LoggerSinkConfiguration sinkConfig,
+            IServiceScopeFactory scopeFactory) // 参数改为 IServiceScopeFactory
         {
-            if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
-            if (dbContextFactory == null) throw new ArgumentNullException(nameof(dbContextFactory));
+            if (sinkConfig == null) throw new ArgumentNullException(nameof(sinkConfig));
+            if (scopeFactory == null) throw new ArgumentNullException(nameof(scopeFactory));
 
-            return sinkConfiguration.Sink(new EFCoreSink(dbContextFactory));
+            // 创建 Sink 实例时传入 IServiceScopeFactory
+            return sinkConfig.Sink(new EFCoreSink(scopeFactory));
         }
     }
 }

@@ -1,14 +1,14 @@
 using Amazon.S3;
 using Amazon.S3.Model;
-using ConsoleApp1.Models;
-using ConsoleApp1.Interfaces;
+using MinioWebBackend.Models;
+using MinioWebBackend.Interfaces;
 using Microsoft.Extensions.Options;
-using ConsoleApp1.Options;
+using MinioWebBackend.Options;
 using Serilog;
 using Microsoft.EntityFrameworkCore;
 
 
-namespace ConsoleApp1.Service
+namespace MinioWebBackend.Service
 {
     public class UploadService : IUploadService
     {

@@ -1,4 +1,4 @@
-namespace ConsoleApp1.Interfaces
+namespace MinioWebBackend.Interfaces
 {
        public interface IDownloadService
 {

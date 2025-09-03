@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http.Features;
-using ConsoleApp1.Interfaces;
-using ConsoleApp1.Options;
-using ConsoleApp1.Service;
+using MinioWebBackend.Interfaces;
+using MinioWebBackend.Options;
+using MinioWebBackend.Service;
 using Microsoft.Extensions.Options;
 using Amazon.S3;
 using Amazon.Runtime;
@@ -70,21 +70,21 @@ builder.Services.AddSingleton<TransferUtility>(sp =>
 );
 
 // ==================== Serilog ====================
+// ==================== Serilog ====================
 builder.Host.UseSerilog((context, services, loggerConfig) => loggerConfig
     .MinimumLevel.Information()
-    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning) // 过滤Microsoft的冗余日志
-    .Enrich.FromLogContext() // 保留日志上下文信息
-    // 输出到控制台（开发环境方便调试）
+    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+    .Enrich.FromLogContext()
     .WriteTo.Console()
-    // 输出到文件（按天滚动，作为备份）
     .WriteTo.File(
         path: "logs/app.log",
         rollingInterval: RollingInterval.Day,
-        retainedFileCountLimit: 14 // 保留14天的日志文件
+        retainedFileCountLimit: 14
     )
-    // 核心：输出到数据库（通过自定义的EF Core Sink）
-    .WriteTo.EFCore(services.GetRequiredService<IDbContextFactory<AppDbContext>>())
+    // 只改这一行：从 IDbContextFactory 改为 IServiceScopeFactory
+    .WriteTo.EFCore(services.GetRequiredService<IServiceScopeFactory>())
 );
+
 
 // ==================== 上传限制 ====================
 builder.WebHost.ConfigureKestrel(opts =>

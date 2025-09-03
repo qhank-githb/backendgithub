@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ConsoleApp1.Models
+namespace MinioWebBackend.Models
 {
 
         public class UploadResult

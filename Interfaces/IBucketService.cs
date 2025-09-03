@@ -1,6 +1,6 @@
 
 
-namespace ConsoleApp1.Interfaces
+namespace MinioWebBackend.Interfaces
 {
 
     public interface IBucketService

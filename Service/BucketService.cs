@@ -1,7 +1,7 @@
 using Amazon.S3;
-using ConsoleApp1.Interfaces;
+using MinioWebBackend.Interfaces;
 
-namespace ConsoleApp1.Service
+namespace MinioWebBackend.Service
 {
     public class BucketService : IBucketService
     {

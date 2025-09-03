@@ -1,6 +1,6 @@
-using ConsoleApp1.Models;
+using MinioWebBackend.Models;
 
-namespace ConsoleApp1.Interfaces
+namespace MinioWebBackend.Interfaces
 {
     public interface IFileTagService
 {

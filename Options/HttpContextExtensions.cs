@@ -1,6 +1,6 @@
 
 
-namespace ConsoleApp1.Options
+namespace MinioWebBackend.Options
 {
     public static class HttpContextExtensions
 {

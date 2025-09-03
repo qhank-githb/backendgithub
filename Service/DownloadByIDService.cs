@@ -1,9 +1,9 @@
 using Amazon.S3;
-using ConsoleApp1.Models;
-using ConsoleApp1.Interfaces;
+using MinioWebBackend.Models;
+using MinioWebBackend.Interfaces;
 
 
-namespace ConsoleApp1.Service
+namespace MinioWebBackend.Service
 {
     public class DownloadByIDService : IDownloadByIDService
 {

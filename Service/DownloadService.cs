@@ -1,14 +1,14 @@
 using Amazon.S3;
 using Amazon.S3.Model;
-using ConsoleApp1.Interfaces;
+using MinioWebBackend.Interfaces;
 using System.IO.Compression;
 using Microsoft.Extensions.Options;
-using ConsoleApp1.Options;
+using MinioWebBackend.Options;
 using Serilog;
 
 
 
-namespace ConsoleApp1.Service
+namespace MinioWebBackend.Service
 {
     public class DownloadService : IDownloadService
 {

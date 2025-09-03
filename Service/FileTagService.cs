@@ -1,5 +1,5 @@
-using ConsoleApp1.Interfaces;
-using ConsoleApp1.Models;
+using MinioWebBackend.Interfaces;
+using MinioWebBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
 

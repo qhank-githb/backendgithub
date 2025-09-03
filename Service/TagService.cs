@@ -1,11 +1,11 @@
-using ConsoleApp1.Interfaces;
-using ConsoleApp1.Models;
+using MinioWebBackend.Interfaces;
+using MinioWebBackend.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 
 
-namespace ConsoleApp1.Service
+namespace MinioWebBackend.Service
 {
     public class TagService : ITagService
     {

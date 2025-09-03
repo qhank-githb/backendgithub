@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using ConsoleApp1.Interfaces;
+using MinioWebBackend.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 
 
-namespace MinioWebApi.Controllers
+namespace MinioWebBackend.Controllers
 {
     [ApiController]
     [Route("api/file")]
