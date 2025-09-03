@@ -17,23 +17,23 @@ namespace ConsoleApp1.Models
 
 
 
-public class FileInfoModel
-{
-    public int Id { get; set; }
-    public string StoredFileName { get; set; } = string.Empty;
-    public string OriginalFileName { get; set; } = string.Empty;
-    public string Bucketname { get; set; } = string.Empty;
-    public string RelativePath { get; set; } = string.Empty;
-    public string AbsolutePath { get; set; } = string.Empty;
-    public long FileSize { get; set; }
-    public string MimeType { get; set; } = string.Empty;
-    public DateTime UploadTime { get; set; }
-    public string Uploader { get; set; } = string.Empty;
-    public string ETag { get; set; } = string.Empty;
+        public class FileInfoModel
+        {
+            public int Id { get; set; }
+            public string StoredFileName { get; set; } = string.Empty;
+            public string OriginalFileName { get; set; } = string.Empty;
+            public string Bucketname { get; set; } = string.Empty;
+            public string RelativePath { get; set; } = string.Empty;
+            public string AbsolutePath { get; set; } = string.Empty;
+            public long FileSize { get; set; }
+            public string MimeType { get; set; } = string.Empty;
+            public DateTime UploadTime { get; set; }
+            public string Uploader { get; set; } = string.Empty;
+            public string ETag { get; set; } = string.Empty;
 
-    // 新增标签字段
-    public List<string> Tags { get; set; } = new List<string>();
-}
+            // 新增标签字段
+            public List<string> Tags { get; set; } = new List<string>();
+        }
 
 
 
