@@ -368,7 +368,6 @@ D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.AssemblyInfo.cs
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.csproj.CoreCompileInputs.cache
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.MvcApplicationPartsAssemblyInfo.cs
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.MvcApplicationPartsAssemblyInfo.cache
-D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.sourcelink.json
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\staticwebassets.build.json
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\staticwebassets.development.json
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\staticwebassets\msbuild.MinioWebApi.Microsoft.AspNetCore.StaticWebAssets.props
@@ -385,3 +384,4 @@ D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.genruntimeconfig.
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\ref\MinioWebApi.dll
 D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.SqlServer.dll
 D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\System.Formats.Asn1.dll
+D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\Newtonsoft.Json.dll

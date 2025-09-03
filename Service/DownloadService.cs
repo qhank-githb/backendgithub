@@ -7,6 +7,7 @@ using ConsoleApp1.Options;
 using Serilog;
 
 
+
 namespace ConsoleApp1.Service
 {
     public class DownloadService : IDownloadService

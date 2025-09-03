@@ -3,6 +3,8 @@ using ConsoleApp1.Interfaces;
 using ConsoleApp1.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using ConsoleApp1.Data;
+
 
 [ApiController]
 [Route("api/files")]

@@ -2,6 +2,8 @@ using ConsoleApp1.Interfaces;
 using ConsoleApp1.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using ConsoleApp1.Data;
+
 
 
 namespace ConsoleApp1.Service

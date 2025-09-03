@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Serilog;
+using ConsoleApp1.Data;
+using MinioWebBackend.Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,14 +71,21 @@ builder.Services.AddSingleton<TransferUtility>(sp =>
 );
 
 // ==================== Serilog ====================
-Log.Logger = new LoggerConfiguration()
+builder.Host.UseSerilog((context, services, loggerConfig) => loggerConfig
     .MinimumLevel.Information()
-    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning) // 过滤Microsoft的冗余日志
+    .Enrich.FromLogContext() // 保留日志上下文信息
+    // 输出到控制台（开发环境方便调试）
     .WriteTo.Console()
-    .WriteTo.File("logs/app.log", rollingInterval: RollingInterval.Day)
-    .CreateLogger();
-
-builder.Host.UseSerilog();
+    // 输出到文件（按天滚动，作为备份）
+    .WriteTo.File(
+        path: "logs/app.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 14 // 保留14天的日志文件
+    )
+    // 核心：输出到数据库（通过自定义的EF Core Sink）
+    .WriteTo.EFCore(services.GetRequiredService<IDbContextFactory<AppDbContext>>())
+);
 
 // ==================== 上传限制 ====================
 builder.WebHost.ConfigureKestrel(opts =>

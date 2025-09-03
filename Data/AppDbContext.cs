@@ -1,8 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using ConsoleApp1.Models;
+using MinioWebBackend.Models;
 
 // Data/AppDbContext.cs
-public class AppDbContext : DbContext
+namespace ConsoleApp1.Data
+{
+        public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -11,7 +14,8 @@ public class AppDbContext : DbContext
     public DbSet<FileTag> FileTags { get; set; }
 
     // ✅ 新增日志表
-    public DbSet<OperationLog> OperationLogs { get; set; }
+
+    public DbSet<SerilogLog> SerilogLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,19 +35,13 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Tag>()
             .HasIndex(t => t.Name).IsUnique();
 
-        // ✅ 可选：给日志表加索引（便于查询）
-        modelBuilder.Entity<OperationLog>()
-            .HasIndex(l => l.Timestamp);
-            modelBuilder.Entity<FileInfoModel>(entity =>
-    {
-        entity.Property(e => e.StoredFileName).HasColumnType("longtext");
-        entity.Property(e => e.OriginalFileName).HasColumnType("longtext");
-        entity.Property(e => e.Bucketname).HasColumnType("varchar(255)");
-        entity.Property(e => e.RelativePath).HasColumnType("longtext");
-        entity.Property(e => e.AbsolutePath).HasColumnType("longtext");
-        entity.Property(e => e.MimeType).HasColumnType("varchar(255)");
-        entity.Property(e => e.Uploader).HasColumnType("varchar(255)");
-        entity.Property(e => e.ETag).HasColumnType("varchar(255)");
-    });
+        // 为SerilogLogs的Timestamp添加索引（与OperationLogs保持一致）
+        modelBuilder.Entity<SerilogLog>()
+            .HasIndex(l => l.Timestamp)
+            .HasDatabaseName("IX_SerilogLogs_Timestamp"); // 索引命名风格一致
+
+
     }
+}
+
 }

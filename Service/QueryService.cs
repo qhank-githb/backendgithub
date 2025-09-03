@@ -1,6 +1,8 @@
 using ConsoleApp1.Models;
 using ConsoleApp1.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using ConsoleApp1.Data;
+
 
 namespace ConsoleApp1.Service
 {
