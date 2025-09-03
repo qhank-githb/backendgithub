@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Serilog;
-using ConsoleApp1.Data;
 using MinioWebBackend.Serilog;
 
 var builder = WebApplication.CreateBuilder(args);

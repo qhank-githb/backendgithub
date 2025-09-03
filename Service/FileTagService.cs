@@ -1,7 +1,6 @@
 using ConsoleApp1.Interfaces;
 using ConsoleApp1.Models;
 using Microsoft.EntityFrameworkCore;
-using ConsoleApp1.Data;
 
 
 public class FileTagService : IFileTagService

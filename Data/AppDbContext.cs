@@ -3,8 +3,6 @@ using ConsoleApp1.Models;
 using MinioWebBackend.Models;
 
 // Data/AppDbContext.cs
-namespace ConsoleApp1.Data
-{
         public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
@@ -44,4 +42,3 @@ namespace ConsoleApp1.Data
     }
 }
 
-}

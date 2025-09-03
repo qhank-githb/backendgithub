@@ -6,7 +6,6 @@ using Microsoft.Extensions.Options;
 using ConsoleApp1.Options;
 using Serilog;
 using Microsoft.EntityFrameworkCore;
-using ConsoleApp1.Data;
 
 
 namespace ConsoleApp1.Service

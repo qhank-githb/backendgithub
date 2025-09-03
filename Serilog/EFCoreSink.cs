@@ -2,7 +2,6 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Microsoft.EntityFrameworkCore;
-using ConsoleApp1.Data;
 using MinioWebBackend.Models;
 using Newtonsoft.Json;
 using System;
