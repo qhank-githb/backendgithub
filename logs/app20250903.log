@@ -1011,3 +1011,22 @@ CREATE TABLE [SerilogLogs] (
 2025-09-03 16:55:43.784 +08:00 [INF] 用户登录成功：bolo-vue-test
 2025-09-03 16:55:47.741 +08:00 [INF] 用户登录成功：bolo-vue-test
 2025-09-03 16:56:00.624 +08:00 [INF] 用户 bolo-vue-test 于 "2025-09-03T16:56:00.5310499+08:00" 成功上传文件 新建 文本文档.txt, 存储名 bolo-vue-test_20250903165600439_2d7d1858e673440caeb6ea0947a7d345, 标签：2,1 , 大小 96 字节
+2025-09-03 17:31:37.398 +08:00 [ERR] Failed executing DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [file_info] (
+    [id] int NOT NULL IDENTITY,
+    [stored_file_name] nvarchar(max) NOT NULL,
+    [original_file_name] nvarchar(max) NOT NULL,
+    [bucketname] nvarchar(max) NOT NULL,
+    [relative_path] nvarchar(max) NOT NULL,
+    [absolute_path] nvarchar(max) NOT NULL,
+    [file_size] bigint NOT NULL,
+    [mime_type] nvarchar(max) NOT NULL,
+    [upload_time] datetime2 NOT NULL,
+    [uploader] nvarchar(max) NOT NULL,
+    [etag] nvarchar(max) NOT NULL,
+    CONSTRAINT [PK_file_info] PRIMARY KEY ([id])
+);
+2025-09-03 17:32:44.217 +08:00 [INF] 用户登录成功：bolo-vue-test
+2025-09-03 17:32:47.729 +08:00 [INF] 用户登录成功：bolo-vue-test
+2025-09-03 17:32:50.632 +08:00 [INF] 用户 bolo-vue-test 尝试创建标签 1
+2025-09-03 17:32:50.684 +08:00 [INF] 用户 bolo-vue-test 成功创建标签 1

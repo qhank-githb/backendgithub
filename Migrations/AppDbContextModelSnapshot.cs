@@ -121,7 +121,7 @@ namespace MinioWebApi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2(6)");
+                        .HasColumnType("datetime");
 
                     b.HasKey("Id");
 

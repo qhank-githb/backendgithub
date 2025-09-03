@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MinioWebApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250903085455_AddSerilogLogsTable")]
+    [Migration("20250903093202_AddSerilogLogsTable")]
     partial class AddSerilogLogsTable
     {
         /// <inheritdoc />
@@ -124,7 +124,7 @@ namespace MinioWebApi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2(6)");
+                        .HasColumnType("datetime");
 
                     b.HasKey("Id");
 

@@ -43,7 +43,7 @@ namespace MinioWebApi.Migrations
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Exception = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Properties = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Timestamp = table.Column<DateTime>(type: "datetime2(6)", nullable: false)
+                    Timestamp = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
                 {

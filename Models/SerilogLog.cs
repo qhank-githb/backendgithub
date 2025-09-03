@@ -41,8 +41,7 @@ namespace MinioWebBackend.Models
         /// <summary>
         /// 日志时间戳（与OperationLogs的Timestamp类型完全一致：datetime(6)）
         /// </summary>
-        [Required]
-        [Column(TypeName = "datetime2(6)")] // 精确到6位小数，与模板一致
-        public DateTime Timestamp { get; set; }
+         [Column(TypeName = "datetime")] 
+    public DateTime Timestamp { get; set; }
     }
 }
