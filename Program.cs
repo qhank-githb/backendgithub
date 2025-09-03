@@ -19,8 +19,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://0.0.0.0:5000");
 
 // ==================== 数据库配置 ====================
-var provider = builder.Configuration["DatabaseProvider"]; // appsettings.json 里指定
-var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
+var activeConfig = builder.Configuration["ActiveConfig"];
+
+// 从对应配置块里拿 provider 和 connStr
+var provider = builder.Configuration[$"Configs:{activeConfig}:DatabaseProvider"];
+var connStr = builder.Configuration[$"Configs:{activeConfig}:ConnectionStrings:DefaultConnection"];
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
