@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Serilog;
 using MinioWebBackend.Serilog;
+using Serilog.Sinks.Elasticsearch;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,8 +85,14 @@ builder.Host.UseSerilog((context, services, loggerConfig) => loggerConfig
         rollingInterval: RollingInterval.Day,
         retainedFileCountLimit: 14
     )
-    // 只改这一行：从 IDbContextFactory 改为 IServiceScopeFactory
     .WriteTo.EFCore(services.GetRequiredService<IServiceScopeFactory>())
+    .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://localhost:9200"))
+        {
+            AutoRegisterTemplate = true,
+            IndexFormat = $"myapp-logs-{DateTime.UtcNow:yyyy.MM}", // 每月一个索引
+            NumberOfReplicas = 1,
+            NumberOfShards = 2
+        })
 );
 
 
