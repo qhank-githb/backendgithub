@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Serilog;
-using MinioWebBackend.Serilog;
 using Serilog.Sinks.Elasticsearch;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -75,25 +74,31 @@ builder.Services.AddSingleton<TransferUtility>(sp =>
 
 // ==================== Serilog ====================
 // ==================== Serilog ====================
-builder.Host.UseSerilog((context, services, loggerConfig) => loggerConfig
-    .MinimumLevel.Information()
-    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.File(
-        path: "logs/app.log",
-        rollingInterval: RollingInterval.Day,
-        retainedFileCountLimit: 14
-    )
-    .WriteTo.EFCore(services.GetRequiredService<IServiceScopeFactory>())
-    .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://localhost:9200"))
+builder.Host.UseSerilog((context, services, loggerConfig) =>
+{
+    loggerConfig
+        .MinimumLevel.Information()
+        .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+        .Enrich.FromLogContext()
+        .Enrich.WithMachineName()
+        .Enrich.WithEnvironmentName()
+        .Enrich.WithThreadId()
+        .WriteTo.Console()
+        .WriteTo.File(
+            path: "logs/app.log",
+            rollingInterval: RollingInterval.Day,
+            retainedFileCountLimit: 14
+        )
+        // 异步写 Elasticsearch
+        .WriteTo.Async(a => a.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://localhost:9200"))
         {
             AutoRegisterTemplate = true,
-            IndexFormat = $"myapp-logs-{DateTime.UtcNow:yyyy.MM}", // 每月一个索引
+            IndexFormat = "myapp-logs-{0:yyyy.MM.dd}", // 每天一个索引
             NumberOfReplicas = 1,
             NumberOfShards = 2
-        })
-);
+        }));
+});
+
 
 
 // ==================== 上传限制 ====================
