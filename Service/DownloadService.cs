@@ -33,10 +33,7 @@ namespace MinioWebBackend.Service
     
     
  
-        /// 从 MinIO/S3 桶里下载对象并以 MemoryStream 返回，方便在 Web API 中做 FileResult。
-        /// 基于AWS SDK的 GetObject 方法 ，所有下载行为的基础方法
-        /// https://docs.aws.amazon.com/zh_cn/sdk-for-net/v3/developer-guide/csharp_s3_code_examples.html
-        /// </summary>
+
         public async Task<Stream> DownloadObjectAsStreamAsync(string bucketName, string objectName)
         {
             // 先查数据库里的原始文件名

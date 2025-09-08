@@ -12,9 +12,6 @@ namespace MinioWebBackend.Service
             _s3Client = s3Client;
         }
 
-        /// 查询所有桶名
-        /// </summary>
-        /// <returns>桶名字符串列表</returns>
         public async Task<List<string>> ListBucketsAsync()
         {
             var response = await _s3Client.ListBucketsAsync();
