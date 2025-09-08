@@ -101,14 +101,7 @@ namespace MinioWebBackend.Service
 
 
 
-        /// <summary>
-        /// 分片上传
-        /// </summary>
-        /// <param name="bucket">要上传到的桶的名称。</param>
-        /// <param name="key">上传到桶后的名称。</param>
-        /// <param name="filePath">上传文件的路径。</param>
-        /// <param name="contentType">文件类型</param>
-        /// <returns>文件的ETAG：string ETag，和文件的大小Long Size。</returns>
+
         public async Task<UploadResult> MultipartUploadAsync(MultipartUploadRequest request)
         {
             try
