@@ -18,7 +18,6 @@ namespace MinioWebBackend.Controllers
 
         /// <summary>
         /// 获取所有桶名
-        /// GET: /api/buckets
         /// </summary>
         [HttpGet]
         public async Task<ActionResult<List<string>>> GetBuckets()

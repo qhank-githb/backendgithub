@@ -1,39 +1,40 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MinioWebBackend.Models
 {
 
-        public class UploadResult
-        {
-            public string Originalfilename { get; set; } = string.Empty;
-            public string ETag { get; set; } = string.Empty;
-            public long Size { get; set; }
-            public string Bucketname { get; set; } = string.Empty;
-            public string Username { get; set; } = string.Empty;
-            public List<string> Tags { get; set; } = new List<string>();
-            public DateTime Uploadtime { get; set; }
-        }
+    public class UploadResult
+    {
+        public string Originalfilename { get; set; } = string.Empty;
+        public string ETag { get; set; } = string.Empty;
+        public long Size { get; set; }
+        public string Bucketname { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+        public List<string> Tags { get; set; } = new List<string>();
+        public DateTime Uploadtime { get; set; }
+    }
 
 
 
-        public class FileInfoModel
-        {
-            public int Id { get; set; }
-            public string StoredFileName { get; set; } = string.Empty;
-            public string OriginalFileName { get; set; } = string.Empty;
-            public string Bucketname { get; set; } = string.Empty;
-            public string RelativePath { get; set; } = string.Empty;
-            public string AbsolutePath { get; set; } = string.Empty;
-            public long FileSize { get; set; }
-            public string MimeType { get; set; } = string.Empty;
-            public DateTime UploadTime { get; set; }
-            public string Uploader { get; set; } = string.Empty;
-            public string ETag { get; set; } = string.Empty;
+    public class FileInfoModel
+    {
+        public int Id { get; set; }
+        public string StoredFileName { get; set; } = string.Empty;
+        public string OriginalFileName { get; set; } = string.Empty;
+        public string Bucketname { get; set; } = string.Empty;
+        public string RelativePath { get; set; } = string.Empty;
+        public string AbsolutePath { get; set; } = string.Empty;
+        public long FileSize { get; set; }
+        public string MimeType { get; set; } = string.Empty;
+        public DateTime UploadTime { get; set; }
+        public string Uploader { get; set; } = string.Empty;
+        public string ETag { get; set; } = string.Empty;
 
-            // 新增标签字段
-            public List<string> Tags { get; set; } = new List<string>();
-        }
+        // 新增标签字段
+        public List<string> Tags { get; set; } = new List<string>();
+    }
 
 
 
@@ -119,24 +120,37 @@ namespace MinioWebBackend.Models
     }
 
 
-public class OperationLog
-{
-    public long Id { get; set; }
-    public string UserName { get; set; } = string.Empty;   // 只保留用户名
-    public string OperationType { get; set; } = string.Empty; // Upload/Delete/Download
-    public string FileName { get; set; } = string.Empty;
-    public string Bucket { get; set; } = string.Empty;
-    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-    public string Status { get; set; } = "Success"; // Success/Fail
-    public string Message { get; set; } = string.Empty;
-}
+    public class OperationLog
+    {
+        public long Id { get; set; }
+        public string UserName { get; set; } = string.Empty;   // 只保留用户名
+        public string OperationType { get; set; } = string.Empty; // Upload/Delete/Download
+        public string FileName { get; set; } = string.Empty;
+        public string Bucket { get; set; } = string.Empty;
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public string Status { get; set; } = "Success"; // Success/Fail
+        public string Message { get; set; } = string.Empty;
+    }
 
-// 前端传过来的数据格式
-public class EditFileDto
+    // 前端传过来的数据格式
+    public class EditFileDto
+    {
+        public int Id { get; set; }              // 文件ID
+        public string FileName { get; set; }     // 新的文件名
+        public List<string> Tags { get; set; }   // 新的标签列表
+    }
+
+
+public class FileUploadDto
 {
-    public int Id { get; set; }              // 文件ID
-    public string FileName { get; set; }     // 新的文件名
-    public List<string> Tags { get; set; }   // 新的标签列表
+    [FromForm(Name = "file")]
+    public IFormFile File { get; set; }
+
+    [FromForm(Name = "username")]
+    public string Username { get; set; }
+
+    [FromForm(Name = "tags")]
+    public string Tags { get; set; }  // 原始 JSON 字符串
 }
 
 

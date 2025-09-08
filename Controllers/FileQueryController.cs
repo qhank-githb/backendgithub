@@ -19,6 +19,9 @@ namespace MinioWebBackend.Controllers
             _iQueryService = iQueryService;
         }
 
+        /// <summary>
+        /// 获取所有文件信息
+        /// </summary>
         // GET: /api/FileInfo
         [HttpGet]
         public async Task<ActionResult<List<FileInfoModel>>> GetAllFiles()
@@ -27,6 +30,11 @@ namespace MinioWebBackend.Controllers
             return Ok(files);
         }
 
+
+        /// <summary>
+        /// 根据文件 ID 获取文件信息
+        /// </summary>
+        /// <param name="id">文件 ID</param>
         // GET: /api/FileInfo/5
         [HttpGet("{id}")]
         public async Task<ActionResult<FileInfoModel>> GetFileById(int id)
@@ -39,7 +47,19 @@ namespace MinioWebBackend.Controllers
         }
 
 
-
+        /// <summary>
+        /// 查询文件（支持分页、时间范围、标签筛选）
+        /// </summary>
+        /// <param name="id">文件 ID</param>
+        /// <param name="uploader">上传者</param>
+        /// <param name="fileName">文件名</param>
+        /// <param name="bucket">桶名</param>
+        /// <param name="start">开始时间</param>
+        /// <param name="end">结束时间</param>
+        /// <param name="pageNumber">分页页码</param>
+        /// <param name="pageSize">每页数量</param>
+        /// <param name="tags">标签列表</param>
+        /// <param name="matchAllTags">是否全部匹配标签</param> 
         [HttpGet("query")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<FileQueryResult>> QueryFiles(
@@ -73,7 +93,15 @@ namespace MinioWebBackend.Controllers
         }
 
 
-
+        /// <summary>
+        /// 查询符合条件的文件 ID 列表
+        /// </summary>
+        /// <param name="id">文件 ID</param>
+        /// <param name="uploader">上传者</param>
+        /// <param name="fileName">文件名</param>
+        /// <param name="bucket">桶名</param>
+        /// <param name="start">开始时间</param>
+        /// <param name="end">结束时间</param>
         [HttpGet("query-ids")]
         public async Task<IActionResult> QueryFileIds(
            [FromQuery] int? id,

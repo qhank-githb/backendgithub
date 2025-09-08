@@ -11,6 +11,11 @@ using Serilog;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
+    /// <summary>
+    /// 用户登录接口
+    /// </summary>
+    /// <param name="request">登录请求对象，包括用户名和密码</param>
+    /// <returns>返回 JWT token，登录成功；失败返回 401</returns>
     [HttpPost("login")]
     public IActionResult Login([FromBody] LoginRequest request)
     {
@@ -27,6 +32,10 @@ public class AuthController : ControllerBase
         return Ok(new { token });
     }
 
+    /// <summary>
+    /// 用户登出接口
+    /// </summary>
+    /// <returns>返回登出成功信息</returns>
     [HttpPost("logout")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public IActionResult Logout()

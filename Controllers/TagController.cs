@@ -11,6 +11,11 @@ public class TagController : ControllerBase
     private readonly ITagService _tagService;
     public TagController(ITagService tagService) => _tagService = tagService;
 
+    /// <summary>
+    /// 创建新标签
+    /// </summary>
+    /// <param name="dto">包含标签名称的 DTO 对象</param>
+    /// <returns>返回创建的标签对象</returns>
     [HttpPost]
     public async Task<IActionResult> CreateTag([FromBody] CreateTagDto dto)
     {
@@ -25,6 +30,10 @@ public class TagController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// 获取所有标签
+    /// </summary>
+    /// <returns>返回标签列表</returns>
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -32,6 +41,11 @@ public class TagController : ControllerBase
         return Ok(tags);
     }
     
+    /// <summary>
+    /// 修改文件信息
+    /// </summary>
+    /// <param name="dto">包含文件修改信息的 DTO 对象</param>
+    /// <returns>返回修改结果</returns>
      [HttpPost("edit")]
     public async Task<IActionResult> EditFile([FromBody] EditFileDto dto)
     {

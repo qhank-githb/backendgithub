@@ -17,6 +17,11 @@ namespace MinioWebBackend.Controllers
             _idownloadService = idownloadService;
         }
 
+         /// <summary>
+        /// 下载指定桶中的单个文件
+        /// </summary>
+        /// <param name="bucket">桶名</param>
+        /// <param name="originalfilename">原始文件名</param>
         [HttpGet("/api/{bucket}/file/download")]
         public async Task<IActionResult> Download([FromRoute] string bucket, [FromQuery] string originalfilename)
         {
@@ -27,6 +32,11 @@ namespace MinioWebBackend.Controllers
             return File(stream, "application/octet-stream", originalfilename);
         }
 
+
+        /// <summary>
+        /// 批量下载文件，返回 ZIP 压缩包
+        /// </summary>
+        /// <param name="ids">文件 ID 列表</param>
         [HttpPost("batch-download")]
         public async Task<IActionResult> BatchDownloadByIds([FromBody] List<int> ids)
         {

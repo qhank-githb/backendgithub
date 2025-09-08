@@ -1,0 +1,217 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MinioWebApi</name>
+    </assembly>
+    <members>
+        <member name="M:AuthController.Login(LoginRequest)">
+            <summary>
+            用户登录接口
+            </summary>
+            <param name="request">登录请求对象，包括用户名和密码</param>
+            <returns>返回 JWT token，登录成功；失败返回 401</returns>
+        </member>
+        <member name="M:AuthController.Logout">
+            <summary>
+            用户登出接口
+            </summary>
+            <returns>返回登出成功信息</returns>
+        </member>
+        <member name="M:MinioWebBackend.Controllers.BucketsController.GetBuckets">
+            <summary>
+            获取所有桶名
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Controllers.DownloadByIDController.DownloadById(System.Int32)">
+            <summary>
+            根据文件 ID 下载文件
+            </summary>
+            <param name="id">文件的唯一 ID</param>
+            <returns>返回文件流，下载成功；找不到文件返回 404</returns>
+        </member>
+        <member name="M:MinioWebBackend.Controllers.DownloadByIDController.PreviewById(System.Int32)">
+            <summary>
+            根据文件 ID 预览文件
+            </summary>
+            <param name="id">文件的唯一 ID</param>
+            <returns>返回文件流，Content-Disposition 为 inline，可直接在浏览器预览；找不到文件返回 404</returns>
+        </member>
+        <member name="M:MinioWebBackend.Controllers.FileDownloadController.Download(System.String,System.String)">
+            <summary>
+            下载指定桶中的单个文件
+            </summary>
+            <param name="bucket">桶名</param>
+            <param name="originalfilename">原始文件名</param>
+        </member>
+        <member name="M:MinioWebBackend.Controllers.FileDownloadController.BatchDownloadByIds(System.Collections.Generic.List{System.Int32})">
+            <summary>
+            批量下载文件，返回 ZIP 压缩包
+            </summary>
+            <param name="ids">文件 ID 列表</param>
+        </member>
+        <member name="M:MinioWebBackend.Controllers.FileQueryController.GetAllFiles">
+            <summary>
+            获取所有文件信息
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Controllers.FileQueryController.GetFileById(System.Int32)">
+            <summary>
+            根据文件 ID 获取文件信息
+            </summary>
+            <param name="id">文件 ID</param>
+        </member>
+        <member name="M:MinioWebBackend.Controllers.FileQueryController.QueryFiles(System.Nullable{System.Int32},System.String,System.String,System.String,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Int32,System.Int32,System.Collections.Generic.List{System.String},System.Boolean)">
+            <summary>
+            查询文件（支持分页、时间范围、标签筛选）
+            </summary>
+            <param name="id">文件 ID</param>
+            <param name="uploader">上传者</param>
+            <param name="fileName">文件名</param>
+            <param name="bucket">桶名</param>
+            <param name="start">开始时间</param>
+            <param name="end">结束时间</param>
+            <param name="pageNumber">分页页码</param>
+            <param name="pageSize">每页数量</param>
+            <param name="tags">标签列表</param>
+            <param name="matchAllTags">是否全部匹配标签</param> 
+        </member>
+        <member name="M:MinioWebBackend.Controllers.FileQueryController.QueryFileIds(System.Nullable{System.Int32},System.String,System.String,System.String,System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            查询符合条件的文件 ID 列表
+            </summary>
+            <param name="id">文件 ID</param>
+            <param name="uploader">上传者</param>
+            <param name="fileName">文件名</param>
+            <param name="bucket">桶名</param>
+            <param name="start">开始时间</param>
+            <param name="end">结束时间</param>
+        </member>
+        <member name="M:MinioWebBackend.Controllers.FileUploadController.UploadFile(System.String,MinioWebBackend.Models.FileUploadDto)">
+            <summary>
+            上传文件
+            POST /api/{bucketName}/fileupload/upload
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.SerilogLog.Id">
+            <summary>
+            自增主键（与OperationLogs的Id类型一致）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.SerilogLog.Level">
+            <summary>
+            日志级别（Info/Warn/Error等，对应OperationLogs的OperationType风格）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.SerilogLog.Message">
+            <summary>
+            渲染后的日志消息（对应OperationLogs的Message风格）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.SerilogLog.Exception">
+            <summary>
+            异常信息（ nullable，对应OperationLogs的Message可空场景）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.SerilogLog.Properties">
+            <summary>
+            结构化参数（JSON格式，存储{username}, {bucket}等键值对）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.SerilogLog.Timestamp">
+            <summary>
+            日志时间戳（与OperationLogs的Timestamp类型完全一致：datetime(6)）
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Options.HttpContextExtensions.GetUsername(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            获取当前请求的用户名（从 JWT Claim 或 Identity）
+            </summary>
+            <param name="context">当前 HttpContext</param>
+            <returns>用户名，如果未登录返回 null</returns>
+        </member>
+        <member name="T:MinioWebBackend.Serilog.EFCoreSink">
+            <summary>
+            依赖 IServiceScopeFactory 的 Serilog Sink（复用已注册的 AppDbContext）
+            </summary>
+        </member>
+        <member name="T:MinioWebBackend.Serilog.EFCoreSinkExtensions">
+            <summary>
+            扩展方法：接收 IServiceScopeFactory（与 Sink 构造函数匹配）
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:MinioWebBackend.Service.BucketService.ListBucketsAsync" -->
+        <!-- Badly formed XML comment ignored for member "M:MinioWebBackend.Service.DownloadService.DownloadObjectAsStreamAsync(System.String,System.String)" -->
+        <member name="M:MinioWebBackend.Service.UploadService.MultipartUploadAsync(MinioWebBackend.Models.MultipartUploadRequest)">
+            <summary>
+            分片上传
+            </summary>
+            <param name="bucket">要上传到的桶的名称。</param>
+            <param name="key">上传到桶后的名称。</param>
+            <param name="filePath">上传文件的路径。</param>
+            <param name="contentType">文件类型</param>
+            <returns>文件的ETAG：string ETag，和文件的大小Long Size。</returns>
+        </member>
+        <member name="M:MinioWebBackend.Service.UploadService.UploadPartWithRetryAsync(Amazon.S3.Model.UploadPartRequest,System.Int32)">
+            <summary>
+            上传单个分片到 Amazon S3，包含失败重试机制和超时控制。
+            </summary>
+            <param name="request">包含分片上传详细信息的 UploadPartRequest 对象。</param>
+            <param name="maxRetries">允许的最大重试次数，默认值为 3。</param>
+            <returns>
+            分片上传成功后返回 UploadPartResponse。
+            若超过最大重试次数仍上传失败，则抛出异常。
+            </returns>
+        </member>
+        <member name="M:MinioWebBackend.Service.UploadService.EnsureBucketExistsAsync(System.String)">
+            <summary>
+            查询bucket是否存在，否则创建新bucket
+            </summary>
+        </member>
+        <member name="M:FileTagController.AddTagsToFile(System.Int32,System.Collections.Generic.List{System.Int32})">
+            <summary>
+            给指定文件添加标签
+            </summary>
+            <param name="fileId">文件 ID</param>
+            <param name="tagIds">标签 ID 列表</param>
+        </member>
+        <member name="M:FileTagController.GetFilesByTag(System.String)">
+            <summary>
+            根据单个标签名查询文件
+            </summary>
+            <param name="tagName">标签名称</param>
+        </member>
+        <member name="M:FileTagController.GetFilesByTags(System.String[],System.Boolean)">
+            <summary>
+            根据多个标签名查询文件，可选择匹配所有标签或任意标签
+            </summary>
+            <param name="tagNames">标签名称数组</param>
+            <param name="matchAll">是否匹配所有标签，true=全部匹配，false=任意匹配</param>
+        </member>
+        <member name="M:FileTagController.GetTagsByFile(System.Int32)">
+            <summary>
+            获取指定文件的所有标签
+            </summary>
+            <param name="fileId">文件 ID</param>
+        </member>
+        <member name="M:TagController.CreateTag(MinioWebBackend.Models.CreateTagDto)">
+            <summary>
+            创建新标签
+            </summary>
+            <param name="dto">包含标签名称的 DTO 对象</param>
+            <returns>返回创建的标签对象</returns>
+        </member>
+        <member name="M:TagController.GetAll">
+            <summary>
+            获取所有标签
+            </summary>
+            <returns>返回标签列表</returns>
+        </member>
+        <member name="M:TagController.EditFile(MinioWebBackend.Models.EditFileDto)">
+            <summary>
+            修改文件信息
+            </summary>
+            <param name="dto">包含文件修改信息的 DTO 对象</param>
+            <returns>返回修改结果</returns>
+        </member>
+    </members>
+</doc>

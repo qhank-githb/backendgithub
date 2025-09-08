@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MinioWebBackend.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace MinioWebBackend.Controllers
 {
@@ -16,7 +17,11 @@ namespace MinioWebBackend.Controllers
             _downloadByIdService = downloadByIdService;
         }
 
-        // ✅ GET: /api/file/download-by-id?id=123
+        /// <summary>
+        /// 根据文件 ID 下载文件
+        /// </summary>
+        /// <param name="id">文件的唯一 ID</param>
+        /// <returns>返回文件流，下载成功；找不到文件返回 404</returns>
         [HttpGet("download-by-id")]
         public async Task<IActionResult> DownloadById([FromQuery] int id)
         {
@@ -42,6 +47,11 @@ namespace MinioWebBackend.Controllers
         }
 
 
+        /// <summary>
+        /// 根据文件 ID 预览文件
+        /// </summary>
+        /// <param name="id">文件的唯一 ID</param>
+        /// <returns>返回文件流，Content-Disposition 为 inline，可直接在浏览器预览；找不到文件返回 404</returns>
         [HttpGet("preview-by-id")]
         public async Task<IActionResult> PreviewById([FromQuery] int id)
         {

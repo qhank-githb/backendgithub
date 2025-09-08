@@ -12,10 +12,13 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
+using Microsoft.OpenApi.Models;
+using MinioWebBackend.Filters;
+using Swashbuckle.AspNetCore.Annotations;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 允许外部访问
 builder.WebHost.UseUrls("http://0.0.0.0:5000");
 
 // ==================== 数据库配置 ====================
@@ -40,6 +43,26 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         throw new Exception($"不支持的数据库类型: {provider}");
     }
 });
+// ==================== Swagger ====================
+// ==================== Swagger ====================
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "My API",
+        Version = "v1"
+    });
+    c.OperationFilter<FileUploadOperationFilter>();
+    // 启用注释显示
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
+
+    // 启用 [SwaggerOperation] 注解
+    c.EnableAnnotations(); // ⚠️ 需要 using Swashbuckle.AspNetCore.Annotations
+});
+
 
 // ==================== CORS ====================
 builder.Services.AddCors(options =>
@@ -72,7 +95,6 @@ builder.Services.AddSingleton<TransferUtility>(sp =>
     new TransferUtility(sp.GetRequiredService<IAmazonS3>())
 );
 
-// ==================== Serilog ====================
 // ==================== Serilog ====================
 builder.Host.UseSerilog((context, services, loggerConfig) =>
 {
@@ -130,6 +152,7 @@ var jwtSecretKey = "MySuperSecretKeyForJWTToken_32BytesOrMore!";
 var issuer = "my_app_issuer";
 var audience = "my_app_audience";
 
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -166,6 +189,8 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+
+
 // ==================== 确保数据库存在 ====================
 using (var scope = app.Services.CreateScope())
 {
@@ -173,6 +198,19 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();  // 没有表就建表
     Console.WriteLine("数据库已迁移到最新版本");
 }
+
+// ==================== Swagger 中间件 ====================
+
+    app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+    c.RoutePrefix = "swagger"; // 访问 http://localhost:5000/swagger
+});
+
+
+
+
 
 // ==================== 中间件顺序 ====================
 app.UseCors("AllowAll");
