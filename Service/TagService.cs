@@ -93,6 +93,7 @@ namespace MinioWebBackend.Service
         var oldTagNames = file.FileTags?
             .Select(ft => ft.Tag?.Name)
             .Where(n => !string.IsNullOrWhiteSpace(n))
+            .Select(n => n!)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList() ?? new List<string>();
 

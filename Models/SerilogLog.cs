@@ -20,13 +20,13 @@ namespace MinioWebBackend.Models
         /// 日志级别（Info/Warn/Error等，对应OperationLogs的OperationType风格）
         /// </summary>
         [Required]
-        public string Level { get; set; } // 对应longtext类型（允许长文本）
+        public string Level { get; set; } = string.Empty;// 对应longtext类型（允许长文本）
 
         /// <summary>
         /// 渲染后的日志消息（对应OperationLogs的Message风格）
         /// </summary>
         [Required]
-        public string Message { get; set; } // 对应longtext类型
+        public string Message { get; set; } = string.Empty; // 对应longtext类型
 
         /// <summary>
         /// 异常信息（ nullable，对应OperationLogs的Message可空场景）

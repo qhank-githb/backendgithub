@@ -139,18 +139,6 @@
             扩展方法：接收 IServiceScopeFactory（与 Sink 构造函数匹配）
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:MinioWebBackend.Service.BucketService.ListBucketsAsync" -->
-        <!-- Badly formed XML comment ignored for member "M:MinioWebBackend.Service.DownloadService.DownloadObjectAsStreamAsync(System.String,System.String)" -->
-        <member name="M:MinioWebBackend.Service.UploadService.MultipartUploadAsync(MinioWebBackend.Models.MultipartUploadRequest)">
-            <summary>
-            分片上传
-            </summary>
-            <param name="bucket">要上传到的桶的名称。</param>
-            <param name="key">上传到桶后的名称。</param>
-            <param name="filePath">上传文件的路径。</param>
-            <param name="contentType">文件类型</param>
-            <returns>文件的ETAG：string ETag，和文件的大小Long Size。</returns>
-        </member>
         <member name="M:MinioWebBackend.Service.UploadService.UploadPartWithRetryAsync(Amazon.S3.Model.UploadPartRequest,System.Int32)">
             <summary>
             上传单个分片到 Amazon S3，包含失败重试机制和超时控制。

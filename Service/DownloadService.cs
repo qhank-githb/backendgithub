@@ -130,6 +130,8 @@ public async Task<(Stream? FileStream, string? Error)> DownloadFileAsync(string 
             {
                 using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, leaveOpen: true))
                 {
+                    //用来记录每个文件名出现的次数
+                    //避免不同文件同名时，压缩包里相互覆盖
                     var nameCount = new Dictionary<string, int>();
 
                     foreach (var id in ids)
@@ -150,7 +152,7 @@ public async Task<(Stream? FileStream, string? Error)> DownloadFileAsync(string 
                                 continue;
                             }
 
-                            // 文件名加桶名前缀避免冲突
+                            // 避免压缩包里多个文件重名
                             var entryName = fileInfo.OriginalFileName;
 
                             if (nameCount.ContainsKey(entryName))

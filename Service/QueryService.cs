@@ -89,13 +89,13 @@ namespace MinioWebBackend.Service
                     // 文件必须包含所有指定标签
                     foreach (var tag in tags)
                     {
-                        query = query.Where(f => f.FileTags.Any(ft => ft.Tag.Name == tag));
+                        query = query.Where(f => f.FileTags.Any(ft => ft.Tag != null && ft.Tag.Name == tag));
                     }
                 }
                 else
                 {
                     // 文件包含任意一个标签
-                    query = query.Where(f => f.FileTags.Any(ft => tags.Contains(ft.Tag.Name)));
+                    query = query.Where(f => f.FileTags.Any(ft => ft.Tag != null && tags.Contains(ft.Tag.Name)));
                 }
             }
 
@@ -170,7 +170,10 @@ namespace MinioWebBackend.Service
                 UploadTime = record.UploadTime,
                 Uploader = record.Uploader,
                 ETag = string.Empty, // FileRecord 里没有 etag 字段，你需要看是否要加
-                Tags = record.FileTags?.Select(ft => ft.Tag.Name).ToList() ?? new List<string>()
+                Tags = record.FileTags?
+                .Where(ft => ft.Tag != null)
+                .Select(ft => ft.Tag!.Name)  // ! 告诉编译器这里一定不为 null
+                .ToList() ?? new List<string>()
             };
         }
     }

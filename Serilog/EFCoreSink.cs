@@ -17,7 +17,6 @@ namespace MinioWebBackend.Serilog
     /// </summary>
     public class EFCoreSink : ILogEventSink, IDisposable
     {
-        // 改为依赖 IServiceScopeFactory（不再用 IDbContextFactory）
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ConcurrentQueue<SerilogLog> _logQueue = new ConcurrentQueue<SerilogLog>();
         private readonly Timer _flushTimer;

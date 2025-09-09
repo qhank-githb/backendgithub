@@ -38,7 +38,7 @@ namespace MinioWebBackend.Controllers
             // 如果已存在，先移除
             Response.Headers.Remove("Content-Disposition");
 
-            // 用索引器赋值，替代 Add
+            //设置响应头，通知浏览器是附件下载。用索引器赋值，替代 Add
             Response.Headers["Content-Disposition"] =
             $"attachment; filename=\"{fileName}\"; filename*=UTF-8''{escapedFileName}";
 
