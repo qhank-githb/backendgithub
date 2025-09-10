@@ -33,7 +33,7 @@ namespace MinioWebBackend.Service
     
     
  
-
+        //StoredFileName 下载 文件，查找原名只是为了显示
         public async Task<Stream> DownloadObjectAsStreamAsync(string bucketName, string objectName)
         {
             // 先查数据库里的原始文件名
@@ -79,42 +79,7 @@ namespace MinioWebBackend.Service
             }
         }
 
-    
 
-    //通过“原始文件名”和“桶名”在数据库中查找对应的“存储文件名”，然后下载文件
-public async Task<(Stream? FileStream, string? Error)> DownloadFileAsync(string bucket, string originalFileName)
-{
-    // 提前获取用户名，避免 try/catch 里作用域问题
-    var userName = _httpContextAccessor.HttpContext?.User.Claims
-        .FirstOrDefault(c => c.Type == "username")?.Value
-        ?? _httpContextAccessor.HttpContext?.User.Identity?.Name
-        ?? "未知用户";
-
-    string? key = null;
-
-    try
-    {
-        key = await _iQueryService.GetStoredFileNameAsync(originalFileName, bucket);
-        if (string.IsNullOrEmpty(key))
-            return (null, $"在桶 {bucket} 中找不到原始文件名为 {originalFileName} 的文件");
-
-        var stream = await DownloadObjectAsStreamAsync(bucket, key);
-        if (stream == null)
-            return (null, $"在桶 {bucket} 中找不到文件 {key}");
-
-
-        return (stream, null);
-    }
-    catch (AmazonS3Exception ex)
-    {
-        return (null, $"MinIO访问异常: {ex.Message}");
-    }
-    catch (Exception ex)
-    {
-
-        return (null, $"未知错误: {ex.Message}");
-    }
-}
 
 
    

@@ -38,13 +38,6 @@
             <param name="id">文件的唯一 ID</param>
             <returns>返回文件流，Content-Disposition 为 inline，可直接在浏览器预览；找不到文件返回 404</returns>
         </member>
-        <member name="M:MinioWebBackend.Controllers.FileDownloadController.Download(System.String,System.String)">
-            <summary>
-            下载指定桶中的单个文件
-            </summary>
-            <param name="bucket">桶名</param>
-            <param name="originalfilename">原始文件名</param>
-        </member>
         <member name="M:MinioWebBackend.Controllers.FileDownloadController.BatchDownloadByIds(System.Collections.Generic.List{System.Int32})">
             <summary>
             批量下载文件，返回 ZIP 压缩包

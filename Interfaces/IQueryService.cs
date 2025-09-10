@@ -5,7 +5,6 @@ namespace MinioWebBackend.Interfaces
 
     public interface IQueryService
     {
-        Task<string?> GetStoredFileNameAsync(string original_file_name, string bucketName);
         Task<string?> GetOriginalFileNameAsync(string storedFileName, string bucketName);
 
         Task<(List<FileInfoModel> Items, int TotalCount)> QueryFilesAsync(

@@ -14,13 +14,6 @@ namespace MinioWebBackend.Service
             _db = db;
         }
 
-        public async Task<string?> GetStoredFileNameAsync(string originalFileName, string bucketName)
-        {
-            return await _db.FileRecords
-                .Where(f => f.OriginalFileName == originalFileName && f.BucketName == bucketName)
-                .Select(f => f.StoredFileName)
-                .FirstOrDefaultAsync();
-        }
 
         public async Task<string?> GetOriginalFileNameAsync(string storedFileName, string bucketName)
         {

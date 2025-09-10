@@ -31,7 +31,7 @@ namespace MinioWebBackend.Controllers
         {
             Console.WriteLine($"上传 Bucket: {bucketName}, File: {dto.File?.FileName}, Tags: {dto.Tags}");
 
-            if (dto.File == null || dto.File.Length == 0)
+            if (dto.File == null)
                 return BadRequest("请选择上传文件");
 
             if (string.IsNullOrEmpty(dto.Username))
