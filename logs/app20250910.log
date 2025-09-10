@@ -1,0 +1,82 @@
+2025-09-10 10:23:03.821 +08:00 [WRN] 用户登录失败：admin
+2025-09-10 10:24:24.229 +08:00 [INF] 用户登录成功：admin
+2025-09-10 10:24:28.377 +08:00 [INF] 用户退出：admin
+2025-09-10 10:25:45.639 +08:00 [WRN] 用户登录失败：admin
+2025-09-10 10:29:27.244 +08:00 [INF] 用户登录成功：admin
+2025-09-10 10:29:28.869 +08:00 [INF] 用户退出：admin
+2025-09-10 10:29:34.987 +08:00 [INF] 用户登录成功：admin
+2025-09-10 10:30:02.564 +08:00 [INF] 用户注册成功：bolo
+2025-09-10 10:30:13.417 +08:00 [INF] 用户 admin 尝试创建标签 1
+2025-09-10 10:30:13.439 +08:00 [INF] 用户 admin 成功创建标签 1
+2025-09-10 10:30:23.139 +08:00 [INF] 用户 admin 于 "2025-09-10T10:30:23.0322775+08:00" 成功上传文件 test3.docx, 存储名 admin_20250910103022924_292834b5d7184b089b09ed481a742609, 标签：1 , 大小 13563 字节
+2025-09-10 10:30:40.432 +08:00 [INF] 用户 admin 尝试创建标签 2
+2025-09-10 10:30:40.438 +08:00 [INF] 用户 admin 成功创建标签 2
+2025-09-10 10:30:43.883 +08:00 [INF] 用户 admin 于 "2025-09-10T10:30:43.8625802+08:00" 成功上传文件 test3.docx, 存储名 admin_20250910103043833_fb2f6666c15e4804a13771f0c8d73a0d, 标签：1,2 , 大小 13563 字节
+2025-09-10 10:31:07.547 +08:00 [INF] 用户退出：admin
+2025-09-10 10:36:11.849 +08:00 [INF] 用户登录成功：admin
+2025-09-10 10:36:24.721 +08:00 [WRN] 用户注册失败：admin, 错误: 用户名已存在
+2025-09-10 10:36:38.455 +08:00 [WRN] 用户注册失败：admin, 错误: 用户名已存在
+2025-09-10 10:37:17.746 +08:00 [WRN] 用户注册失败：bolo, 错误: 用户名已存在
+2025-09-10 10:37:38.882 +08:00 [INF] 用户注册成功：test
+2025-09-10 10:41:07.815 +08:00 [INF] 用户退出：admin
+2025-09-10 10:41:08.542 +08:00 [INF] 用户登录成功：admin
+2025-09-10 10:41:10.075 +08:00 [INF] 用户退出：admin
+2025-09-10 10:41:12.442 +08:00 [INF] 用户登录成功：admin
+2025-09-10 10:41:15.911 +08:00 [WRN] 用户注册失败：admin, 错误: 用户名已存在
+2025-09-10 10:44:36.049 +08:00 [INF] 用户退出：admin
+2025-09-10 10:44:36.836 +08:00 [INF] 用户登录成功：admin
+2025-09-10 10:44:39.182 +08:00 [WRN] 用户注册失败：admin, 错误: 用户名已存在
+2025-09-10 10:56:30.533 +08:00 [INF] 用户退出：admin
+2025-09-10 10:56:31.750 +08:00 [INF] 用户登录成功：admin
+2025-09-10 10:56:35.366 +08:00 [INF] 用户退出：admin
+2025-09-10 10:56:36.050 +08:00 [INF] 用户登录成功：admin
+2025-09-10 10:57:03.745 +08:00 [INF] 用户退出：admin
+2025-09-10 10:57:06.508 +08:00 [WRN] 用户登录失败：bolo
+2025-09-10 10:57:09.574 +08:00 [WRN] 用户登录失败：bolo
+2025-09-10 10:57:10.849 +08:00 [WRN] 用户登录失败：bolo
+2025-09-10 10:57:18.419 +08:00 [WRN] 用户登录失败：bolo
+2025-09-10 10:57:23.520 +08:00 [WRN] 用户登录失败：bolo
+2025-09-10 10:57:32.799 +08:00 [INF] 用户登录成功：test
+2025-09-10 10:58:12.071 +08:00 [INF] 用户退出：test
+2025-09-10 10:58:13.057 +08:00 [INF] 用户登录成功：admin
+2025-09-10 10:58:18.466 +08:00 [INF] 用户注册成功：ok
+2025-09-10 10:59:37.597 +08:00 [INF] 用户退出：admin
+2025-09-10 10:59:38.421 +08:00 [INF] 用户登录成功：admin
+2025-09-10 10:59:57.497 +08:00 [INF] 用户退出：admin
+2025-09-10 10:59:58.578 +08:00 [INF] 用户登录成功：admin
+2025-09-10 11:00:02.265 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: test3.docx, 存储名: admin_20250910103022924_292834b5d7184b089b09ed481a742609, 大小: 13563 字节
+2025-09-10 11:00:31.644 +08:00 [INF] 用户 admin 于 "2025-09-10T11:00:31.5602880+08:00" 成功上传文件 测试.docx, 存储名 admin_20250910110031473_cfd2c2c1a6d140048f821bd0a3534c18, 标签：2,1 , 大小 13555 字节
+2025-09-10 11:00:45.620 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: 测试.docx, 存储名: admin_20250910110031473_cfd2c2c1a6d140048f821bd0a3534c18, 大小: 13555 字节
+2025-09-10 11:00:45.627 +08:00 [ERR] An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: Invalid non-ASCII or control character in header: 0x6D4B
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpHeaders.ThrowInvalidHeaderCharacter(Char ch)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpResponseHeaders.SetValueFast(String key, StringValues value)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpHeaders.Microsoft.AspNetCore.Http.IHeaderDictionary.set_Item(String key, StringValues value)
+   at MinioWebBackend.Controllers.DownloadByIDController.PreviewById(Int32 id) in D:\bolo_backend\minio-web-backend\Controllers\DownloadByIDController.cs:line 70
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2025-09-10 11:10:06.327 +08:00 [INF] 用户退出：admin
+2025-09-10 11:10:59.506 +08:00 [INF] 用户登录成功：admin
+2025-09-10 11:11:00.561 +08:00 [INF] 用户退出：admin
+2025-09-10 11:11:49.764 +08:00 [INF] 用户登录成功：admin
+2025-09-10 11:30:19.096 +08:00 [INF] 用户退出：admin
+2025-09-10 11:30:19.861 +08:00 [INF] 用户登录成功：admin
+2025-09-10 11:30:28.590 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: 测试.docx, 存储名: admin_20250910110031473_cfd2c2c1a6d140048f821bd0a3534c18, 大小: 13555 字节
+2025-09-10 11:30:30.914 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: 测试.docx, 存储名: admin_20250910110031473_cfd2c2c1a6d140048f821bd0a3534c18, 大小: 13555 字节
+2025-09-10 11:30:34.521 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: 测试.docx, 存储名: admin_20250910110031473_cfd2c2c1a6d140048f821bd0a3534c18, 大小: 13555 字节
+2025-09-10 11:30:36.186 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: 测试.docx, 存储名: admin_20250910110031473_cfd2c2c1a6d140048f821bd0a3534c18, 大小: 13555 字节
+2025-09-10 11:32:17.812 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: 测试.docx, 存储名: admin_20250910110031473_cfd2c2c1a6d140048f821bd0a3534c18, 大小: 13555 字节

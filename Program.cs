@@ -12,9 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
-using Microsoft.OpenApi.Models;
 using MinioWebBackend.Filters;
-using Swashbuckle.AspNetCore.Annotations;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -69,11 +67,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy
+            policy
             .AllowAnyOrigin()
             .AllowAnyMethod()
             .AllowAnyHeader()
             .WithExposedHeaders("Content-Disposition");
+
     });
 });
 
@@ -143,6 +142,8 @@ builder.Services.AddScoped<IDownloadByIDService, DownloadByIDService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IFileTagService, FileTagService>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 
 // ==================== 控制器 ====================
 builder.Services.AddControllers();
@@ -185,9 +186,30 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var serviceProvider = scope.ServiceProvider;
+    
+    try
+    {
+        // 确保数据库已创建（如果使用Code First迁移，可替换为数据库迁移逻辑）
+        var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
+        await dbContext.Database.EnsureCreatedAsync(); // 创建数据库和表（首次运行时）
+        
+        // 触发管理员账号初始化
+        var authService = serviceProvider.GetRequiredService<IAuthService>();
+        await authService.InitializeAdminAccountAsync(); // 调用初始化方法
+    }
+    catch (Exception ex)
+    {
+        // 记录初始化失败的日志
+        var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "应用启动时初始化管理员账号失败");
+    }
+}
 
 
 
@@ -205,17 +227,32 @@ using (var scope = app.Services.CreateScope())
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-    c.RoutePrefix = "swagger"; // 访问 http://localhost:5000/swagger
+    c.RoutePrefix = "swagger"; 
 });
 
-
-
-
-
 // ==================== 中间件顺序 ====================
+// 1. Swagger 中间件（仅开发环境建议启用，生产环境可注释）
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+    c.RoutePrefix = "swagger"; 
+});
+
+// 2. CORS 中间件（必须在 UseRouting 之前）
 app.UseCors("AllowAll");
+
+// 3. 路由中间件（启用路由匹配）
 app.UseRouting();
+
+// 4. 认证中间件（验证用户身份，必须在 UseAuthorization 之前）
 app.UseAuthentication();
-app.UseAuthorization();
+
+// 5. 授权中间件（处理 [Authorize] 特性，必须在 UseRouting 之后、MapControllers 之前）
+app.UseAuthorization(); // ⚠️ 之前缺失的关键中间件
+
+// 6. 控制器映射（必须在 UseAuthorization 之后）
 app.MapControllers();
+
+// 启动应用
 app.Run();

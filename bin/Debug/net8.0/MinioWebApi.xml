@@ -4,18 +4,20 @@
         <name>MinioWebApi</name>
     </assembly>
     <members>
+        <member name="M:AuthController.Register(RegisterRequest)">
+            <summary>
+            用户注册
+            </summary>
+        </member>
         <member name="M:AuthController.Login(LoginRequest)">
             <summary>
-            用户登录接口
+            用户登录
             </summary>
-            <param name="request">登录请求对象，包括用户名和密码</param>
-            <returns>返回 JWT token，登录成功；失败返回 401</returns>
         </member>
         <member name="M:AuthController.Logout">
             <summary>
-            用户登出接口
+            用户登出
             </summary>
-            <returns>返回登出成功信息</returns>
         </member>
         <member name="M:MinioWebBackend.Controllers.BucketsController.GetBuckets">
             <summary>
@@ -92,6 +94,26 @@
             POST /api/{bucketName}/fileupload/upload
             </summary>
         </member>
+        <member name="M:MinioWebBackend.Interfaces.IAuthService.RegisterAsync(System.String,System.String,System.String)">
+            <summary>
+            注册用户
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Interfaces.IAuthService.LoginAsync(System.String,System.String)">
+            <summary>
+            用户登录
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Interfaces.IAuthService.GenerateJwtToken(MinioWebBackend.Models.User)">
+            <summary>
+            生成JWT令牌
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Interfaces.IAuthService.InitializeAdminAccountAsync">
+            <summary>
+            初始化管理员账号
+            </summary>
+        </member>
         <member name="P:MinioWebBackend.Models.SerilogLog.Id">
             <summary>
             自增主键（与OperationLogs的Id类型一致）
@@ -137,6 +159,26 @@
         <member name="T:MinioWebBackend.Serilog.EFCoreSinkExtensions">
             <summary>
             扩展方法：接收 IServiceScopeFactory（与 Sink 构造函数匹配）
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Service.AuthService.RegisterAsync(System.String,System.String,System.String)">
+            <summary>
+            注册用户
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Service.AuthService.LoginAsync(System.String,System.String)">
+            <summary>
+            用户登录（验证密码 + 更新最后登录时间）
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Service.AuthService.GenerateJwtToken(MinioWebBackend.Models.User)">
+            <summary>
+            生成 JWT
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Service.AuthService.InitializeAdminAccountAsync">
+            <summary>
+            初始化管理员账号（仅在管理员账号不存在时创建）
             </summary>
         </member>
         <member name="M:MinioWebBackend.Service.UploadService.UploadPartWithRetryAsync(Amazon.S3.Model.UploadPartRequest,System.Int32)">
@@ -200,6 +242,18 @@
             </summary>
             <param name="dto">包含文件修改信息的 DTO 对象</param>
             <returns>返回修改结果</returns>
+        </member>
+        <member name="T:MinioWebApi.Migrations.AddUserTable">
+            <inheritdoc />
+        </member>
+        <member name="M:MinioWebApi.Migrations.AddUserTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:MinioWebApi.Migrations.AddUserTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:MinioWebApi.Migrations.AddUserTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
         </member>
     </members>
 </doc>

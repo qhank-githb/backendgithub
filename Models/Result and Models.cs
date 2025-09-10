@@ -92,7 +92,7 @@ namespace MinioWebBackend.Models
 
         [Column("etag")]
         public string ETag { get; set; } = string.Empty;
-        public ICollection<FileTag> FileTags { get; set; } = new List<FileTag>();
+        public ICollection<FileTag> ?FileTags { get; set; } 
     }
 
     [Table("tags")]
@@ -100,14 +100,14 @@ namespace MinioWebBackend.Models
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
-        public ICollection<FileTag> FileTags { get; set; } = new List<FileTag>();
+        public ICollection<FileTag> ?FileTags { get; set; }
     }
 
     [Table("file_tags")]
     public class FileTag
     {
         public int FileId { get; set; }
-        public FileRecord FileRecord { get; set; } = new FileRecord();
+        public FileRecord ? FileRecord { get; set; }
 
         public int TagId { get; set; }
         public Tag ?Tag { get; set; }  
@@ -154,7 +154,7 @@ namespace MinioWebBackend.Models
     }
 
 
-public class User
+    public class User
     {
         public int Id { get; set; }              // 用户唯一 ID (主键)
 
@@ -162,7 +162,7 @@ public class User
 
         public string PasswordHash { get; set; }  = string.Empty;// 加密后的密码（不要存明文）
 
-        public string Role { get; set; } = string.Empty;         // 角色 (Admin/User 等)
+        public string Role { get; set; } = "User";         // 角色 (Admin/User 等)
 
         public DateTime? LastLogin { get; set; } // 上次登录时间，可为空
     }

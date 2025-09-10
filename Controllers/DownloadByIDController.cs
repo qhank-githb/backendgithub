@@ -53,6 +53,7 @@ namespace MinioWebBackend.Controllers
         /// <param name="id">文件的唯一 ID</param>
         /// <returns>返回文件流，Content-Disposition 为 inline，可直接在浏览器预览；找不到文件返回 404</returns>
         [HttpGet("preview-by-id")]
+
         public async Task<IActionResult> PreviewById([FromQuery] int id)
         {
             var (stream, error, fileInfo) = await _downloadByIdService.DownloadByIdAsync(id);
@@ -67,14 +68,15 @@ namespace MinioWebBackend.Controllers
 
             // 设置 inline，而不是 attachment
             Response.Headers.Remove("Content-Disposition");
-            Response.Headers["Content-Disposition"] =
-                $"inline; filename=\"{fileName}\"; filename*=UTF-8''{escapedFileName}";
+            // 只保留编码后的文件名格式
+            Response.Headers["Content-Disposition"] = $"inline; filename*=UTF-8''{escapedFileName}";
 
             // 返回正确的 MIME 类型
             var mimeType = fileInfo.MimeType ?? "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
             return File(stream, mimeType);
         }
+
 
 
 

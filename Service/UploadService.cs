@@ -30,6 +30,13 @@ namespace MinioWebBackend.Service
 
         private async Task<int> InsertFileInfoAsync(FileInfoModel fileInfo)
         {
+            if (string.IsNullOrWhiteSpace(fileInfo.OriginalFileName) ||
+    string.IsNullOrWhiteSpace(fileInfo.StoredFileName) ||
+    string.IsNullOrWhiteSpace(fileInfo.Uploader))
+{
+    throw new InvalidOperationException($"无效的文件信息，拒绝入库: {System.Text.Json.JsonSerializer.Serialize(fileInfo)}");
+}
+
             var entity = new FileRecord
             {
                 StoredFileName = fileInfo.StoredFileName,
@@ -52,6 +59,9 @@ namespace MinioWebBackend.Service
 
             private async Task UpsertFileTagsAsync(int fileId, IEnumerable<string> tagNames)
             {
+                if (fileId <= 0)
+    throw new InvalidOperationException("FileId 无效，标签绑定失败");
+
                 if (tagNames == null) return;
 
                 var names = tagNames
@@ -226,6 +236,9 @@ namespace MinioWebBackend.Service
                  request.storedFileName,
                  string.Join(",", request.Tags ?? new List<string>()),
                  fileLength);
+
+             Console.WriteLine($"[DEBUG] Request: originalFileName={request.originalFileName}, contentType={request.contentType}, bucket={request.bucket}, username={request.username}");
+
                 return result;
 
             }

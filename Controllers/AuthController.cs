@@ -1,41 +1,65 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
+using MinioWebBackend.Interfaces;
 using Serilog;
 
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    /// <summary>
-    /// 用户登录接口
-    /// </summary>
-    /// <param name="request">登录请求对象，包括用户名和密码</param>
-    /// <returns>返回 JWT token，登录成功；失败返回 401</returns>
-    [HttpPost("login")]
-    public IActionResult Login([FromBody] LoginRequest request)
+    private readonly IAuthService _AuthService;
+
+    public AuthController(IAuthService AuthService)
     {
-        if (request.Username != "bolo-vue-test" || request.Password != "123456")
+        _AuthService = AuthService;
+    }
+
+    /// <summary>
+    /// 用户注册
+    /// </summary>
+    [HttpPost("register")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    {
+        try
+        {
+            var user = await _AuthService.RegisterAsync(request.Username, request.Password, request.Role ?? "User");
+            Log.Information("用户注册成功：{Username}", user.Username);
+
+            return Ok(new { user.Id, user.Username, user.Role });
+        }
+        catch (Exception ex)
+        {
+            Log.Warning("用户注册失败：{Username}, 错误: {Error}", request.Username, ex.Message);
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// 用户登录
+    /// </summary>
+    [HttpPost("login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    {
+        var user = await _AuthService.LoginAsync(request.Username, request.Password);
+        if (user == null)
         {
             Log.Warning("用户登录失败：{Username}", request.Username);
             return Unauthorized(new { message = "用户名或密码错误" });
         }
 
-        var token = GenerateJwtToken(request.Username);
+        var token = _AuthService.GenerateJwtToken(user);
 
-        Log.Information("用户登录成功：{Username}", request.Username);
+        Log.Information("用户登录成功：{Username}", user.Username);
 
-        return Ok(new { token });
+        return Ok(new { token, user.Username, user.Role, user.LastLogin });
     }
 
     /// <summary>
-    /// 用户登出接口
+    /// 用户登出
     /// </summary>
-    /// <returns>返回登出成功信息</returns>
     [HttpPost("logout")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public IActionResult Logout()
@@ -45,38 +69,17 @@ public class AuthController : ControllerBase
 
         return Ok(new { message = "退出成功" });
     }
-
-
-
-    private string GenerateJwtToken(string username)
-    {
-        // ⚠️ 密钥长度必须 >= 32 字节
-        var secretKey = "MySuperSecretKeyForJWTToken_32BytesOrMore!";
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-        // 加上用户身份的 claim
-        var claims = new[]
-        {
-        new Claim(ClaimTypes.Name, username), // 这样 HttpContext.User.Identity.Name 就有值了
-        new Claim("username", username),      // 额外放一个自定义字段
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-    };
-
-        var token = new JwtSecurityToken(
-            issuer: "my_app_issuer",   // 与 Program.cs 中一致
-            audience: "my_app_audience", // 与 Program.cs 中一致
-            claims: claims,
-            expires: DateTime.Now.AddHours(2),
-            signingCredentials: credentials
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
 }
 
 public class LoginRequest
 {
     public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
+}
+
+public class RegisterRequest
+{
+    public string Username { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public string? Role { get; set; }
 }
