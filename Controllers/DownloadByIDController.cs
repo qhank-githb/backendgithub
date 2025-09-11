@@ -2,19 +2,32 @@ using Microsoft.AspNetCore.Mvc;
 using MinioWebBackend.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Swashbuckle.AspNetCore.Annotations;
+using MinioWebBackend.Models;
+using Amazon.S3;
+using Amazon.S3.Model;
 
 namespace MinioWebBackend.Controllers
 {
     [ApiController]
     [Route("api/file")] // ✅ 只以固定路径访问，无需 bucket 参数
-    [Authorize] 
+    [Authorize]
     public class DownloadByIDController : ControllerBase
     {
         private readonly IDownloadByIDService _downloadByIdService;
+        private readonly IAmazonS3 _s3Client;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IQueryService _iQueryService;
 
-        public DownloadByIDController(IDownloadByIDService downloadByIdService)
+        public DownloadByIDController(IDownloadByIDService downloadByIdService,
+        IAmazonS3 s3Client,
+        IHttpContextAccessor httpContextAccessor,
+        IQueryService iQueryService
+        )
         {
             _downloadByIdService = downloadByIdService;
+            _s3Client = s3Client;
+            _httpContextAccessor = httpContextAccessor;
+            _iQueryService = iQueryService;
         }
 
         /// <summary>
@@ -44,14 +57,56 @@ namespace MinioWebBackend.Controllers
         [HttpGet("preview-by-id")]
         public async Task<IActionResult> PreviewById([FromQuery] int id)
         {
-            var (stream, error, fileInfo) = await _downloadByIdService. DownloadFileByIdAsync(id);
-            if (stream == null) return NotFound(new { Message = error });
+            var (response, error, fileInfo) = await PreviewFileByIdAsync(id);
+            if (response == null) return NotFound(new { Message = error });
 
-            var mime = fileInfo!.MimeType ?? "application/octet-stream";
+            var mime = fileInfo?.MimeType ?? "application/octet-stream";
+            var fileName = fileInfo?.OriginalFileName ?? "file";
 
-            // 直接返回文件流，浏览器会根据 mimeType 决定是否 inline 预览
-            return File(stream, mime);
+            if (response.ContentLength > 0)
+            {
+                Response.ContentLength = response.ContentLength;
+            }
+
+            Response.Headers["Content-Disposition"] = $"inline; filename*=UTF-8''{Uri.EscapeDataString(fileName)}";
+
+            // 直接返回底层流（不要 Dispose response 直到框架写完）
+            return File(response.ResponseStream, mime);
         }
+
+        
+        // Controller 中（替换原来的 PreviewFileByIdAsync）
+        private async Task<(GetObjectResponse? Response, string? Error, FileInfoModel? FileInfo)> PreviewFileByIdAsync(int id)
+        {
+            try
+            {
+                var fileInfo = await _iQueryService.GetFileByIdAsync(id);
+                if (fileInfo == null)
+                    return (null, $"未找到 ID={id} 的文件", null);
+
+                var request = new GetObjectRequest
+                {
+                    BucketName = fileInfo.Bucketname,
+                    Key = fileInfo.StoredFileName
+                };
+
+                var response = await _s3Client.GetObjectAsync(request);
+
+                // 注意：不要在这里 Dispose response
+                return (response, null, fileInfo);
+            }
+            catch (AmazonS3Exception ex)
+            {
+                return (null, $"MinIO 访问异常: {ex.Message}", null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"未知错误: {ex.Message}", null);
+            }
+        }
+
+
+
 
 
 

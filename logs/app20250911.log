@@ -1,0 +1,82 @@
+2025-09-11 10:31:02.854 +08:00 [ERR] 应用启动时初始化管理员账号失败
+Microsoft.Data.SqlClient.SqlException (0x80131904): 在与 SQL Server 建立连接时出现与网络相关的或特定于实例的错误。未找到或无法访问服务器。请验证实例名称是否正确并且 SQL Server 已配置为允许远程连接。 (provider: 命名管道提供程序, error: 40 - 无法打开与 SQL Server 的连接)
+ ---> System.ComponentModel.Win32Exception (2): 系统找不到指定的文件。
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, SqlCommand command, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.Connect(ServerInfo serverInfo, SqlInternalConnectionTds connHandler, TimeoutTimer timeout, SqlConnectionString connectionOptions, Boolean withFailover)
+   at Microsoft.Data.SqlClient.SqlInternalConnectionTds.AttemptOneLogin(ServerInfo serverInfo, String newPassword, SecureString newSecurePassword, TimeoutTimer timeout, Boolean withFailover)
+   at Microsoft.Data.SqlClient.SqlInternalConnectionTds.LoginNoFailover(ServerInfo serverInfo, String newPassword, SecureString newSecurePassword, Boolean redirectedUserInstance, SqlConnectionString connectionOptions, SqlCredential credential, TimeoutTimer timeout)
+   at Microsoft.Data.SqlClient.SqlInternalConnectionTds.OpenLoginEnlist(TimeoutTimer timeout, SqlConnectionString connectionOptions, SqlCredential credential, String newPassword, SecureString newSecurePassword, Boolean redirectedUserInstance)
+   at Microsoft.Data.SqlClient.SqlInternalConnectionTds..ctor(DbConnectionPoolIdentity identity, SqlConnectionString connectionOptions, SqlCredential credential, Object providerInfo, String newPassword, SecureString newSecurePassword, Boolean redirectedUserInstance, SqlConnectionString userConnectionOptions, SessionData reconnectSessionData, Boolean applyTransientFaultHandling, String accessToken, DbConnectionPool pool, Func`3 accessTokenCallback)
+   at Microsoft.Data.SqlClient.SqlConnectionFactory.CreateConnection(DbConnectionOptions options, DbConnectionPoolKey poolKey, Object poolGroupProviderInfo, DbConnectionPool pool, DbConnection owningConnection, DbConnectionOptions userOptions)
+   at Microsoft.Data.ProviderBase.DbConnectionFactory.CreatePooledConnection(DbConnectionPool pool, DbConnection owningObject, DbConnectionOptions options, DbConnectionPoolKey poolKey, DbConnectionOptions userOptions)
+   at Microsoft.Data.ProviderBase.DbConnectionPool.CreateObject(DbConnection owningObject, DbConnectionOptions userOptions, DbConnectionInternal oldConnection)
+   at Microsoft.Data.ProviderBase.DbConnectionPool.UserCreateRequest(DbConnection owningObject, DbConnectionOptions userOptions, DbConnectionInternal oldConnection)
+   at Microsoft.Data.ProviderBase.DbConnectionPool.TryGetConnection(DbConnection owningObject, UInt32 waitForMultipleObjectsTimeout, Boolean allowCreate, Boolean onlyOneCheckConnection, DbConnectionOptions userOptions, DbConnectionInternal& connection)
+   at Microsoft.Data.ProviderBase.DbConnectionPool.WaitForPendingOpen()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenAsync(CancellationToken cancellationToken, Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerDatabaseCreator.<>c__DisplayClass20_0.<<ExistsAsync>b__0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerDatabaseCreator.<>c__DisplayClass20_0.<<ExistsAsync>b__0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerDatabaseCreator.<>c__DisplayClass20_0.<<ExistsAsync>b__0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabaseCreator.EnsureCreatedAsync(CancellationToken cancellationToken)
+   at Program.<Main>$(String[] args) in D:\bolo_backend\minio-web-backend\Program.cs:line 200
+ClientConnectionId:00000000-0000-0000-0000-000000000000
+Error Number:2,State:0,Class:20
+2025-09-11 10:34:39.710 +08:00 [INF] 用户登录成功：admin
+2025-09-11 10:34:49.703 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: 1、产品说明与介绍.rar, 存储名: admin_20250910150708159_8ff63cb679f9413fa3d902c27a27b709, 大小: 48435713 字节
+2025-09-11 10:34:52.265 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: 1、产品说明与介绍.rar, 存储名: admin_20250910150708159_8ff63cb679f9413fa3d902c27a27b709, 大小: 48435713 字节
+2025-09-11 11:07:15.247 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: 行政费用汇总表.xlsx, 存储名: admin_20250910141842981_db0c255b3a0642fa9652212d0cd67830, 大小: 10621 字节
+2025-09-11 11:07:17.762 +08:00 [ERR] 下载文件失败。桶: my-bucket, 存储名: admin_20250910110031473_cfd2c2c1a6d140048f821bd0a3534c18, 原始名: 测试.docx
+Amazon.S3.AmazonS3Exception: The specified key does not exist.
+ ---> Amazon.Runtime.Internal.HttpErrorResponseException: Exception of type 'Amazon.Runtime.Internal.HttpErrorResponseException' was thrown.
+   at Amazon.Runtime.HttpWebRequestMessage.GetResponseAsync(CancellationToken cancellationToken)
+   at Amazon.Runtime.Internal.HttpHandler`1.InvokeAsync[T](IExecutionContext executionContext)
+   at Amazon.Runtime.Internal.RedirectHandler.InvokeAsync[T](IExecutionContext executionContext)
+   at Amazon.Runtime.Internal.Unmarshaller.InvokeAsync[T](IExecutionContext executionContext)
+   at Amazon.S3.Internal.AmazonS3ResponseHandler.InvokeAsync[T](IExecutionContext executionContext)
+   at Amazon.Runtime.Internal.ErrorHandler.InvokeAsync[T](IExecutionContext executionContext)
+   --- End of inner exception stack trace ---
+   at Amazon.Runtime.Internal.HttpErrorResponseExceptionHandler.HandleExceptionStream(IRequestContext requestContext, IWebResponseData httpErrorResponse, HttpErrorResponseException exception, Stream responseStream)
+   at Amazon.Runtime.Internal.HttpErrorResponseExceptionHandler.HandleExceptionAsync(IExecutionContext executionContext, HttpErrorResponseException exception)
+   at Amazon.Runtime.Internal.ExceptionHandler`1.HandleAsync(IExecutionContext executionContext, Exception exception)
+   at Amazon.Runtime.Internal.ErrorHandler.ProcessExceptionAsync(IExecutionContext executionContext, Exception exception)
+   at Amazon.Runtime.Internal.ErrorHandler.InvokeAsync[T](IExecutionContext executionContext)
+   at Amazon.Runtime.Internal.CallbackHandler.InvokeAsync[T](IExecutionContext executionContext)
+   at Amazon.Runtime.Internal.EndpointDiscoveryHandler.InvokeAsync[T](IExecutionContext executionContext)
+   at Amazon.Runtime.Internal.EndpointDiscoveryHandler.InvokeAsync[T](IExecutionContext executionContext)
+   at Amazon.Runtime.Internal.CredentialsRetriever.InvokeAsync[T](IExecutionContext executionContext)
+   at Amazon.Runtime.Internal.RetryHandler.InvokeAsync[T](IExecutionContext executionContext)
+   at Amazon.Runtime.Internal.RetryHandler.InvokeAsync[T](IExecutionContext executionContext)
+   at Amazon.Runtime.Internal.CallbackHandler.InvokeAsync[T](IExecutionContext executionContext)
+   at Amazon.Runtime.Internal.CallbackHandler.InvokeAsync[T](IExecutionContext executionContext)
+   at Amazon.S3.Internal.AmazonS3ExceptionHandler.InvokeAsync[T](IExecutionContext executionContext)
+   at Amazon.Runtime.Internal.ErrorCallbackHandler.InvokeAsync[T](IExecutionContext executionContext)
+   at Amazon.Runtime.Internal.MetricsHandler.InvokeAsync[T](IExecutionContext executionContext)
+   at MinioWebBackend.Service.DownloadService.DownloadObjectAsStreamAsync(String bucketName, String objectName) in D:\bolo_backend\minio-web-backend\Service\DownloadService.cs:line 50
+2025-09-11 11:07:22.860 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: 1.txt, 存储名: admin_20250910165532237_e55550177b4446b3a5688b528a8ba33f, 大小: 5 字节
+2025-09-11 11:07:25.348 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: TODO.txt, 存储名: admin_20250910184537119_4222c8b343414a7b80714be246d24482, 大小: 414 字节
+2025-09-11 11:09:10.459 +08:00 [INF] 用户 admin 于 "2025-09-11T11:09:10.4070651+08:00" 成功上传文件 1.csv, 存储名 admin_20250911110910323_ac7ada6a48654779bea768ee16b5cee4, 标签： , 大小 7 字节
+2025-09-11 11:09:12.358 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: 1.csv, 存储名: admin_20250911110910323_ac7ada6a48654779bea768ee16b5cee4, 大小: 7 字节
+2025-09-11 11:09:52.636 +08:00 [INF] 用户 admin 于 "2025-09-11T11:09:52.6309651+08:00" 成功上传文件 app20250902.log, 存储名 admin_20250911110952604_c8734910de3c47c3bbe0ca80aabc34d8, 标签： , 大小 1534 字节
+2025-09-11 11:10:25.390 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: app20250902.log, 存储名: admin_20250911110952604_c8734910de3c47c3bbe0ca80aabc34d8, 大小: 1534 字节
+2025-09-11 11:19:59.575 +08:00 [INF] 用户 admin 于 "2025-09-11T11:19:59.5718970+08:00" 成功上传文件 IMG_0432.jpg, 存储名 admin_20250911111958669_6e2ca7ea2b9f4909b77fa33b623bb337, 标签： , 大小 9195194 字节
+2025-09-11 11:20:34.824 +08:00 [INF] 用户 admin 于 "2025-09-11T11:20:34.8202956+08:00" 成功上传文件 招聘-待入职.mp4, 存储名 admin_20250911112013504_7195e67c367e4602a53a50a957f3563f, 标签： , 大小 218950661 字节
+2025-09-11 11:23:52.168 +08:00 [INF] 用户 admin 于 "2025-09-11T11:23:52.1639971+08:00" 成功上传文件 Twowin -商業登記証 (2Jan25-1Jan26).pdf, 存储名 admin_20250911112352100_cd724ead9a26476e91f257801f14313a, 标签： , 大小 372559 字节
+2025-09-11 11:23:53.050 +08:00 [INF] 用户 admin 于 "2025-09-11T11:23:53.0475393+08:00" 成功上传文件 IMG_0432.jpg, 存储名 admin_20250911112352130_2e66f96ceaf34b6fa532c357f3401ffb, 标签： , 大小 9195194 字节
+2025-09-11 11:26:01.190 +08:00 [INF] 用户 admin 于 "2025-09-11T11:26:01.1862191+08:00" 成功上传文件 Twowin -商業登記証 (2Jan25-1Jan26).pdf, 存储名 admin_20250911112601120_9150ac0d13784a949ded7cc7c1432e70, 标签： , 大小 372559 字节
+2025-09-11 11:26:02.071 +08:00 [INF] 用户 admin 于 "2025-09-11T11:26:02.0692717+08:00" 成功上传文件 IMG_0432.jpg, 存储名 admin_20250911112601151_fbc34d8bc5c54b8d99082cb3093167c9, 标签： , 大小 9195194 字节
+2025-09-11 11:26:28.802 +08:00 [INF] 用户 admin 于 "2025-09-11T11:26:28.7996162+08:00" 成功上传文件 招聘-待入职.mp4, 存储名 admin_20250911112607778_c0bab15f30e5417fb529e431a72ed8fc, 标签： , 大小 218950661 字节
+2025-09-11 11:31:23.276 +08:00 [INF] 用户 admin 于 "2025-09-11T11:31:23.2726034+08:00" 成功上传文件 IMG_0432.jpg, 存储名 admin_20250911113122371_be7d9f2d0c24436e94fab20d1bc2979b, 标签： , 大小 9195194 字节
+2025-09-11 11:31:47.759 +08:00 [INF] 用户 admin 于 "2025-09-11T11:31:47.7572222+08:00" 成功上传文件 TODO.txt, 存储名 admin_20250911113147732_9f2831821d4d4b3bb776e0202136e079, 标签： , 大小 163 字节
+2025-09-11 11:31:55.803 +08:00 [INF] 用户 admin 于 "2025-09-11T11:31:55.8011112+08:00" 成功上传文件 IMG_0432.jpg, 存储名 admin_20250911113154900_887f95dc2e8d492397094be741e8aea2, 标签： , 大小 9195194 字节
+2025-09-11 11:32:02.040 +08:00 [INF] 用户 admin 于 "2025-09-11T11:32:02.0372872+08:00" 成功上传文件 1.pptx, 存储名 admin_20250911113201837_853f40ea161d4757b3d1f58c63caec75, 标签： , 大小 1842987 字节
+2025-09-11 11:32:16.740 +08:00 [INF] 用户 admin 于 "2025-09-11T11:32:16.7367744+08:00" 成功上传文件 1.pptx, 存储名 admin_20250911113216535_fcd8bd582ec247dfa4f829783ee6382e, 标签： , 大小 1842987 字节
+2025-09-11 11:32:36.195 +08:00 [INF] 用户 admin 于 "2025-09-11T11:32:36.1932509+08:00" 成功上传文件 测试docx.docx, 存储名 admin_20250911113236167_c94d4f2382964327beb9d81c89f0e2e9, 标签： , 大小 13555 字节
+2025-09-11 11:33:04.668 +08:00 [INF] 用户 admin 于 "2025-09-11T11:33:04.6666150+08:00" 成功上传文件 招聘-待入职.mp4, 存储名 admin_20250911113243568_39ad1c953fc34b838e61e984eaf33f0b, 标签： , 大小 218950661 字节
