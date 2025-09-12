@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using MinioWebBackend.Models;
 using Serilog.Events;
+using System.Text.Json.Serialization;
 
 namespace MinioWebBackend.Dtos.LogDtos
 {
@@ -12,6 +13,7 @@ namespace MinioWebBackend.Dtos.LogDtos
     public class LogItemDto
     {
         public long Id { get; set; }
+         [JsonConverter(typeof(JsonStringEnumConverter))]
         public LogEventLevel Level { get; set; }
         public string Message { get; set; } = string.Empty;
         public string? Exception { get; set; }
