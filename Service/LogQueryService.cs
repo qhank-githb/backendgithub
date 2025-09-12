@@ -47,38 +47,39 @@
 
                 // JSON 过滤
                 // JSON 过滤（修改后）
-if (request.PropertyFilters?.Count > 0)
-{
-    foreach (var (jsonKey, targetValue) in request.PropertyFilters)
-    {
-        // 关键修改：JSON 路径从 "$.{jsonKey}" 改为 "$.{jsonKey}.Value"
-        string jsonPath = $"$.{jsonKey}.Value"; 
-        
-        if (_isMySql)
-        {
-            // MySQL: 提取嵌套的 Value 字段
-            query = query.Where(log =>
-                log.Properties != null &&
-                MySqlJsonDbFunctionsExtensions.JsonUnquote(
-                    EF.Functions,
-                    MySqlJsonDbFunctionsExtensions.JsonExtract<string>(
-                        EF.Functions,
-                        log.Properties,
-                        jsonPath  // 使用修改后的路径
-                    )
-                ) == targetValue
-            );
-        }
-        else if (_isSqlServer)
-        {
-            // SQL Server: 提取嵌套的 Value 字段
-            query = query.Where(log =>
-                log.Properties != null &&
-                SqlServerJsonFunctions.JsonValue(log.Properties, jsonPath) == targetValue  // 使用修改后的路径
-            );
-        }
-    }
-}
+            // JSON 过滤（修改 MySQL 部分的 JsonExtract 调用）
+            if (request.PropertyFilters?.Count > 0)
+            {
+                foreach (var (jsonKey, targetValue) in request.PropertyFilters)
+                {
+                    string jsonPath = $"$.{jsonKey}.Value"; 
+                    
+                    if (_isMySql)
+                    {
+                        // 关键修改：JsonExtract 第二个参数从数组 new string[]{jsonPath} 改为单个字符串 jsonPath
+                        query = query.Where(log =>
+                            log.Properties != null &&
+                            MySqlJsonDbFunctionsExtensions.JsonUnquote(
+                                EF.Functions,
+                                MySqlJsonDbFunctionsExtensions.JsonExtract<string>(
+                                    EF.Functions,
+                                    log.Properties,  // 数据库 JSON 字段
+                                    jsonPath         // 单个字符串路径（去掉数组！）
+                                )
+                            ) == targetValue
+                        );
+                    }
+                    else if (_isSqlServer)
+                    {
+                        // SQL Server 部分不变
+                        query = query.Where(log =>
+                            log.Properties != null &&
+                            SqlServerJsonFunctions.JsonValue(log.Properties, jsonPath) == targetValue
+                        );
+                    }
+                }
+            }
+
 
 
                 // 排序 & 分页
