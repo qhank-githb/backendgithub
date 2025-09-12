@@ -87,6 +87,106 @@
             POST /api/{bucketName}/fileupload/upload
             </summary>
         </member>
+        <member name="M:MinioWebBackend.Controllers.LogQueryController.QueryLogs(MinioWebBackend.Dtos.LogDtos.LogQueryRequest)">
+            <summary>
+            按条件查询日志
+            </summary>
+        </member>
+        <member name="T:MinioWebBackend.Dtos.LogDtos.LogItemDto">
+            <summary>
+            单条日志DTO
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Dtos.LogDtos.LogItemDto.FromEntity(MinioWebBackend.Models.SerilogLog)">
+            <summary>
+            从数据库实体转换为DTO
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Dtos.LogDtos.LogItemDto.ParseLogLevel(System.String)">
+            <summary>
+            解析日志级别
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Dtos.LogDtos.LogItemDto.ParseProperties(System.String)">
+            <summary>
+            解析Properties JSON
+            </summary>
+        </member>
+        <member name="T:MinioWebBackend.Dtos.LogDtos.LogQueryRequest">
+            <summary>
+            日志查询请求参数
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogQueryRequest.Levels">
+            <summary>
+            日志级别（可多选：Information/Warning/Error等）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogQueryRequest.MessageKeyword">
+            <summary>
+            日志消息关键词（模糊匹配）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogQueryRequest.ExceptionKeyword">
+            <summary>
+            异常信息关键词（模糊匹配）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogQueryRequest.TimestampStart">
+            <summary>
+            时间戳开始（UTC时间）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogQueryRequest.TimestampEnd">
+            <summary>
+            时间戳结束（UTC时间）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogQueryRequest.PropertyFilters">
+            <summary>
+            Properties中的键值过滤（如{"MachineName":"localhost"}）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogQueryRequest.PageIndex">
+            <summary>
+            分页页码（默认1）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogQueryRequest.PageSize">
+            <summary>
+            每页条数（默认20，最大100）
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Dtos.LogDtos.LogQueryRequest.Validate">
+            <summary>
+            校验分页参数合法性
+            </summary>
+        </member>
+        <member name="T:MinioWebBackend.Dtos.LogDtos.LogQueryResponse">
+            <summary>
+            日志查询响应（分页）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogQueryResponse.TotalCount">
+            <summary>
+            总日志条数
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogQueryResponse.TotalPages">
+            <summary>
+            总页数
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogQueryResponse.CurrentPage">
+            <summary>
+            当前页码
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogQueryResponse.Logs">
+            <summary>
+            当前页日志列表
+            </summary>
+        </member>
         <member name="M:MinioWebBackend.Interfaces.IAuthService.RegisterAsync(System.String,System.String,System.String)">
             <summary>
             注册用户
@@ -105,6 +205,16 @@
         <member name="M:MinioWebBackend.Interfaces.IAuthService.InitializeAdminAccountAsync">
             <summary>
             初始化管理员账号
+            </summary>
+        </member>
+        <member name="T:MinioWebBackend.Interfaces.ILogQueryService">
+            <summary>
+            日志查询服务接口
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Interfaces.ILogQueryService.QueryLogsAsync(MinioWebBackend.Dtos.LogDtos.LogQueryRequest)">
+            <summary>
+            按条件查询日志
             </summary>
         </member>
         <member name="P:MinioWebBackend.Models.SerilogLog.Id">
@@ -172,6 +282,11 @@
         <member name="M:MinioWebBackend.Service.AuthService.InitializeAdminAccountAsync">
             <summary>
             初始化管理员账号（仅在管理员账号不存在时创建）
+            </summary>
+        </member>
+        <member name="T:MinioWebBackend.Service.SqlServerJsonFunctions">
+            <summary>
+            SQL Server JSON_VALUE 映射
             </summary>
         </member>
         <member name="M:MinioWebBackend.Service.UploadService.UploadPartWithRetryAsync(Amazon.S3.Model.UploadPartRequest,System.Int32)">

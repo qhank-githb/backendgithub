@@ -13,6 +13,8 @@ using System.Text;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
 using MinioWebBackend.Filters;
+using MinioWebBackend.Serilog; // 引入包含 EFCoreSinkExtensions 的命名空间
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -97,6 +99,7 @@ builder.Services.AddSingleton<TransferUtility>(sp =>
 // ==================== Serilog ====================
 builder.Host.UseSerilog((context, services, loggerConfig) =>
 {
+    var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
     loggerConfig
         .MinimumLevel.Information()
         .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
@@ -110,6 +113,7 @@ builder.Host.UseSerilog((context, services, loggerConfig) =>
             rollingInterval: RollingInterval.Day,
             retainedFileCountLimit: 14
         )
+        .WriteTo.EFCore(scopeFactory)
         // 异步写 Elasticsearch
         .WriteTo.Async(a => a.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://localhost:9200"))
         {
@@ -143,6 +147,7 @@ builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IFileTagService, FileTagService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ILogQueryService, LogQueryService>(); // 新增：日志查询服务
 
 
 // ==================== 控制器 ====================
