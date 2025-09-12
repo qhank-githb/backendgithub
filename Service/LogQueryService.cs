@@ -53,12 +53,18 @@ namespace MinioWebBackend.Service
 
                     if (_isMySql)
                     {
-                        query = query.Where(log =>
-                            log.Properties != null &&
-                            EF.Functions.JsonUnquote(
-                                EF.Functions.JsonExtract<string>(log.Properties, jsonPath)
-                            ) == targetValue
-                        );
+
+                    query = query.Where(log =>
+                        log.Properties != null &&
+                        EF.Functions.JsonUnquote(
+                            // 👇 注意这里：只传 string，不要触发 params string[]
+                            EF.Functions.JsonExtract<string>(
+                                log.Properties,
+                                jsonPath as string   // 这样能确保走单路径重载
+                            )
+                        ) == targetValue
+                    );
+
                     }
                     else if (_isSqlServer)
                     {
