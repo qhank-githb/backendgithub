@@ -2,9 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using MinioWebBackend.Dtos.LogDtos;
 using MinioWebBackend.Interfaces;
 using MinioWebBackend.Models;
-using System.Data.Common;
-using Microsoft.Data.SqlClient;
-using MySqlConnector;
 
 namespace MinioWebBackend.Service
 {
@@ -25,8 +22,7 @@ namespace MinioWebBackend.Service
         public async Task<LogQueryResponse> QueryLogsAsync(LogQueryRequest request)
         {
             request.Validate();
-
-            IQueryable<SerilogLog> query = _dbContext.SerilogLogs;
+            var query = _dbContext.SerilogLogs.AsQueryable();
 
             // 日志级别过滤
             if (request.Levels?.Count > 0)
@@ -48,32 +44,30 @@ namespace MinioWebBackend.Service
                 query = query.Where(log => log.Timestamp <= request.TimestampEnd.Value);
 
             // JSON 属性过滤
-            // JSON 属性过滤
-if (request.PropertyFilters?.Count > 0)
-{
-    foreach (var (jsonKey, targetValue) in request.PropertyFilters)
-    {
-        // 假设 Serilog 属性结构是 { "Username": { "Value": "xxx" } }
-        string jsonPath = $"$.{jsonKey}.Value";
+            if (request.PropertyFilters?.Count > 0)
+            {
+                foreach (var (jsonKey, targetValue) in request.PropertyFilters)
+                {
+                    string jsonPath = $"$.{jsonKey}.Value";
 
-        if (_isMySql)
-        {
-            query = query.Where(log =>
-                EF.Functions.JsonUnquote(
-                    EF.Functions.JsonExtract<string>(log.Properties, jsonPath)
-                ) == targetValue
-            );
-        }
-        else if (_isSqlServer)
-        {
-            query = query.Where(log =>
-                log.Properties != null &&
-                SqlServerJsonFunctions.JsonValue(log.Properties, jsonPath) == targetValue
-            );
-        }
-    }
-}
-
+                    if (_isMySql)
+                    {
+                        // ⚡ 用 SQL 原生 JSON_EXTRACT 查询
+                        query = _dbContext.SerilogLogs
+                            .FromSqlRaw(@"
+                                SELECT * FROM SerilogLogs
+                                WHERE JSON_UNQUOTE(JSON_EXTRACT(Properties, {0})) = {1}", 
+                                jsonPath, targetValue);
+                    }
+                    else if (_isSqlServer)
+                    {
+                        query = query.Where(log =>
+                            log.Properties != null &&
+                            SqlServerJsonFunctions.JsonValue(log.Properties, jsonPath) == targetValue
+                        );
+                    }
+                }
+            }
 
             // 排序 & 分页
             query = query.OrderByDescending(log => log.Timestamp);
