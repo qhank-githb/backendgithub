@@ -4,8 +4,9 @@
     using MinioWebBackend.Dtos.LogDtos;
     using MinioWebBackend.Interfaces;
     using MinioWebBackend.Models;
+    using MySqlConnector;
 
-    namespace MinioWebBackend.Service
+namespace MinioWebBackend.Service
     {
         public class LogQueryService : ILogQueryService
         {
@@ -54,21 +55,22 @@
                 {
                     string jsonPath = $"$.{jsonKey}.Value"; 
                     
-                    if (_isMySql)
-                    {
-                        // 关键修改：JsonExtract 第二个参数从数组 new string[]{jsonPath} 改为单个字符串 jsonPath
-                        query = query.Where(log =>
-                            log.Properties != null &&
-                            MySqlJsonDbFunctionsExtensions.JsonUnquote(
-                                EF.Functions,
-                                MySqlJsonDbFunctionsExtensions.JsonExtract<string>(
-                                    EF.Functions,
-                                    log.Properties,  // 数据库 JSON 字段
-                                    jsonPath         // 单个字符串路径（去掉数组！）
-                                )
-                            ) == targetValue
-                        );
-                    }
+                if (_isMySql)
+                {
+                    // 1. 将路径参数转为字符串常量（避免动态变量被识别为数组）
+                    string fixedJsonPath = jsonPath; 
+                    // 2. 显式调用 JsonExtract，指定返回类型为 string，且路径用常量
+                    query = query.Where(log =>
+                        log.Properties != null &&
+                        EF.Functions.JsonUnquote(
+                            EF.Functions.JsonExtract<string>(
+                                log.Properties,  // 数据库 JSON 字段
+                                fixedJsonPath    // 字符串常量路径（非数组）
+                            )
+                        ) == targetValue
+                    );
+                }
+
                     else if (_isSqlServer)
                     {
                         // SQL Server 部分不变
