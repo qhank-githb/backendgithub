@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using MinioWebBackend.Dtos.LogDtos;
 using MinioWebBackend.Interfaces;
 using MinioWebBackend.Models;
+using System.Data.Common;
+using Microsoft.Data.SqlClient;
+using MySqlConnector;
 
 namespace MinioWebBackend.Service
 {
@@ -22,7 +25,8 @@ namespace MinioWebBackend.Service
         public async Task<LogQueryResponse> QueryLogsAsync(LogQueryRequest request)
         {
             request.Validate();
-            var query = _dbContext.SerilogLogs.AsQueryable();
+
+            IQueryable<SerilogLog> query = _dbContext.SerilogLogs;
 
             // 日志级别过滤
             if (request.Levels?.Count > 0)
@@ -44,37 +48,32 @@ namespace MinioWebBackend.Service
                 query = query.Where(log => log.Timestamp <= request.TimestampEnd.Value);
 
             // JSON 属性过滤
-            if (request.PropertyFilters?.Count > 0)
-            {
-                foreach (var (jsonKey, targetValue) in request.PropertyFilters)
-                {
-                    // 假设 Serilog 属性结构是 { "Username": { "Value": "xxx" } }
-                    string jsonPath = $"$.{jsonKey}.Value";
+            // JSON 属性过滤
+if (request.PropertyFilters?.Count > 0)
+{
+    foreach (var (jsonKey, targetValue) in request.PropertyFilters)
+    {
+        // 假设 Serilog 属性结构是 { "Username": { "Value": "xxx" } }
+        string jsonPath = $"$.{jsonKey}.Value";
 
-                    if (_isMySql)
-                    {
+        if (_isMySql)
+        {
+            query = query.Where(log =>
+                EF.Functions.JsonUnquote(
+                    EF.Functions.JsonExtract<string>(log.Properties, jsonPath)
+                ) == targetValue
+            );
+        }
+        else if (_isSqlServer)
+        {
+            query = query.Where(log =>
+                log.Properties != null &&
+                SqlServerJsonFunctions.JsonValue(log.Properties, jsonPath) == targetValue
+            );
+        }
+    }
+}
 
-                    query = query.Where(log =>
-                        log.Properties != null &&
-                        EF.Functions.JsonUnquote(
-                            // 👇 注意这里：只传 string，不要触发 params string[]
-                            EF.Functions.JsonExtract<string>(
-                                log.Properties,
-                                jsonPath as string   // 这样能确保走单路径重载
-                            )
-                        ) == targetValue
-                    );
-
-                    }
-                    else if (_isSqlServer)
-                    {
-                        query = query.Where(log =>
-                            log.Properties != null &&
-                            SqlServerJsonFunctions.JsonValue(log.Properties, jsonPath) == targetValue
-                        );
-                    }
-                }
-            }
 
             // 排序 & 分页
             query = query.OrderByDescending(log => log.Timestamp);
