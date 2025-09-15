@@ -26,7 +26,7 @@ namespace MinioWebBackend.Service
         public async Task<List<FileInfoModel>> GetAllFilesAsync()
         {
             var files = await _db.FileRecords
-                .Include(f => f.FileTags)
+                .Include(f => f.FileTags!)
                     .ThenInclude(ft => ft.Tag)
                 .OrderByDescending(f => f.UploadTime)
                 .ToListAsync();
@@ -51,7 +51,7 @@ namespace MinioWebBackend.Service
             pageSize = Math.Clamp(pageSize, 10, 1000);
 
             var query = _db.FileRecords
-                .Include(f => f.FileTags)
+                .Include(f => f.FileTags!)
                     .ThenInclude(ft => ft.Tag)
                 .AsQueryable();
 
@@ -82,13 +82,13 @@ namespace MinioWebBackend.Service
                     // 文件必须包含所有指定标签
                     foreach (var tag in tags)
                     {
-                        query = query.Where(f => f.FileTags.Any(ft => ft.Tag != null && ft.Tag.Name == tag));
+                        query = query.Where(f => f.FileTags!.Any(ft => ft.Tag != null && ft.Tag.Name == tag));
                     }
                 }
                 else
                 {
                     // 文件包含任意一个标签
-                    query = query.Where(f => f.FileTags.Any(ft => ft.Tag != null && tags.Contains(ft.Tag.Name)));
+                    query = query.Where(f => f.FileTags!.Any(ft => ft.Tag != null && tags.Contains(ft.Tag.Name)));
                 }
             }
 
@@ -141,7 +141,7 @@ namespace MinioWebBackend.Service
         public async Task<FileInfoModel?> GetFileByIdAsync(int id)
         {
             var record = await _db.FileRecords
-                .Include(f => f.FileTags)
+                .Include(f => f.FileTags!)
                     .ThenInclude(ft => ft.Tag)
                 .FirstOrDefaultAsync(f => f.Id == id);
 
