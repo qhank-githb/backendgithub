@@ -6,161 +6,18 @@
     <members>
         <member name="M:AuthController.Register(RegisterRequest)">
             <summary>
-            用户注册（仅管理员可操作）
+            用户注册
             </summary>
-            <remarks>
-            功能：
-            - 管理员创建新用户账号
-            - 密码会被加密存储
-            - 注册成功后用户状态为“启用”
-            
-            示例请求 JSON：
-            ```json
-            {
-              "username": "test_user_001",
-              "password": "Test@123456",
-              "role": "User"
-            }
-            ```
-            </remarks>
-            <param name="request">注册请求参数（JSON 格式，从请求体获取）</param>
-            <returns>
-            成功响应（200 OK）：
-            ```json
-            {
-              "id": 1001,
-              "username": "test_user_001",
-              "role": "User",
-              "message": "注册成功",
-              "createdAt": "2023-10-01T10:30:00"
-            }
-            ```
-            失败响应（400 Bad Request）：
-            ```json
-            {
-              "error": "用户名已存在"
-            }
-            ```
-            无权限响应（403 Forbidden）：
-            ```json
-            {
-              "error": "仅管理员可执行此操作"
-            }
-            ```
-            </returns>
-            <response code="200">注册成功，返回用户基础信息</response>
-            <response code="400">参数无效或业务校验失败（如用户名重复）</response>
-            <response code="401">未登录（无有效 Token）</response>
-            <response code="403">已登录但非管理员角色</response>
         </member>
         <member name="M:AuthController.Login(LoginRequest)">
             <summary>
             用户登录
             </summary>
-            <remarks>
-            功能说明：验证用户凭据并生成访问令牌
-            
-            示例请求：
-            ```json
-            {
-              "username": "testUser",
-              "password": "Test@123456"
-            }
-            ```
-            </remarks>
-            <param name="request">登录请求参数对象，来源于请求体（FromBody）</param>
-            <param name="request.Username.Username">用户名，字符串类型，必填项
-            <list type="bullet">
-            <item>与注册时填写的用户名一致</item>
-            <item>示例值："testUser123"</item>
-            </list>
-            </param>
-            <param name="request.Password.Password">用户密码，字符串类型，必填项
-            <list type="bullet">
-            <item>与注册时设置的密码一致</item>
-            <item>示例值："Test@123456"</item>
-            </list>
-            </param>
-            <returns>
-            成功响应（200 OK）：
-            ```json
-            {
-              "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-              "username": "testUser",
-              "role": "User",
-              "lastLoginTime": "2023-10-01T14:30:00"
-            }
-            ```
-            
-            失败响应（401 Unauthorized）：
-            ```json
-            {
-              "error": "用户名或密码错误"
-            }
-            ```
-            </returns>
-            <response code="200">登录成功，返回JWT令牌、用户名、角色和最后登录时间</response>
-            <response code="400">请求参数不完整</response>
-            <response code="401">用户名或密码错误</response>
         </member>
         <member name="M:AuthController.Logout">
             <summary>
-            用户登出（清除登录状态）
+            用户登出
             </summary>
-            <remarks>
-            功能说明：使当前用户的令牌失效，清除登录状态
-            
-            调用说明：
-            - 需要在请求头中携带有效的Authorization令牌
-            - 示例请求头：Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-            </remarks>
-            <returns>
-            成功响应（200 OK）：
-            ```json
-            {
-              "message": "退出成功"
-            }
-            ```
-            
-            失败响应（401 Unauthorized）：
-            ```json
-            {
-              "error": "未授权访问"
-            }
-            ```
-            </returns>
-            <response code="200">登出成功</response>
-            <response code="401">未登录状态下调用此接口</response>
-        </member>
-        <member name="T:RegisterRequest">
-            <summary>
-            用户注册请求参数模型
-            </summary>
-        </member>
-        <member name="P:RegisterRequest.Username">
-            <summary>
-            用户名
-            </summary>
-            <remarks>
-            约束：
-            - 长度 3-20 字符
-            - 仅允许字母、数字、下划线（_）
-            - 全局唯一，不可重复
-            </remarks>
-            <example>test_user_001</example>
-        </member>
-        <!-- Badly formed XML comment ignored for member "P:RegisterRequest.Password" -->
-        <member name="P:RegisterRequest.Role">
-            <summary>
-            用户角色
-            </summary>
-            <remarks>
-            可选值：
-            - "Admin"：管理员（所有权限）
-            - "User"：普通用户（默认值，基础权限）
-            注意：非管理员调用注册接口时，此参数会被强制设为 "User"
-            </remarks>
-            <example>User</example>
         </member>
         <member name="M:MinioWebBackend.Controllers.BucketsController.GetBuckets">
             <summary>
@@ -230,10 +87,44 @@
             POST /api/{bucketName}/fileupload/upload
             </summary>
         </member>
+        <member name="T:MinioWebBackend.Controllers.LogQueryController">
+            <summary>
+            日志查询控制器（仅管理员可访问）
+            </summary>
+            <remarks>
+            提供日志的高级查询功能：支持通过日志等级、关键词、异常关键字、时间范围等条件进行过滤，
+            并支持分页返回结果。
+            </remarks>
+        </member>
+        <member name="M:MinioWebBackend.Controllers.LogQueryController.#ctor(MinioWebBackend.Interfaces.ILogQueryService,Microsoft.Extensions.Logging.ILogger{MinioWebBackend.Controllers.LogQueryController})">
+            <summary>
+            构造函数，注入日志查询服务和日志记录器
+            </summary>
+        </member>
         <member name="M:MinioWebBackend.Controllers.LogQueryController.QueryLogs(MinioWebBackend.Dtos.LogDtos.LogQueryRequest)">
             <summary>
-            按条件查询日志
+            按条件查询日志（支持分页）
             </summary>
+            <remarks>
+            示例请求：
+            
+            ```
+            GET /api/LogQuery/query?Levels=4&amp;MessageKeyword=数据库&amp;Page=1&amp;PageSize=50
+            ```
+            
+            - **Levels**: 日志等级集合 (如 `4 = Warning`, `5 = Error`)
+            - **MessageKeyword**: 日志消息关键词
+            - **ExceptionKeyword**: 异常关键词
+            - **TimestampStart**: 起始时间 (UTC)
+            - **TimestampEnd**: 结束时间 (UTC)
+            - **Page**: 页码，从 1 开始
+            - **PageSize**: 每页大小
+            </remarks>
+            <param name="request">日志查询参数对象，包含等级、关键词、时间范围及分页信息</param>
+            <returns>
+            分页后的日志查询结果。
+            返回 <see cref="T:MinioWebBackend.Dtos.LogDtos.LogQueryResponse"/>，包含日志条目集合、总记录数和分页信息。
+            </returns>
         </member>
         <member name="T:MinioWebBackend.Dtos.LogDtos.LogItemDto">
             <summary>
@@ -262,7 +153,7 @@
         </member>
         <member name="P:MinioWebBackend.Dtos.LogDtos.LogQueryRequest.Levels">
             <summary>
-            日志级别（可多选：Information/Warning/Error等）
+            日志级别（对应 Verbose，Debug,Information,Warning,Error,Fatal）
             </summary>
         </member>
         <member name="P:MinioWebBackend.Dtos.LogDtos.LogQueryRequest.MessageKeyword">
@@ -287,7 +178,7 @@
         </member>
         <member name="P:MinioWebBackend.Dtos.LogDtos.LogQueryRequest.PropertyFilters">
             <summary>
-            Properties中的键值过滤（如{"MachineName":"localhost"}）
+            Properties中的键值过滤（如{"MachineName":"localhost"}） 非模糊匹配
             </summary>
         </member>
         <member name="P:MinioWebBackend.Dtos.LogDtos.LogQueryRequest.PageIndex">

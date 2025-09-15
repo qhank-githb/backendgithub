@@ -10,7 +10,7 @@ namespace MinioWebBackend.Dtos.LogDtos
     public class LogQueryRequest
     {
         /// <summary>
-        /// 日志级别（可多选：Information/Warning/Error等）
+        /// 日志级别（对应 Verbose，Debug,Information,Warning,Error,Fatal）
         /// </summary>
         public List<LogEventLevel>? Levels { get; set; }
 
@@ -35,7 +35,7 @@ namespace MinioWebBackend.Dtos.LogDtos
         public DateTime? TimestampEnd { get; set; }
 
         /// <summary>
-        /// Properties中的键值过滤（如{"MachineName":"localhost"}）
+        /// Properties中的键值过滤（如{"MachineName":"localhost"}） 非模糊匹配
         /// </summary>
         public Dictionary<string, string>? PropertyFilters { get; set; }
 

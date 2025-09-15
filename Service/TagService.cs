@@ -65,7 +65,7 @@ namespace MinioWebBackend.Service
         var username = _httpContextAccessor.HttpContext?.User?.Identity?.Name ?? "未知用户";
 
         var file = await _context.FileRecords
-            .Include(f => f.FileTags)
+            .Include(f => f.FileTags!)
                 .ThenInclude(ft => ft.Tag)
             .FirstOrDefaultAsync(f => f.Id == dto.Id);
 

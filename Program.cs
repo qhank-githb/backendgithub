@@ -59,15 +59,13 @@ builder.Services.AddSwaggerGen(c =>
     });
 
     // 读取 XML 注释文件（确保文件名与 .csproj 一致）
-    var xmlFileName = "minio-web-backend.xml"; // 与 .csproj 中 <DocumentationFile> 配置一致
-    var xmlFilePath = Path.Combine(AppContext.BaseDirectory, xmlFileName);
-    
-    // 关键：只有文件存在时才加载（避免文件缺失导致的错误）
+    var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlFilePath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
     if (File.Exists(xmlFilePath))
     {
-        // 必须设置 includeControllerXmlComments: true 才能读取模型和控制器注释
         c.IncludeXmlComments(xmlFilePath, includeControllerXmlComments: true);
     }
+
     else
     {
         // 调试用：如果 XML 文件不存在，输出警告（方便排查）
@@ -241,7 +239,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();  // 没有表就建表
-    Console.WriteLine("数据库已迁移到最新版本");
+    Console.WriteLine("数据库存在，服务已启动");
 }
 
 

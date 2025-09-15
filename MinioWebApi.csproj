@@ -10,7 +10,7 @@
 
     <!-- 可选：忽略未注释的警告 -->
     <NoWarn>$(NoWarn);1591</NoWarn>
-     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\minio-web-backend.xml</DocumentationFile>
+     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
