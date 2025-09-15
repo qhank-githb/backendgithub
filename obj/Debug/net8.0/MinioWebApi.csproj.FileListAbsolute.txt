@@ -12,7 +12,6 @@ D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\MinioWebApi.deps.json
 D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\MinioWebApi.runtimeconfig.json
 D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\MinioWebApi.dll
 D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\MinioWebApi.pdb
-D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\MinioWebApi.xml
 D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\AWSSDK.Core.dll
 D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\AWSSDK.S3.dll
 D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\Azure.Core.dll
@@ -182,7 +181,7 @@ D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\scopedcss\bundle\MinioWebApi.
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWeb.2CBDF097.Up2Date
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.dll
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\refint\MinioWebApi.dll
-D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.xml
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.pdb
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.genruntimeconfig.cache
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\ref\MinioWebApi.dll
+D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\minio-web-backend.xml

@@ -11,7 +11,7 @@ namespace MinioWebBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize] // 需登录访问
+    [Authorize(Roles = "Admin")] // 需登录访问
     public class LogQueryController : ControllerBase
     {
         private readonly ILogQueryService _logQueryService;

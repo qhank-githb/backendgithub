@@ -13,7 +13,10 @@ using System.Text;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
 using MinioWebBackend.Filters;
-using MinioWebBackend.Serilog; // 引入包含 EFCoreSinkExtensions 的命名空间
+using MinioWebBackend.Serilog;
+using Microsoft.OpenApi.Models; // 引入包含 EFCoreSinkExtensions 的命名空间
+using Swashbuckle.AspNetCore.SwaggerGen;
+
 
 
 
@@ -48,20 +51,35 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "My API",
-        Version = "v1"
+        Title = "MinIO Web Backend API",
+        Version = "v1",
+        Description = "MinIO 文件管理 API（含认证、上传、标签等）"
     });
-    c.OperationFilter<FileUploadOperationFilter>();
-    // 启用注释显示
-    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
 
-    // 启用 [SwaggerOperation] 注解
-    c.EnableAnnotations(); // ⚠️ 需要 using Swashbuckle.AspNetCore.Annotations
+    // 读取 XML 注释文件（确保文件名与 .csproj 一致）
+    var xmlFileName = "minio-web-backend.xml"; // 与 .csproj 中 <DocumentationFile> 配置一致
+    var xmlFilePath = Path.Combine(AppContext.BaseDirectory, xmlFileName);
+    
+    // 关键：只有文件存在时才加载（避免文件缺失导致的错误）
+    if (File.Exists(xmlFilePath))
+    {
+        // 必须设置 includeControllerXmlComments: true 才能读取模型和控制器注释
+        c.IncludeXmlComments(xmlFilePath, includeControllerXmlComments: true);
+    }
+    else
+    {
+        // 调试用：如果 XML 文件不存在，输出警告（方便排查）
+        Console.WriteLine($"警告：未找到 XML 注释文件，路径：{xmlFilePath}");
+    }
+
+    // 保留其他必要配置（如文件上传过滤器、JWT 等）
+    c.OperationFilter<FileUploadOperationFilter>();
+    c.EnableAnnotations();
 });
+
+
 
 
 // ==================== CORS ====================
@@ -226,14 +244,6 @@ using (var scope = app.Services.CreateScope())
     Console.WriteLine("数据库已迁移到最新版本");
 }
 
-// ==================== Swagger 中间件 ====================
-
-    app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-    c.RoutePrefix = "swagger"; 
-});
 
 // ==================== 中间件顺序 ====================
 // 1. Swagger 中间件（仅开发环境建议启用，生产环境可注释）
