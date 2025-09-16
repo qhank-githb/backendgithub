@@ -94,10 +94,10 @@ public static LogItemDto FromESDto(SerilogLogESDto esDto)
     return new LogItemDto
     {
         Level = level,
-        Message = esDto.Message,
+        Message = esDto.Message ?? string.Empty,
         Exception = esDto.Exception,
         Timestamp = esDto.AtTimestamp,  // ✅ 使用正确的属性名
-        Properties = esDto.Fields       // ⚠️ 确保类型一致
+        Properties = esDto.Fields  ?? new Dictionary<string, object>()      // ⚠️ 确保类型一致
     };
 }
 

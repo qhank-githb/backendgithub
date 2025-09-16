@@ -51,7 +51,7 @@ namespace MinioWebBackend.Dtos.LogDtos
     /// <summary>
     /// 文件标签
     /// </summary>
-    public List<string> Tags { get; set; } = new List<string>();
+    public List<string>? Tags { get; set; } = new List<string>();
 }
 
 

@@ -298,20 +298,6 @@
         <member name="P:MinioWebBackend.Controllers.DownloadFileResponse.Base64Content">
             <summary>文件内容 Base64 编码字符串</summary>
         </member>
-        <member name="M:MinioWebBackend.Controllers.ElasticSearchController.SearchFiles(MinioWebBackend.Dtos.LogDtos.FileSearchDto)">
-            <summary>
-            查询文件（Elasticsearch）
-            </summary>
-            <remarks>
-            支持按 Id、文件名、上传者、存储桶、标签查询，支持分页。
-            标签支持 MatchAll（必须包含所有）和 MatchAny（包含任意一个）。
-            </remarks>
-            <param name="dto">查询条件 DTO</param>
-            <returns>
-            - Items: 文件记录列表  
-            - TotalCount: 总记录数
-            </returns>
-        </member>
         <member name="T:MinioWebBackend.Controllers.FileDownloadController">
             <summary>
             文件批量下载控制器（需登录访问）
@@ -1257,11 +1243,6 @@
         <member name="M:MinioWebBackend.Service.AuthService.InitializeAdminAccountAsync">
             <summary>
             初始化管理员账号（仅在管理员账号不存在时创建）
-            </summary>
-        </member>
-        <member name="T:MinioWebBackend.Service.SqlServerJsonFunctions">
-            <summary>
-            SQL Server JSON_VALUE 映射
             </summary>
         </member>
         <member name="M:MinioWebBackend.Service.UploadService.UploadPartWithRetryAsync(Amazon.S3.Model.UploadPartRequest,System.Int32)">
