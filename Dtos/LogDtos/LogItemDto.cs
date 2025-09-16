@@ -76,7 +76,7 @@ namespace MinioWebBackend.Dtos.LogDtos
 
             try
             {
-                return JsonSerializer.Deserialize<Dictionary<string, object>>(propertiesJson) 
+                return JsonSerializer.Deserialize<Dictionary<string, object>>(propertiesJson)
                     ?? new Dictionary<string, object>();
             }
             catch (JsonException)
@@ -84,5 +84,23 @@ namespace MinioWebBackend.Dtos.LogDtos
                 return new Dictionary<string, object>();
             }
         }
+        
+        public static LogItemDto FromESDto(SerilogLogESDto esDto)
+        {
+            // 将字符串转换为 LogEventLevel，如果转换失败则默认 Information
+            var level = Enum.TryParse<LogEventLevel>(esDto.Level, true, out var parsedLevel)
+                ? parsedLevel
+                : LogEventLevel.Information;
+
+            return new LogItemDto
+            {
+                Level = level,
+                Message = esDto.Message,
+                Exception = esDto.Exception,
+                Timestamp = esDto.Timestamp,
+                Properties = esDto.Properties
+            };
+        }
+
     }
 }

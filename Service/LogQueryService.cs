@@ -1,99 +1,83 @@
-using Microsoft.EntityFrameworkCore;
 using MinioWebBackend.Dtos.LogDtos;
 using MinioWebBackend.Interfaces;
-using MinioWebBackend.Models;
+using Nest;
 
-namespace MinioWebBackend.Service
+public class LogQueryService : ILogQueryService
 {
-    public class LogQueryService : ILogQueryService
+    private readonly IElasticClient _elastic;
+
+    public LogQueryService(IElasticClient elastic)
     {
-        private readonly AppDbContext _dbContext;
-        private readonly bool _isMySql;
-        private readonly bool _isSqlServer;
+        _elastic = elastic;
+    }
 
-        public LogQueryService(AppDbContext dbContext)
+    public async Task<LogQueryResponse> QueryLogsAsync(LogQueryRequest request)
+    {
+        request.Validate();
+
+        Func<QueryContainerDescriptor<SerilogLogESDto>, QueryContainer> query = q =>
         {
-            _dbContext = dbContext;
-            var providerName = _dbContext.Database.ProviderName;
-            _isMySql = !string.IsNullOrEmpty(providerName) && providerName.Contains("MySql");
-            _isSqlServer = !string.IsNullOrEmpty(providerName) && providerName.Contains("SqlServer");
-        }
+            var mustQueries = new List<Func<QueryContainerDescriptor<SerilogLogESDto>, QueryContainer>>();
 
-        public async Task<LogQueryResponse> QueryLogsAsync(LogQueryRequest request)
-        {
-            request.Validate();
-            var query = _dbContext.SerilogLogs.AsQueryable();
-
-            // 日志级别过滤
             if (request.Levels?.Count > 0)
             {
-                var levelStrings = request.Levels.ConvertAll(l => l.ToString());
-                query = query.Where(log => levelStrings.Contains(log.Level));
+                mustQueries.Add(m => m.Terms(t => t.Field(f => f.Level.Suffix("keyword")).Terms(request.Levels.Select(l => l.ToString()))));
             }
 
-            // 消息/异常关键词过滤
             if (!string.IsNullOrEmpty(request.MessageKeyword))
-                query = query.Where(log => log.Message.Contains(request.MessageKeyword));
+            {
+                mustQueries.Add(m => m.Match(ma => ma.Field(f => f.Message).Query(request.MessageKeyword)));
+            }
+
             if (!string.IsNullOrEmpty(request.ExceptionKeyword))
-                query = query.Where(log => log.Exception != null && log.Exception.Contains(request.ExceptionKeyword));
+            {
+                mustQueries.Add(m => m.Match(ma => ma.Field(f => f.Exception!).Query(request.ExceptionKeyword)));
+            }
 
-            // 时间范围过滤
-            if (request.TimestampStart.HasValue)
-                query = query.Where(log => log.Timestamp >= request.TimestampStart.Value);
-            if (request.TimestampEnd.HasValue)
-                query = query.Where(log => log.Timestamp <= request.TimestampEnd.Value);
+            if (request.TimestampStart.HasValue || request.TimestampEnd.HasValue)
+            {
+                mustQueries.Add(m => m.DateRange(dr =>
+                {
+                    dr.Field(f => f.Timestamp);
+                    if (request.TimestampStart.HasValue) dr.GreaterThanOrEquals(request.TimestampStart.Value);
+                    if (request.TimestampEnd.HasValue) dr.LessThanOrEquals(request.TimestampEnd.Value);
+                    return dr;
+                }));
+            }
 
-            // JSON 属性过滤
             if (request.PropertyFilters?.Count > 0)
             {
                 foreach (var (jsonKey, targetValue) in request.PropertyFilters)
                 {
-                    string jsonPath = $"$.{jsonKey}.Value";
-
-                    if (_isMySql)
-                    {
-                        // ⚡ 用 SQL 原生 JSON_EXTRACT 查询
-                        query = _dbContext.SerilogLogs
-                            .FromSqlRaw(@"
-                                SELECT * FROM SerilogLogs
-                                WHERE JSON_UNQUOTE(JSON_EXTRACT(Properties, {0})) = {1}", 
-                                jsonPath, targetValue);
-                    }
-                    else if (_isSqlServer)
-                    {
-                        query = query.Where(log =>
-                            log.Properties != null &&
-                            SqlServerJsonFunctions.JsonValue(log.Properties, jsonPath) == targetValue
-                        );
-                    }
+                    mustQueries.Add(m => m.Term(t => t.Field($"properties.{jsonKey}.keyword").Value(targetValue)));
                 }
             }
 
-            // 排序 & 分页
-            query = query.OrderByDescending(log => log.Timestamp);
-            var totalCount = await query.CountAsync();
-            var logs = await query
-                .Skip((request.PageIndex - 1) * request.PageSize)
-                .Take(request.PageSize)
-                .ToListAsync();
+            return mustQueries.Any() ? q.Bool(b => b.Must(mustQueries)) : q.MatchAll();
+        };
 
-            return new LogQueryResponse
-            {
-                TotalCount = totalCount,
-                TotalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize),
-                CurrentPage = request.PageIndex,
-                Logs = logs.ConvertAll(LogItemDto.FromEntity)
-            };
-        }
+        var response = await _elastic.SearchAsync<SerilogLogESDto>(s => s
+            .Index("logs")  // ES 索引名
+            .From((request.PageIndex - 1) * request.PageSize)
+            .Size(request.PageSize)
+            .Query(query)
+            .Sort(ss => ss.Descending(f => f.Timestamp))
+        );
+
+        if (!response.IsValid)
+            throw new Exception(response.ServerError?.ToString() ?? "Elasticsearch 查询失败");
+
+        var totalCount = (int)response.Total;
+        var logs = response.Documents.Select(LogItemDto.FromESDto).ToList();
+
+        return new LogQueryResponse
+        {
+            TotalCount = totalCount,
+            TotalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize),
+            CurrentPage = request.PageIndex,
+            Logs = logs
+        };
     }
 
-    /// <summary>
-    /// SQL Server JSON_VALUE 映射
-    /// </summary>
-    public static class SqlServerJsonFunctions
-    {
-        [DbFunction(name: "JSON_VALUE", IsBuiltIn = true)]
-        public static string JsonValue(string expression, string path)
-            => throw new NotSupportedException("仅用于 EF Core 查询翻译，不能在本地调用。");
-    }
+    
 }
