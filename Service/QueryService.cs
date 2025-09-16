@@ -74,23 +74,34 @@ namespace MinioWebBackend.Service
             if (end.HasValue)
                 query = query.Where(f => f.UploadTime <= end.Value);
 
-            // 标签筛选
+            // 标签筛选（按 TagId）
             if (tags != null && tags.Count > 0)
+            {
+                // 把 string 转换成 int
+                var tagIds = tags
+                    .Select(t => int.TryParse(t, out var id) ? id : (int?)null)
+                    .Where(id => id.HasValue)
+                    .Select(id => id!.Value)
+                    .ToList();
+
+            if (tagIds.Count > 0)
             {
                 if (matchAllTags)
                 {
-                    // 文件必须包含所有指定标签
-                    foreach (var tag in tags)
+                    // 文件必须包含所有指定标签 ID
+                    foreach (var tagId in tagIds)
                     {
-                        query = query.Where(f => f.FileTags!.Any(ft => ft.Tag != null && ft.Tag.Name == tag));
+                        query = query.Where(f => f.FileTags!.Any(ft => ft.TagId == tagId));
                     }
                 }
                 else
                 {
-                    // 文件包含任意一个标签
-                    query = query.Where(f => f.FileTags!.Any(ft => ft.Tag != null && tags.Contains(ft.Tag.Name)));
+                    // 文件包含任意一个标签 ID
+                    query = query.Where(f => f.FileTags!.Any(ft => tagIds.Contains(ft.TagId)));
                 }
             }
+        }
+
 
             var totalCount = await query.CountAsync();
 
