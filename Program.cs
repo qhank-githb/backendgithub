@@ -146,6 +146,7 @@ builder.Services.AddScoped<IFileTagService, FileTagService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ILogQueryService, LogQueryService>();
+builder.Services.AddScoped<ElasticSearchService>();
 
 // ==================== 控制器 ====================
 builder.Services.AddControllers();

@@ -1,37 +1,46 @@
-using MinioWebBackend.Models;
+using MinioWebBackend.Dtos.LogDtos;
 using MinioWebBackend.Interfaces;
-using Microsoft.EntityFrameworkCore;
-
+using MinioWebBackend.Models;
+using Nest;
 
 namespace MinioWebBackend.Service
 {
     public class QueryService : IQueryService
     {
-        private readonly AppDbContext _db;
+        private readonly IElasticClient _elastic;
 
-        public QueryService(AppDbContext db)
+        public QueryService(IElasticClient elastic)
         {
-            _db = db;
+            _elastic = elastic;
         }
-
 
         public async Task<string?> GetOriginalFileNameAsync(string storedFileName, string bucketName)
         {
-            return await _db.FileRecords
-                .Where(f => f.StoredFileName == storedFileName && f.BucketName == bucketName)
-                .Select(f => f.OriginalFileName)
-                .FirstOrDefaultAsync();
+            var response = await _elastic.SearchAsync<FileRecordESDto>(s => s
+                .Index("files")
+                .Size(1)
+                .Query(q => q
+                    .Bool(b => b
+                        .Must(
+                            mu => mu.Term(t => t.Field(f => f.StoredFileName).Value(storedFileName)),
+                            mu => mu.Term(t => t.Field(f => f.BucketName).Value(bucketName))
+                        )
+                    )
+                )
+            );
+
+            return response.Documents.FirstOrDefault()?.OriginalFileName;
         }
 
         public async Task<List<FileInfoModel>> GetAllFilesAsync()
         {
-            var files = await _db.FileRecords
-                .Include(f => f.FileTags!)
-                    .ThenInclude(ft => ft.Tag)
-                .OrderByDescending(f => f.UploadTime)
-                .ToListAsync();
+            var response = await _elastic.SearchAsync<FileRecordESDto>(s => s
+                .Index("files")
+                .Size(10000) // 尽量返回全部，注意ES默认限制10000
+                .Sort(ss => ss.Descending(f => f.UploadTime))
+            );
 
-            return files.Select(MapRecordToFileInfo).ToList();
+            return response.Documents.Select(MapEsToFileInfo).ToList();
         }
 
         public async Task<(List<FileInfoModel> Items, int TotalCount)> QueryFilesAsync(
@@ -50,68 +59,66 @@ namespace MinioWebBackend.Service
             pageNumber = Math.Max(1, pageNumber);
             pageSize = Math.Clamp(pageSize, 10, 1000);
 
-            var query = _db.FileRecords
-                .Include(f => f.FileTags!)
-                    .ThenInclude(ft => ft.Tag)
-                .AsQueryable();
-
-            // 基础条件
-            if (id.HasValue)
-                query = query.Where(f => f.Id == id.Value);
-
-            if (!string.IsNullOrWhiteSpace(uploader))
-                query = query.Where(f => f.Uploader.Contains(uploader));
-
-            if (!string.IsNullOrWhiteSpace(fileName))
-                query = query.Where(f => f.OriginalFileName.Contains(fileName));
-
-            if (!string.IsNullOrWhiteSpace(bucket))
-                query = query.Where(f => f.BucketName.Contains(bucket));
-
-            if (start.HasValue)
-                query = query.Where(f => f.UploadTime >= start.Value);
-
-            if (end.HasValue)
-                query = query.Where(f => f.UploadTime <= end.Value);
-
-            // 标签筛选（按 TagId）
-            if (tags != null && tags.Count > 0)
+            Func<QueryContainerDescriptor<FileRecordESDto>, QueryContainer> query = q =>
             {
-                // 把 string 转换成 int
-                var tagIds = tags
-                    .Select(t => int.TryParse(t, out var id) ? id : (int?)null)
-                    .Where(id => id.HasValue)
-                    .Select(id => id!.Value)
-                    .ToList();
+                var mustQueries = new List<Func<QueryContainerDescriptor<FileRecordESDto>, QueryContainer>>();
 
-            if (tagIds.Count > 0)
-            {
-                if (matchAllTags)
+                if (id.HasValue)
+                    mustQueries.Add(m => m.Term(t => t.Field(f => f.Id).Value(id.Value)));
+
+                if (!string.IsNullOrWhiteSpace(uploader))
+                    mustQueries.Add(m => m.Match(ma => ma.Field(f => f.Uploader).Query(uploader!)));
+
+                if (!string.IsNullOrWhiteSpace(fileName))
+                    mustQueries.Add(m => m.Match(ma => ma.Field(f => f.OriginalFileName).Query(fileName!)));
+
+                if (!string.IsNullOrWhiteSpace(bucket))
+                    mustQueries.Add(m => m.Match(ma => ma.Field(f => f.BucketName).Query(bucket!)));
+
+                if (start.HasValue || end.HasValue)
                 {
-                    // 文件必须包含所有指定标签 ID
-                    foreach (var tagId in tagIds)
+                    mustQueries.Add(m => m.DateRange(dr =>
                     {
-                        query = query.Where(f => f.FileTags!.Any(ft => ft.TagId == tagId));
+                        dr.Field(f => f.UploadTime);
+                        if (start.HasValue) dr.GreaterThanOrEquals(start.Value);
+                        if (end.HasValue) dr.LessThanOrEquals(end.Value);
+                        return dr;
+                    }));
+                }
+
+                if (tags != null && tags.Any())
+                {
+                    if (matchAllTags)
+                    {
+                        foreach (var tag in tags)
+                        {
+                            mustQueries.Add(m => m.Term(t => t.Field(f => f.Tags).Value(tag)));
+                        }
+                    }
+                    else
+                    {
+                        mustQueries.Add(m => m.Terms(t => t.Field(f => f.Tags).Terms(tags)));
                     }
                 }
-                else
-                {
-                    // 文件包含任意一个标签 ID
-                    query = query.Where(f => f.FileTags!.Any(ft => tagIds.Contains(ft.TagId)));
-                }
-            }
-        }
 
+                if (!mustQueries.Any())
+                    return q.MatchAll();
 
-            var totalCount = await query.CountAsync();
+                return q.Bool(b => b.Must(mustQueries));
+            };
 
-            var items = await query
-                .OrderByDescending(f => f.UploadTime)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var response = await _elastic.SearchAsync<FileRecordESDto>(s => s
+                .Index("files")
+                .From((pageNumber - 1) * pageSize)
+                .Size(pageSize)
+                .Query(query)
+                .Sort(ss => ss.Descending(f => f.UploadTime))
+            );
 
-            return (items.Select(MapRecordToFileInfo).ToList(), totalCount);
+            if (!response.IsValid)
+                throw new Exception(response.ServerError?.ToString() ?? "Elasticsearch 查询失败");
+
+            return (response.Documents.Select(MapEsToFileInfo).ToList(), (int)response.Total);
         }
 
         public async Task<List<int>> QueryFileIdsAsync(
@@ -123,43 +130,17 @@ namespace MinioWebBackend.Service
             DateTime? end = null
         )
         {
-            var query = _db.FileRecords.AsQueryable();
-
-            if (id.HasValue)
-                query = query.Where(f => f.Id == id.Value);
-
-            if (!string.IsNullOrWhiteSpace(uploader))
-                query = query.Where(f => f.Uploader.Contains(uploader));
-
-            if (!string.IsNullOrWhiteSpace(fileName))
-                query = query.Where(f => f.OriginalFileName.Contains(fileName));
-
-            if (!string.IsNullOrWhiteSpace(bucket))
-                query = query.Where(f => f.BucketName.Contains(bucket));
-
-            if (start.HasValue)
-                query = query.Where(f => f.UploadTime >= start.Value);
-
-            if (end.HasValue)
-                query = query.Where(f => f.UploadTime <= end.Value);
-
-            return await query
-                .OrderByDescending(f => f.UploadTime)
-                .Select(f => f.Id)
-                .ToListAsync();
+            var (items, _) = await QueryFilesAsync(id, uploader, fileName, bucket, start, end, 1, 10000);
+            return items.Select(f => f.Id).ToList();
         }
 
         public async Task<FileInfoModel?> GetFileByIdAsync(int id)
         {
-            var record = await _db.FileRecords
-                .Include(f => f.FileTags!)
-                    .ThenInclude(ft => ft.Tag)
-                .FirstOrDefaultAsync(f => f.Id == id);
-
-            return record != null ? MapRecordToFileInfo(record) : null;
+            var response = await _elastic.GetAsync<FileRecordESDto>(id, idx => idx.Index("files"));
+            return response.Found ? MapEsToFileInfo(response.Source) : null;
         }
 
-        private FileInfoModel MapRecordToFileInfo(FileRecord record)
+        private FileInfoModel MapEsToFileInfo(FileRecordESDto record)
         {
             return new FileInfoModel
             {
@@ -167,17 +148,14 @@ namespace MinioWebBackend.Service
                 StoredFileName = record.StoredFileName,
                 OriginalFileName = record.OriginalFileName,
                 Bucketname = record.BucketName,
-                RelativePath = record.RelativePath,
-                AbsolutePath = record.AbsolutePath,
+                RelativePath   = string.Empty,
+                AbsolutePath  = string.Empty,
                 FileSize = record.FileSize,
                 MimeType = record.MimeType,
                 UploadTime = record.UploadTime,
                 Uploader = record.Uploader,
-                ETag = string.Empty, // FileRecord 里没有 etag 字段，你需要看是否要加
-                Tags = record.FileTags?
-                .Where(ft => ft.Tag != null)
-                .Select(ft => ft.Tag!.Name)  // ! 告诉编译器这里一定不为 null
-                .ToList() ?? new List<string>()
+                ETag = record.ETag ?? string.Empty,
+                Tags = record.Tags ?? new List<string>()
             };
         }
     }
