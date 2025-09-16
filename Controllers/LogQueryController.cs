@@ -14,12 +14,20 @@ namespace MinioWebBackend.Controllers
     /// 日志查询控制器（仅管理员可访问）
     /// </summary>
     /// <remarks>
-    /// 提供日志的高级查询功能：支持通过日志等级、关键词、异常关键字、时间范围等条件进行过滤，
-    /// 并支持分页返回结果。
+    /// 提供基于 Elasticsearch 的日志查询功能：
+    /// - 支持按日志等级(Levels)过滤
+    /// - 支持按消息关键字(MessageKeyword)和异常关键字(ExceptionKeyword)过滤
+    /// - 支持时间范围过滤(TimestampStart / TimestampEnd)
+    /// - 支持自定义 JSON 字段过滤(PropertyFilters)，如 fields.ActionName="Login"
+    /// - 支持分页返回结果(PageIndex / PageSize)
+    /// 
+    /// 注意：
+    /// - 普通用户不可访问，仅限 Admin 角色
+    /// - 返回的日志列表为 <see cref="LogItemDto"/> 对象
     /// </remarks>
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")] // 仅管理员可访问
+    [Authorize(Roles = "Admin")]
     public class LogQueryController : ControllerBase
     {
         private readonly ILogQueryService _logQueryService;
@@ -39,15 +47,26 @@ namespace MinioWebBackend.Controllers
         /// <summary>
         /// 按条件查询日志（支持分页）
         /// </summary>
-        /// <param name="request">日志查询参数对象，包含等级、关键词、时间范围及分页信息</param>
+        /// <param name="request">
+        /// 日志查询参数对象：
+        /// - Levels：日志等级列表（Verbose, Debug, Information, Warning, Error, Fatal）
+        /// - MessageKeyword：日志消息关键字
+        /// - ExceptionKeyword：异常消息关键字
+        /// - TimestampStart / TimestampEnd：查询时间范围
+        /// - PropertyFilters：JSON 属性过滤，如 fields.ActionName="Login"
+        /// - PageIndex / PageSize：分页信息
+        /// </param>
         /// <returns>
-        /// 分页后的日志查询结果。
-        /// 返回 <see cref="LogQueryResponse"/>，包含日志条目集合、总记录数和分页信息。
+        /// 返回 <see cref="LogQueryResponse"/>：
+        /// - Logs：符合条件的日志列表（每条日志为 <see cref="LogItemDto"/>）
+        /// - TotalCount：总匹配条数
+        /// - TotalPages：总页数
+        /// - CurrentPage：当前页码
         /// </returns>
         [HttpGet("query")]
         [SwaggerOperation(
             Summary = "查询日志",
-            Description = "根据等级、关键词、时间范围、分页参数等条件查询日志记录，仅管理员可用"
+            Description = "基于 Elasticsearch 的日志查询，支持等级、关键字、异常关键字、时间范围、JSON 属性字段以及分页查询，仅 Admin 可用"
         )]
         [Produces("application/json")]
         [ProducesResponseType(typeof(LogQueryResponse), StatusCodes.Status200OK)]
