@@ -22,28 +22,25 @@ public class LogQueryService : ILogQueryService
             // 日志级别过滤
             if (request.Levels?.Count > 0)
             {
-                mustQueries.Add(m => m.Terms(t => t
-                    .Field(f => f.Level.Suffix("keyword"))
-                    .Terms(request.Levels.Select(l => l.ToString()))
-                ));
+                mustQueries.Add(m =>
+                    m.Bool(b => b.Should(
+                        request.Levels.Select(l => (Func<QueryContainerDescriptor<SerilogLogESDto>, QueryContainer>)(t =>
+                            t.Match(ma => ma.Field(f => f.Level).Query(l.ToString()))
+                        )).ToArray()
+                    ))
+                );
             }
 
             // 消息关键词
             if (!string.IsNullOrEmpty(request.MessageKeyword))
             {
-                mustQueries.Add(m => m.Match(ma => ma
-                    .Field(f => f.Message)
-                    .Query(request.MessageKeyword)
-                ));
+                mustQueries.Add(m => m.Match(ma => ma.Field(f => f.Message).Query(request.MessageKeyword)));
             }
 
             // 异常关键词
             if (!string.IsNullOrEmpty(request.ExceptionKeyword))
             {
-                mustQueries.Add(m => m.Match(ma => ma
-                    .Field(f => f.Exception!)
-                    .Query(request.ExceptionKeyword)
-                ));
+                mustQueries.Add(m => m.Match(ma => ma.Field(f => f.Exception!).Query(request.ExceptionKeyword)));
             }
 
             // 时间范围
@@ -51,7 +48,7 @@ public class LogQueryService : ILogQueryService
             {
                 mustQueries.Add(m => m.DateRange(dr =>
                 {
-                    dr.Field(f => f.AtTimestamp);
+                    dr.Field("@timestamp");
                     if (request.TimestampStart.HasValue) dr.GreaterThanOrEquals(request.TimestampStart.Value);
                     if (request.TimestampEnd.HasValue) dr.LessThanOrEquals(request.TimestampEnd.Value);
                     return dr;
@@ -63,10 +60,7 @@ public class LogQueryService : ILogQueryService
             {
                 foreach (var (jsonKey, targetValue) in request.PropertyFilters)
                 {
-                    mustQueries.Add(m => m.Term(t => t
-                        .Field($"fields.{jsonKey}.keyword")
-                        .Value(targetValue)
-                    ));
+                    mustQueries.Add(m => m.Match(ma => ma.Field($"fields.{jsonKey}").Query(targetValue)));
                 }
             }
 
@@ -79,7 +73,7 @@ public class LogQueryService : ILogQueryService
             .From((request.PageIndex - 1) * request.PageSize)
             .Size(request.PageSize)
             .Query(query)
-            .Sort(ss => ss.Descending(f => f.AtTimestamp)) // 使用 @timestamp 映射
+            .Sort(ss => ss.Descending("@timestamp")) // 正确排序字段
         );
 
         if (!response.IsValid)
