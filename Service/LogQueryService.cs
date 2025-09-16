@@ -57,7 +57,7 @@ public class LogQueryService : ILogQueryService
         };
 
         var response = await _elastic.SearchAsync<SerilogLogESDto>(s => s
-            .Index("logs")  // ES 索引名
+            .Index("myapp-logs-*")  // ES 索引名
             .From((request.PageIndex - 1) * request.PageSize)
             .Size(request.PageSize)
             .Query(query)
