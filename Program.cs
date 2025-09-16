@@ -85,14 +85,23 @@ builder.Services.AddSingleton<TransferUtility>(sp =>
     new TransferUtility(sp.GetRequiredService<IAmazonS3>()));
 
 // ==================== Elasticsearch ====================
+// ==================== Elasticsearch ====================
 builder.Services.AddSingleton<IElasticClient>(sp =>
 {
-    var settings = new ConnectionSettings(new Uri("http://192.168.150.93:9200"))
-                   .DefaultIndex("files");
+    var uri = new Uri("http://192.168.150.93:9200"); // Elasticsearch IP
+
+    var settings = new ConnectionSettings(uri)
+                   .DefaultIndex("files")
+                   .EnableDebugMode(); // 打开调试，方便排查错误
+
+    // 如果 Elasticsearch 需要用户名密码，请取消注释：
+    // settings = settings.BasicAuthentication("elastic", "你的密码");
+
     return new ElasticClient(settings);
 });
 
 builder.Services.AddScoped<ElasticSyncService>();
+
 
 
 // ==================== Serilog ====================
@@ -185,6 +194,7 @@ using (var scope = app.Services.CreateScope())
 {
     var serviceProvider = scope.ServiceProvider;
 
+    // 数据库初始化
     try
     {
         var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
@@ -198,6 +208,8 @@ using (var scope = app.Services.CreateScope())
         var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "应用启动时初始化管理员账号失败");
     }
+
+    // Elasticsearch 同步
     var elasticService = scope.ServiceProvider.GetRequiredService<ElasticSyncService>();
     try
     {
@@ -209,6 +221,7 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine($"同步失败: {ex.Message}");
     }
 }
+
 
 // ==================== 中间件 ====================
 app.UseSwagger();

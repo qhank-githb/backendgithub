@@ -1,6 +1,7 @@
-using Microsoft.EntityFrameworkCore;
-using Nest;
 using MinioWebBackend.Models;
+using Nest;
+using Microsoft.EntityFrameworkCore;
+using MinioWebBackend.Dtos.LogDtos;
 
 namespace MinioWebBackend.Service
 {
@@ -17,31 +18,43 @@ namespace MinioWebBackend.Service
 
         public async Task SyncAllFilesAsync()
         {
-            // 1. 从数据库读取所有文件（包含标签）
             var files = await _db.FileRecords
-                .Include(f => f.FileTags!)  // null-forgiving
+                .Include(f => f.FileTags!)
                     .ThenInclude(ft => ft.Tag)
                 .ToListAsync();
 
-            if (files.Count == 0)
-            {
-                Console.WriteLine("没有需要同步的文件记录。");
-                return;
-            }
+            var dtos = files.Select(MapToESDto).ToList();
 
-            // 2. 映射 DTO
-            var dtos = files.Select(f => ElasticMapper.MapToESDto(f)).ToList();
-
-            // 3. 批量写入 Elasticsearch
             var response = await _elastic.IndexManyAsync(dtos, "files");
 
             if (!response.IsValid)
             {
-                Console.WriteLine($"同步失败: {response.ServerError?.Error.Reason}");
-                throw new Exception($"同步到 Elasticsearch 失败: {response.ServerError?.Error.Reason}");
+                var serverErr = response.ServerError?.Error?.Reason ?? "未知错误";
+                var debugInfo = response.DebugInformation;
+                Console.WriteLine("Elasticsearch 同步失败！");
+                Console.WriteLine($"ServerError: {serverErr}");
+                Console.WriteLine($"DebugInfo: {debugInfo}");
+                throw new Exception($"同步到 Elasticsearch 失败: {serverErr}");
             }
 
             Console.WriteLine($"成功同步 {dtos.Count} 条文件记录到 Elasticsearch");
+        }
+
+        private FileRecordESDto MapToESDto(FileRecord file)
+        {
+            return new FileRecordESDto
+            {
+                Id = file.Id,
+                OriginalFileName = file.OriginalFileName,
+                StoredFileName = file.StoredFileName,
+                BucketName = file.BucketName,
+                Uploader = file.Uploader,
+                UploadTime = file.UploadTime,
+                FileSize = file.FileSize,
+                MimeType = file.MimeType,
+                ETag = file.ETag,
+                Tags = file.FileTags?.Select(ft => ft.Tag?.Name ?? "").ToList() ?? new List<string>()
+            };
         }
     }
 }
