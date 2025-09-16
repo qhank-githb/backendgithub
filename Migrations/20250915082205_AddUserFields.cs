@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MinioWebApi.Migrations
 {
     /// <inheritdoc />
-    public partial class AddUserTable : Migration
+    public partial class AddUserFields : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -54,59 +54,59 @@ namespace MinioWebApi.Migrations
                 name: "tags",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    name = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_tags", x => x.Id);
+                    table.PrimaryKey("PK_tags", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "users",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Username = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LastLogin = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    username = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    password_hash = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    role = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    last_login = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_users", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "file_tags",
                 columns: table => new
                 {
-                    FileId = table.Column<int>(type: "int", nullable: false),
-                    TagId = table.Column<int>(type: "int", nullable: false)
+                    file_id = table.Column<int>(type: "int", nullable: false),
+                    tag_id = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_file_tags", x => new { x.FileId, x.TagId });
+                    table.PrimaryKey("PK_file_tags", x => new { x.file_id, x.tag_id });
                     table.ForeignKey(
-                        name: "FK_file_tags_file_info_FileId",
-                        column: x => x.FileId,
+                        name: "FK_file_tags_file_info_file_id",
+                        column: x => x.file_id,
                         principalTable: "file_info",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_file_tags_tags_TagId",
-                        column: x => x.TagId,
+                        name: "FK_file_tags_tags_tag_id",
+                        column: x => x.tag_id,
                         principalTable: "tags",
-                        principalColumn: "Id",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_file_tags_TagId",
+                name: "IX_file_tags_tag_id",
                 table: "file_tags",
-                column: "TagId");
+                column: "tag_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SerilogLogs_Timestamp",
@@ -114,15 +114,15 @@ namespace MinioWebApi.Migrations
                 column: "Timestamp");
 
             migrationBuilder.CreateIndex(
-                name: "IX_tags_Name",
+                name: "IX_tags_name",
                 table: "tags",
-                column: "Name",
+                column: "name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_Username",
-                table: "Users",
-                column: "Username",
+                name: "IX_users_username",
+                table: "users",
+                column: "username",
                 unique: true);
         }
 
@@ -136,7 +136,7 @@ namespace MinioWebApi.Migrations
                 name: "SerilogLogs");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "users");
 
             migrationBuilder.DropTable(
                 name: "file_info");

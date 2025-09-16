@@ -15,3 +15,114 @@
 2025-09-15 10:33:23.043 +08:00 [INF] 用户登录成功：admin
 2025-09-15 10:34:43.244 +08:00 [INF] 用户退出：admin
 2025-09-15 10:34:45.582 +08:00 [INF] 用户登录成功：admin
+2025-09-15 16:14:27.229 +08:00 [ERR] Failed executing DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[id], [u].[last_login], [u].[password_hash], [u].[role], [u].[username]
+FROM [users] AS [u]
+WHERE [u].[username] = N'admin' OR [u].[role] = N'Admin'
+2025-09-15 16:14:27.417 +08:00 [ERR] An exception occurred while iterating over the results of a query for context type 'AppDbContext'.
+Microsoft.Data.SqlClient.SqlException (0x80131904): 列名 'last_login' 无效。
+列名 'password_hash' 无效。
+   at Microsoft.Data.SqlClient.SqlCommand.<>c.<ExecuteDbDataReaderAsync>b__195_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:1a0ebd3d-94c4-40d4-85d1-c0f10656e985
+Error Number:207,State:1,Class:16
+Microsoft.Data.SqlClient.SqlException (0x80131904): 列名 'last_login' 无效。
+列名 'password_hash' 无效。
+   at Microsoft.Data.SqlClient.SqlCommand.<>c.<ExecuteDbDataReaderAsync>b__195_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:1a0ebd3d-94c4-40d4-85d1-c0f10656e985
+Error Number:207,State:1,Class:16
+2025-09-15 16:14:27.430 +08:00 [ERR] 应用启动时初始化管理员账号失败
+Microsoft.Data.SqlClient.SqlException (0x80131904): 列名 'last_login' 无效。
+列名 'password_hash' 无效。
+   at Microsoft.Data.SqlClient.SqlCommand.<>c.<ExecuteDbDataReaderAsync>b__195_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.Query.ShapedQueryCompilingExpressionVisitor.SingleOrDefaultAsync[TSource](IAsyncEnumerable`1 asyncEnumerable, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.ShapedQueryCompilingExpressionVisitor.SingleOrDefaultAsync[TSource](IAsyncEnumerable`1 asyncEnumerable, CancellationToken cancellationToken)
+   at MinioWebBackend.Service.AuthService.InitializeAdminAccountAsync() in D:\bolo_backend\minio-web-backend\Service\AuthService.cs:line 110
+   at Program.<Main>$(String[] args) in D:\bolo_backend\minio-web-backend\Program.cs:line 225
+ClientConnectionId:1a0ebd3d-94c4-40d4-85d1-c0f10656e985
+Error Number:207,State:1,Class:16
+2025-09-15 16:22:20.743 +08:00 [ERR] Failed executing DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [file_info] (
+    [id] int NOT NULL IDENTITY,
+    [stored_file_name] nvarchar(max) NOT NULL,
+    [original_file_name] nvarchar(max) NOT NULL,
+    [bucketname] nvarchar(max) NOT NULL,
+    [relative_path] nvarchar(max) NOT NULL,
+    [absolute_path] nvarchar(max) NOT NULL,
+    [file_size] bigint NOT NULL,
+    [mime_type] nvarchar(max) NOT NULL,
+    [upload_time] datetime2 NOT NULL,
+    [uploader] nvarchar(max) NOT NULL,
+    [etag] nvarchar(max) NOT NULL,
+    CONSTRAINT [PK_file_info] PRIMARY KEY ([id])
+);
+2025-09-15 17:26:08.573 +08:00 [INF] 用户登录成功：admin
+2025-09-15 17:26:30.970 +08:00 [INF] 用户退出：admin
+2025-09-15 17:26:31.818 +08:00 [INF] 用户登录成功：admin
+2025-09-15 17:26:53.442 +08:00 [INF] 用户退出：admin
+2025-09-15 17:26:54.312 +08:00 [INF] 用户登录成功：admin
+2025-09-15 17:29:08.563 +08:00 [INF] 用户退出：admin
+2025-09-15 17:29:11.252 +08:00 [INF] 用户登录成功：admin
+2025-09-15 17:29:49.526 +08:00 [INF] 用户退出：admin
+2025-09-15 17:29:50.177 +08:00 [INF] 用户登录成功：admin
+2025-09-15 17:39:55.880 +08:00 [INF] 用户退出：admin
+2025-09-15 17:39:57.635 +08:00 [INF] 用户登录成功：admin
+2025-09-15 17:40:17.191 +08:00 [INF] 用户退出：admin
+2025-09-15 17:40:19.225 +08:00 [INF] 用户登录成功：admin
+2025-09-15 17:40:33.396 +08:00 [INF] 用户退出：admin
+2025-09-15 17:40:34.297 +08:00 [INF] 用户登录成功：admin
+2025-09-15 17:47:42.241 +08:00 [INF] 用户退出：admin
+2025-09-15 17:47:43.101 +08:00 [INF] 用户登录成功：admin
+2025-09-15 17:48:56.673 +08:00 [INF] 用户退出：admin
+2025-09-15 17:48:57.729 +08:00 [INF] 用户登录成功：admin
+2025-09-15 17:49:47.194 +08:00 [INF] 用户退出：admin
+2025-09-15 17:49:47.781 +08:00 [INF] 用户登录成功：admin
+2025-09-15 17:49:55.875 +08:00 [INF] 用户注册成功：admin11
+2025-09-15 17:50:03.964 +08:00 [INF] 用户 admin 尝试创建标签 1
+2025-09-15 17:50:03.985 +08:00 [INF] 用户 admin 成功创建标签 1
+2025-09-15 17:50:10.747 +08:00 [INF] 用户 admin 于 "2025-09-15T17:50:10.6489212+08:00" 成功上传文件 TODO.txt, 存储名 admin_20250915175010541_520dff1b76134536ae80e67b7f5e3843, 标签：1 , 大小 105 字节
+2025-09-15 18:34:19.519 +08:00 [INF] 用户退出：admin
+2025-09-15 18:34:20.396 +08:00 [INF] 用户登录成功：admin
+2025-09-15 18:34:29.620 +08:00 [INF] 用户 admin 尝试创建标签 2
+2025-09-15 18:34:29.647 +08:00 [INF] 用户 admin 成功创建标签 2
+2025-09-15 18:34:38.948 +08:00 [INF] 用户 admin 于 "2025-09-15T18:34:38.8823604+08:00" 成功上传文件 IMG_0432.jpg, 存储名 admin_20250915183437906_79f8e79ab5954e95a2bde5356d78c441, 标签：2 , 大小 9195194 字节
+2025-09-15 18:34:47.924 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: IMG_0432.jpg, 存储名: admin_20250915183437906_79f8e79ab5954e95a2bde5356d78c441, 大小: 9195194 字节
+2025-09-15 18:34:48.948 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: TODO.txt, 存储名: admin_20250915175010541_520dff1b76134536ae80e67b7f5e3843, 大小: 105 字节
+2025-09-15 18:35:04.687 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: IMG_0432.jpg, 存储名: admin_20250915183437906_79f8e79ab5954e95a2bde5356d78c441, 大小: 9195194 字节
+2025-09-15 18:35:05.714 +08:00 [INF] 用户 admin 下载文件 成功。桶: my-bucket, 原始名: TODO.txt, 存储名: admin_20250915175010541_520dff1b76134536ae80e67b7f5e3843, 大小: 105 字节
+2025-09-15 18:41:01.876 +08:00 [INF] 用户退出：admin
+2025-09-15 18:41:03.041 +08:00 [INF] 用户登录成功：admin
+2025-09-15 18:57:47.311 +08:00 [INF] 用户 admin 于 "2025-09-15T18:57:47.1643764+08:00" 成功上传文件 1.pptx, 存储名 admin_20250915185746791_0b3be68b1dda4662a06eb4d52004b521, 标签：1 , 大小 1842987 字节
+2025-09-15 19:14:37.968 +08:00 [INF] 用户 admin 于 "2025-09-15T19:14:37.6917998+08:00" 成功上传文件 测试docx.docx, 存储名 admin_20250915191437425_e225e6662e5b44f4a4e0593756b87814, 标签：1 , 大小 13555 字节

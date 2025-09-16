@@ -4,88 +4,451 @@
         <name>MinioWebApi</name>
     </assembly>
     <members>
+        <member name="T:AuthController">
+            <summary>
+            认证控制器，处理用户注册、登录、登出等身份认证相关操作
+            </summary>
+            <remarks>
+            提供用户身份管理的核心接口，包括：
+            - 管理员创建新用户（注册）
+            - 用户登录并获取JWT令牌
+            - 已登录用户登出
+            依赖 <see cref="T:MinioWebBackend.Interfaces.IAuthService"/> 处理具体业务逻辑，使用Serilog记录操作日志
+            </remarks>
+        </member>
+        <member name="F:AuthController._AuthService">
+            <summary>
+            认证服务接口，用于处理用户注册、登录、令牌生成等业务逻辑
+            </summary>
+        </member>
+        <member name="M:AuthController.#ctor(MinioWebBackend.Interfaces.IAuthService)">
+            <summary>
+            构造函数，注入认证服务依赖
+            </summary>
+            <param name="AuthService">认证服务实现类实例</param>
+        </member>
         <member name="M:AuthController.Register(RegisterRequest)">
             <summary>
-            用户注册
+            用户注册接口（仅管理员可访问）
             </summary>
+            <remarks>
+            功能：由管理员创建新用户，支持指定用户角色（默认普通用户）<br/>
+            权限：需携带管理员（Admin）角色的JWT令牌<br/>
+            业务限制：
+            - 用户名不可重复
+            - 普通用户（User）不能使用"admin"作为用户名
+            - 若未指定角色，默认创建普通用户（User）
+            </remarks>
+            <param name="request">注册请求参数，包含用户名、密码和可选角色</param>
+            <returns>
+            成功：200 OK，返回新用户的ID、用户名和角色<br/>
+            失败：400 Bad Request，返回错误消息（如用户名已存在）
+            </returns>
         </member>
         <member name="M:AuthController.Login(LoginRequest)">
             <summary>
-            用户登录
+            用户登录接口（允许匿名访问）
             </summary>
+            <remarks>
+            功能：验证用户凭据并生成JWT令牌<br/>
+            流程：
+            1. 验证用户名和密码是否匹配
+            2. 验证通过后更新用户最后登录时间
+            3. 生成有效期为2小时的JWT令牌
+            4. 返回令牌及用户基本信息
+            </remarks>
+            <param name="request">登录请求参数，包含用户名和密码</param>
+            <returns>
+            成功：200 OK，返回JWT令牌、用户名、角色和最后登录时间
+            失败：401 Unauthorized，返回"用户名或密码错误"
+            </returns>
         </member>
         <member name="M:AuthController.Logout">
             <summary>
-            用户登出
+            用户登出接口（需已认证）
             </summary>
+            <remarks>
+            功能：处理用户登出逻辑（前端需自行清除本地JWT令牌）<br/>
+            说明：JWT令牌为无状态，后端无法主动失效，此接口仅记录登出日志
+            </remarks>
+            <returns>
+            成功：200 OK，返回"退出成功"消息<br/>
+            （注：若令牌无效，会被认证中间件拦截为401）
+            </returns>
+        </member>
+        <member name="T:LoginRequest">
+            <summary>
+            登录请求DTO（数据传输对象），封装用户登录时的输入参数
+            </summary>
+        </member>
+        <member name="P:LoginRequest.Username">
+            <summary>
+            登录用户名（必须与注册时的用户名一致）
+            </summary>
+            <example>testuser</example>
+        </member>
+        <member name="P:LoginRequest.Password">
+            <summary>
+            登录密码（明文，后端会与数据库中的加密密码比对）
+            </summary>
+            <example>Test@123456</example>
+        </member>
+        <member name="T:RegisterRequest">
+            <summary>
+            注册请求DTO（数据传输对象），封装用户注册时的输入参数
+            </summary>
+        </member>
+        <member name="P:RegisterRequest.Username">
+            <summary>
+            注册用户名（必须唯一，不允许为"admin"（普通用户角色时））
+            </summary>
+            <example>newuser</example>
+        </member>
+        <member name="P:RegisterRequest.Password">
+            <summary>
+            注册密码（明文，后端会进行加密存储）
+            </summary>
+            <example>New@123456</example>
+        </member>
+        <member name="P:RegisterRequest.Role">
+            <summary>
+            用户角色（可选，默认为"User"）
+            </summary>
+            <remarks>
+            允许值："Admin"（管理员）、"User"（普通用户）<br/>
+            仅管理员可指定"Admin"角色
+            </remarks>
+            <example>User</example>
+        </member>
+        <member name="T:RegisterResponse">
+            <summary>
+            用户注册返回对象
+            </summary>
+        </member>
+        <member name="P:RegisterResponse.Id">
+            <summary>用户ID</summary>
+        </member>
+        <member name="P:RegisterResponse.Username">
+            <summary>用户名</summary>
+        </member>
+        <member name="P:RegisterResponse.Role">
+            <summary>角色</summary>
+        </member>
+        <member name="T:LoginResponse">
+            <summary>
+            登录返回数据
+            </summary>
+        </member>
+        <member name="P:LoginResponse.Token">
+            <summary>JWT 访问令牌</summary>
+            <example>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</example>
+        </member>
+        <member name="P:LoginResponse.Username">
+            <summary>用户名</summary>
+            <example>testuser</example>
+        </member>
+        <member name="P:LoginResponse.Role">
+            <summary>用户角色</summary>
+            <example>User</example>
+        </member>
+        <member name="P:LoginResponse.LastLogin">
+            <summary>最后登录时间（UTC）</summary>
+            <example>2025-09-15T15:30:00Z</example>
+        </member>
+        <member name="T:MinioWebBackend.Controllers.BucketsController">
+            <summary>
+            存储桶控制器，提供与对象存储桶相关的API接口
+            </summary>
+            <remarks>
+            负责处理存储桶的查询操作，当前包含获取所有桶名的功能
+            依赖于<see cref="T:MinioWebBackend.Interfaces.IBucketService"/>接口处理底层业务逻辑
+            路由规则：api/buckets（控制器名复数形式）
+            </remarks>
+        </member>
+        <member name="F:MinioWebBackend.Controllers.BucketsController._bucketService">
+            <summary>
+            存储桶服务接口，用于处理存储桶的业务逻辑
+            </summary>
+            <remarks>
+            包含存储桶的查询、创建、删除等核心操作的实现
+            通过依赖注入获取具体实现
+            </remarks>
+        </member>
+        <member name="M:MinioWebBackend.Controllers.BucketsController.#ctor(MinioWebBackend.Interfaces.IBucketService)">
+            <summary>
+            构造函数，注入存储桶服务依赖
+            </summary>
+            <param name="bucketService">存储桶服务的具体实现实例</param>
         </member>
         <member name="M:MinioWebBackend.Controllers.BucketsController.GetBuckets">
             <summary>
-            获取所有桶名
+            获取系统中所有存储桶的名称列表
             </summary>
+            <remarks>
+            功能：查询并返回所有存储桶的名称集合<br/>
+            权限：默认允许所有已认证用户访问（可根据实际需求添加[Authorize]特性）<br/>
+            数据来源：通过IBucketService从底层存储系统获取
+            </remarks>
+            <returns>
+            成功：200 OK，返回字符串列表，包含所有桶名<br/>
+            异常：500 Internal Server Error，返回错误信息（由全局异常过滤器处理）
+            </returns>
+            <response code="200">成功,返回桶名列表</response>
+            <response code="500">服务器处理错误</response>
+        </member>
+        <member name="T:MinioWebBackend.Controllers.DownloadByIDController">
+            <summary>
+            文件下载与预览接口控制器（需登录后使用）
+            </summary>
+            <remarks>
+            提供以下功能：
+            - 根据文件 ID 下载文件（Content-Disposition = attachment）
+            - 根据文件 ID 在线预览文件（Content-Disposition = inline）
+            </remarks>
+        </member>
+        <member name="M:MinioWebBackend.Controllers.DownloadByIDController.#ctor(MinioWebBackend.Interfaces.IDownloadByIDService,Amazon.S3.IAmazonS3,Microsoft.AspNetCore.Http.IHttpContextAccessor,MinioWebBackend.Interfaces.IQueryService)">
+            <summary>
+            构造函数，注入依赖服务
+            </summary>
+            <param name="downloadByIdService">文件下载服务</param>
+            <param name="s3Client">S3/MinIO 客户端</param>
+            <param name="httpContextAccessor">HttpContext 访问器</param>
+            <param name="iQueryService">文件信息查询服务</param>
         </member>
         <member name="M:MinioWebBackend.Controllers.DownloadByIDController.DownloadById(System.Int32)">
-            <summary>
-            根据文件 ID 下载文件
-            </summary>
-            <param name="id">文件的唯一 ID</param>
-            <returns>返回文件流，下载成功；找不到文件返回 404</returns>
+             <summary>
+             根据文件 ID 下载文件（作为附件）
+             </summary>
+             <param name="id">文件的唯一 ID（数据库主键）</param>
+             <remarks>
+             **接口说明：**
+             - 根据文件 ID 从 S3/MinIO 下载文件  
+             - 文件以附件形式返回，浏览器会触发下载
+            
+             **请求示例：**
+             GET /api/files/download-by-id?id=123
+            
+             **成功响应（200 OK）：**
+             - 返回类型：<see cref="T:Microsoft.AspNetCore.Mvc.FileStreamResult"/>
+             - 响应体：文件二进制流，来源于 S3/MinIO 的对象流复制到 <see cref="T:System.IO.MemoryStream"/>
+             - 响应头：
+            Content-Type: 文件 MIME 类型（如 application/pdf、image/png 等）  
+            Content-Disposition: attachment; filename="原始文件名"  
+            
+             **失败响应：**
+             - 404 Not Found：未找到对应文件，返回 <see cref="T:Microsoft.AspNetCore.Mvc.NotFoundObjectResult"/>，响应体包含错误信息  
+             - 500 Internal Server Error：下载失败或服务异常
+            
+             **返回示例（404）：**
+             ```json
+             {
+                 "message": "文件不存在或下载失败"
+             }
+             ```
+             </remarks>
         </member>
         <member name="M:MinioWebBackend.Controllers.DownloadByIDController.PreviewById(System.Int32)">
+             <summary>
+             根据文件 ID 预览文件（内联显示）
+             </summary>
+             <param name="id">文件的唯一 ID（数据库主键）</param>
+             <returns>
+             成功返回文件流 (<see cref="T:System.IO.Stream"/>)，前端可直接在浏览器中内联显示文件（如 PDF、图片、TXT）。
+             失败返回 404，响应体包含错误信息，例如 `{ "message": "文件不存在" }`。
+             </returns>
+             <remarks>
+             **接口行为：**
+             - 设置 `Content-Disposition: inline`，浏览器直接显示文件内容而非下载
+             - 设置文件 MIME 类型 (`Content-Type`)，浏览器根据类型渲染
+             - 支持 PDF、图片、TXT 等常见文件类型
+            
+             **前端调用示例（Axios）：**
+             ```js
+             const res = await axios.get('/api/file/preview-by-id?id=123', { responseType: 'blob' });
+             const blob = new Blob([res.data], { type: res.data.type || 'application/octet-stream' });
+             const url = URL.createObjectURL(blob);
+             window.open(url); // 直接在浏览器打开预览
+             ```
+            
+             **注意事项：**
+             - 与 DownloadById 接口不同，DownloadById 会强制下载文件（`Content-Disposition: attachment`）
+             - PreviewById 仅用于内联预览
+             </remarks>
+        </member>
+        <member name="M:MinioWebBackend.Controllers.DownloadByIDController.PreviewFileByIdAsync(System.Int32)">
             <summary>
-            根据文件 ID 预览文件
+            根据文件 ID 从 S3 获取文件流（预览用）
             </summary>
-            <param name="id">文件的唯一 ID</param>
-            <returns>返回文件流，Content-Disposition 为 inline，可直接在浏览器预览；找不到文件返回 404</returns>
+            <param name="id">文件 ID</param>
+            <returns>
+            返回一个元组：
+            - Response：S3 原始响应（包含文件流）  
+            - Error：错误信息（如果失败）  
+            - FileInfo：数据库中的文件元数据
+            </returns>
+        </member>
+        <member name="P:MinioWebBackend.Controllers.DownloadFileResponse.FileName">
+            <summary>文件名称</summary>
+        </member>
+        <member name="P:MinioWebBackend.Controllers.DownloadFileResponse.MimeType">
+            <summary>MIME 类型</summary>
+        </member>
+        <member name="P:MinioWebBackend.Controllers.DownloadFileResponse.Size">
+            <summary>文件大小（字节）</summary>
+        </member>
+        <member name="P:MinioWebBackend.Controllers.DownloadFileResponse.Base64Content">
+            <summary>文件内容 Base64 编码字符串</summary>
+        </member>
+        <member name="T:MinioWebBackend.Controllers.FileDownloadController">
+            <summary>
+            文件批量下载控制器（需登录访问）
+            </summary>
+            <remarks>
+            提供文件批量下载功能：  
+            - 接收多个文件 ID  
+            - 将对应文件打包成 ZIP 压缩包  
+            - 返回给调用方  
+            </remarks>
+        </member>
+        <member name="M:MinioWebBackend.Controllers.FileDownloadController.#ctor(MinioWebBackend.Interfaces.IDownloadService)">
+            <summary>
+            构造函数，注入文件下载服务
+            </summary>
+            <param name="idownloadService">文件下载服务接口</param>
         </member>
         <member name="M:MinioWebBackend.Controllers.FileDownloadController.BatchDownloadByIds(System.Collections.Generic.List{System.Int32})">
             <summary>
-            批量下载文件，返回 ZIP 压缩包
+            批量下载文件（返回 ZIP 压缩包）
             </summary>
-            <param name="ids">文件 ID 列表</param>
+            /// <param name="ids">文件 ID 列表（数据库主键 ID），示例：["2","1"]</param>
+            <returns>
+            - 成功：返回一个 ZIP 文件流（包含所有文件）  
+            - 失败：返回 400，包含错误信息  
+            </returns>
+            <response code="200">下载成功，返回 zip 文件</response>
+            <response code="400">下载失败，可能是文件不存在或打包失败</response>
+        </member>
+        <member name="T:MinioWebBackend.Controllers.FileQueryController">
+            <summary>
+            文件查询控制器（需登录访问）
+            </summary>
+            <remarks>
+            提供以下功能：
+            - 获取所有文件信息  
+            - 根据文件 ID 获取单个文件信息  
+            - 按条件查询文件（分页、时间范围、标签等）  
+            - 查询符合条件的文件 ID 列表（便于批量下载）  
+            </remarks>
+        </member>
+        <member name="M:MinioWebBackend.Controllers.FileQueryController.#ctor(MinioWebBackend.Interfaces.IQueryService)">
+            <summary>
+            构造函数，注入文件查询服务
+            </summary>
+            <param name="iQueryService">文件查询服务接口</param>
         </member>
         <member name="M:MinioWebBackend.Controllers.FileQueryController.GetAllFiles">
             <summary>
             获取所有文件信息
             </summary>
+            <returns>
+            - 成功：返回文件信息列表  
+            - 失败：返回 500（内部错误）  
+            </returns>
+            <response code="200">成功返回文件信息列表</response>
         </member>
         <member name="M:MinioWebBackend.Controllers.FileQueryController.GetFileById(System.Int32)">
             <summary>
-            根据文件 ID 获取文件信息
+            根据文件 ID 获取单个文件信息
             </summary>
-            <param name="id">文件 ID</param>
+            <param name="id">文件 ID（数据库主键）</param>
+            <returns>
+            - 成功：返回文件信息  
+            - 失败：返回 404（未找到）  
+            </returns>
+            <response code="200">成功返回文件信息</response>
+            <response code="404">未找到文件</response>
         </member>
         <member name="M:MinioWebBackend.Controllers.FileQueryController.QueryFiles(System.Nullable{System.Int32},System.String,System.String,System.String,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Int32,System.Int32,System.Collections.Generic.List{System.String},System.Boolean)">
             <summary>
-            查询文件（支持分页、时间范围、标签筛选）
+            条件查询文件（支持分页、时间范围、标签筛选）
             </summary>
             <param name="id">文件 ID</param>
             <param name="uploader">上传者</param>
-            <param name="fileName">文件名</param>
-            <param name="bucket">桶名</param>
-            <param name="start">开始时间</param>
-            <param name="end">结束时间</param>
-            <param name="pageNumber">分页页码</param>
-            <param name="pageSize">每页数量</param>
-            <param name="tags">标签列表</param>
-            <param name="matchAllTags">是否全部匹配标签</param> 
+            <param name="fileName">文件名（支持模糊查询）</param>
+            <param name="bucket">存储桶名称</param>
+            <param name="start">上传时间起始</param>
+            <param name="end">上传时间结束</param>
+            <param name="pageNumber">页码（默认 1）</param>
+            <param name="pageSize">每页大小（默认 10）</param>
+            <param name="tags">标签列表（多选）</param>
+            <param name="matchAllTags">标签匹配模式：true=全部匹配，false=任意匹配</param>
+            <returns>分页结果，包含文件列表和总数</returns>
+            <response code="200">查询成功</response>
         </member>
         <member name="M:MinioWebBackend.Controllers.FileQueryController.QueryFileIds(System.Nullable{System.Int32},System.String,System.String,System.String,System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
             <summary>
-            查询符合条件的文件 ID 列表
+            查询符合条件的文件 ID 列表（用于批量下载）
             </summary>
             <param name="id">文件 ID</param>
             <param name="uploader">上传者</param>
-            <param name="fileName">文件名</param>
-            <param name="bucket">桶名</param>
-            <param name="start">开始时间</param>
-            <param name="end">结束时间</param>
+            <param name="fileName">文件名（支持模糊查询）</param>
+            <param name="bucket">存储桶名称</param>
+            <param name="start">上传时间起始</param>
+            <param name="end">上传时间结束</param>
+            <returns>
+            - 成功：返回符合条件的文件 ID 列表 和 符合条件的文件总数
+            - 失败：返回 500（内部错误）  
+            </returns>
+            <response code="200">成功返回文件 ID 列表和符合条件的文件总数 如: {"items":[2,1],"total":2} </response>
         </member>
         <member name="M:MinioWebBackend.Controllers.FileUploadController.UploadFile(System.String,MinioWebBackend.Models.FileUploadDto)">
-            <summary>
-            上传文件
-            POST /api/{bucketName}/fileupload/upload
-            </summary>
+             <summary>
+             上传文件到指定 Bucket
+             </summary>
+             <remarks>
+             ```
+             /// 请求示例（multipart/form-data）：
+            — URL 参数：
+             - bucketName: 指定上传的存储桶名称
+            
+             Form 表单参数:
+             ```text
+             file: 要上传的文件 (IFormFile)
+             username: 上传者用户名 (string)
+             description: 文件描述信息，可选 (string)
+             tags: 文件标签列表，可选，多值可用逗号分隔 (string)
+             ```
+            
+             示例请求：
+            — POST /api/files/upload/my-bucket
+            — Content-Type: multipart/form-data
+            
+             FormData:
+            Form 表单参数:
+             | 字段名   | 类型       | 必填 | 描述                                        | 示例                     |
+             |----------|-----------|------|-------------------------------------------|-------------------------|
+             | file     | IFormFile | 是   | 要上传的文件                                | example.pdf             |
+             | username | string    | 是   | 上传者用户名                                | testUser                |
+             | tags     | string    | 否   | 文件标签（JSON 数组字符串），例如：["合同","PDF"] | ["合同","PDF"]           |
+             ```
+             </remarks>
+             <param name="bucketName">桶名称</param>
+             <param name="dto">上传参数（文件 + 用户名 + 标签）</param>
+             <returns>返回上传结果，包括文件元信息和存储名</returns>
+             <response code="200">上传成功，返回文件信息
+             响应示例：
+             ```json
+            {"bucket":"my-bucket",
+             "originalFileName":"测试docx.docx",
+             "storedFileName":"admin_20250915191437425_e225e6662e5b44f4a4e0593756b87814",
+             "size":13555,
+             "eTag":"\"3327a5262d1956c3d969057a87574be5-1\"",
+             "tags":["1"],
+             "uploadtime":"2025-09-15T19:14:38.0656739+08:00"}
+             ```
+             </response>
+             <response code="400">请求错误（如缺少文件、用户名或 tags 格式错误）</response>
+             <response code="500">服务器错误（如 MinIO 上传失败）</response>
         </member>
         <member name="T:MinioWebBackend.Controllers.LogQueryController">
             <summary>
@@ -105,21 +468,6 @@
             <summary>
             按条件查询日志（支持分页）
             </summary>
-            <remarks>
-            示例请求：
-            
-            ```
-            GET /api/LogQuery/query?Levels=4&amp;MessageKeyword=数据库&amp;Page=1&amp;PageSize=50
-            ```
-            
-            - **Levels**: 日志等级集合 (如 `4 = Warning`, `5 = Error`)
-            - **MessageKeyword**: 日志消息关键词
-            - **ExceptionKeyword**: 异常关键词
-            - **TimestampStart**: 起始时间 (UTC)
-            - **TimestampEnd**: 结束时间 (UTC)
-            - **Page**: 页码，从 1 开始
-            - **PageSize**: 每页大小
-            </remarks>
             <param name="request">日志查询参数对象，包含等级、关键词、时间范围及分页信息</param>
             <returns>
             分页后的日志查询结果。
@@ -128,23 +476,45 @@
         </member>
         <member name="T:MinioWebBackend.Dtos.LogDtos.LogItemDto">
             <summary>
-            单条日志DTO
+            单条日志的DTO（数据传输对象），用于展示日志的详细信息
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogItemDto.Id">
+            <summary>
+            日志记录的唯一标识（自增ID）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogItemDto.Level">
+            <summary>
+            日志级别（如 Verbose、Debug、Information、Warning、Error、Fatal 等）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogItemDto.Message">
+            <summary>
+            日志的具体消息内容
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogItemDto.Exception">
+            <summary>
+            异常信息（如果存在），否则为 null
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogItemDto.Properties">
+            <summary>
+            日志的结构化属性（键值对集合），包含额外的上下文信息
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.LogItemDto.Timestamp">
+            <summary>
+            日志记录的时间戳（UTC时间）
             </summary>
         </member>
         <member name="M:MinioWebBackend.Dtos.LogDtos.LogItemDto.FromEntity(MinioWebBackend.Models.SerilogLog)">
             <summary>
-            从数据库实体转换为DTO
+            将数据库中的日志实体（SerilogLog）转换为当前DTO对象
             </summary>
-        </member>
-        <member name="M:MinioWebBackend.Dtos.LogDtos.LogItemDto.ParseLogLevel(System.String)">
-            <summary>
-            解析日志级别
-            </summary>
-        </member>
-        <member name="M:MinioWebBackend.Dtos.LogDtos.LogItemDto.ParseProperties(System.String)">
-            <summary>
-            解析Properties JSON
-            </summary>
+            <param name="log">数据库中的日志实体对象</param>
+            <returns>转换后的日志DTO实例</returns>
         </member>
         <member name="T:MinioWebBackend.Dtos.LogDtos.LogQueryRequest">
             <summary>
@@ -251,6 +621,514 @@
             按条件查询日志
             </summary>
         </member>
+        <member name="T:MinioWebBackend.Models.UploadResult">
+            <summary>
+            文件上传结果（接口返回模型）
+            </summary>
+            <remarks>
+            上传成功后，返回文件的元数据信息。
+            </remarks>
+        </member>
+        <member name="P:MinioWebBackend.Models.UploadResult.Originalfilename">
+            <summary>
+            上传时的原始文件名（用户上传的文件名，带扩展名）
+            </summary>
+            <example>合同2025.pdf</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.UploadResult.ETag">
+            <summary>
+            文件的 ETag（存储系统返回的唯一标识，用于校验文件完整性）
+            </summary>
+            <example>5d41402abc4b2a76b9719d911017c592</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.UploadResult.Size">
+            <summary>
+            文件大小（单位：字节）
+            </summary>
+            <example>204800</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.UploadResult.Bucketname">
+            <summary>
+            所属存储桶名称（MinIO/S3 的 Bucket）
+            </summary>
+            <example>documents</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.UploadResult.Username">
+            <summary>
+            上传者用户名
+            </summary>
+            <example>admin</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.UploadResult.Tags">
+            <summary>
+            文件标签（用于分类或搜索）
+            </summary>
+            <example>["合同","PDF","2025"]</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.UploadResult.Uploadtime">
+            <summary>
+            文件上传时间（UTC 时间）
+            </summary>
+            <example>2025-09-15T12:30:00Z</example>
+        </member>
+        <member name="T:MinioWebBackend.Models.FileInfoModel">
+            <summary>
+            文件信息模型（对应数据库中的文件记录）
+            </summary>
+            <remarks>
+            保存文件的基本信息和元数据，用于文件存储、查询、下载、预览等场景。
+            </remarks>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileInfoModel.Id">
+            <summary>
+            文件唯一 ID（数据库主键，自增）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileInfoModel.StoredFileName">
+            <summary>
+            存储时的文件名（系统生成的唯一名称，用于 MinIO/S3 存储 Key）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileInfoModel.OriginalFileName">
+            <summary>
+            上传时的原始文件名（用户上传的文件名，带扩展名）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileInfoModel.Bucketname">
+            <summary>
+            所属存储桶名称（MinIO/S3 的 Bucket）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileInfoModel.RelativePath">
+            <summary>
+            文件的相对路径（相对于存储桶或应用的逻辑路径，例如 "2025/09/15/"）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileInfoModel.AbsolutePath">
+            <summary>
+            文件的绝对路径（包含存储桶、目录、文件名的完整路径）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileInfoModel.FileSize">
+            <summary>
+            文件大小（单位：字节）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileInfoModel.MimeType">
+            <summary>
+            文件 MIME 类型（如 "image/png", "application/pdf", "text/plain"）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileInfoModel.UploadTime">
+            <summary>
+            文件上传时间（UTC 时间）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileInfoModel.Uploader">
+            <summary>
+            上传人（用户名或系统标识）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileInfoModel.ETag">
+            <summary>
+            文件的 ETag（存储系统返回的校验标识，用于验证文件完整性）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileInfoModel.Tags">
+            <summary>
+            文件标签（用于分类或搜索，例如 ["合同", "2025", "PDF"]）
+            </summary>
+        </member>
+        <member name="T:MinioWebBackend.Models.MultipartUploadRequest">
+            <summary>
+            分片上传请求模型（后端内部使用）
+            </summary>
+            <remarks>
+            用于封装上传文件所需的元数据和参数，传递给 MinIO/S3 服务执行上传。
+            </remarks>
+        </member>
+        <member name="P:MinioWebBackend.Models.MultipartUploadRequest.bucket">
+            <summary>
+            存储桶名称（MinIO/S3 的 Bucket）
+            </summary>
+            <example>documents</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.MultipartUploadRequest.originalFileName">
+            <summary>
+            上传时的原始文件名（用户上传的文件名，带扩展名）
+            </summary>
+            <example>合同2025.pdf</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.MultipartUploadRequest.storedFileName">
+            <summary>
+            存储时的文件名（系统生成的唯一名称，用于 MinIO/S3 存储 Key）
+            </summary>
+            <example>admin_20250915123045001_a7f9e2c13b4d4f8e9e11demo</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.MultipartUploadRequest.filePath">
+            <summary>
+            本地临时文件路径（后端生成，用于传输到 MinIO/S3）
+            </summary>
+            <example>C:\temp\minio\upload_tmp_12345.pdf</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.MultipartUploadRequest.contentType">
+            <summary>
+            文件 MIME 类型（如 "image/png", "application/pdf"）
+            </summary>
+            <example>application/pdf</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.MultipartUploadRequest.username">
+            <summary>
+            上传者用户名
+            </summary>
+            <example>admin</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.MultipartUploadRequest.Tags">
+            <summary>
+            文件标签列表（用于分类或搜索）
+            </summary>
+            <example>["合同","PDF","2025"]</example>
+        </member>
+        <member name="T:MinioWebBackend.Models.FileQueryResult">
+            <summary>
+            文件查询结果模型
+            </summary>
+            <remarks>
+            用于分页查询时返回数据，包含：
+            - Items：当前页的文件信息列表
+            - TotalCount：符合条件的总记录数（用于分页计算）
+            // ```
+            
+            返回示例：
+            ```json
+            {
+              "items": [
+                {
+                  "id": 101,
+                  "storedFileName": "a7f9e2c1-3b4d-4f8e-9e11-demo.pdf",
+                  "originalFileName": "合同2025.pdf",
+                  "bucketname": "documents",
+                  "relativePath": "2025/09/",
+                  "absolutePath": "documents/2025/09/a7f9e2c1-3b4d-4f8e-9e11-demo.pdf",
+                  "fileSize": 204800,
+                  "mimeType": "application/pdf",
+                  "uploadTime": "2025-09-15T12:30:00Z",
+                  "uploader": "admin",
+                  "etag": "5d41402abc4b2a76b9719d911017c592",
+                  "tags": [ "合同", "PDF", "2025" ]
+                },
+                {
+                  "id": 102,
+                  "storedFileName": "f2d3e5c9-7a6b-4f0c-8a11-report.docx",
+                  "originalFileName": "报告.docx",
+                  "bucketname": "documents",
+                  "relativePath": "2025/09/",
+                  "absolutePath": "documents/2025/09/f2d3e5c9-7a6b-4f0c-8a11-report.docx",
+                  "fileSize": 102400,
+                  "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                  "uploadTime": "2025-09-14T09:15:00Z",
+                  "uploader": "user01",
+                  "etag": "098f6bcd4621d373cade4e832627b4f6",
+                  "tags": [ "报告", "Word" ]
+                }
+              ],
+              "totalCount": 25
+            }
+            ```
+            </remarks>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileQueryResult.Items">
+            <summary>
+            当前页的文件列表
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileQueryResult.TotalCount">
+            <summary>
+            符合条件的总文件数（不受分页限制）
+            </summary>
+        </member>
+        <member name="T:MinioWebBackend.Models.FileRecord">
+            <summary>
+            文件记录表实体（映射数据库表 file_info）
+            </summary>
+            <remarks>
+            存储在数据库中的文件元数据，用于文件查询、下载、预览和标签管理。
+            与 MinIO/S3 的对象存储对应，每条记录代表一个文件。
+            </remarks>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileRecord.Id">
+            <summary>
+            文件唯一 ID（数据库主键，自增）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileRecord.StoredFileName">
+            <summary>
+            存储时的文件名（系统生成的唯一名称，用作 MinIO/S3 的对象 Key）
+            </summary>
+            <example>admin_20250915123045_demo.pdf</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileRecord.OriginalFileName">
+            <summary>
+            上传时的原始文件名（用户本地文件名，带扩展名）
+            </summary>
+            <example>合同2025.pdf</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileRecord.BucketName">
+            <summary>
+            存储桶名称（MinIO/S3 的 Bucket）
+            </summary>
+            <example>documents</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileRecord.RelativePath">
+            <summary>
+            文件的相对路径（逻辑目录，例如 "2025/09/15/"）
+            </summary>
+            <example>2025/09/</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileRecord.AbsolutePath">
+            <summary>
+            文件的绝对路径（包含存储桶和完整 Key）
+            </summary>
+            <example>documents/2025/09/admin_20250915123045_demo.pdf</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileRecord.FileSize">
+            <summary>
+            文件大小（字节数）
+            </summary>
+            <example>204800</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileRecord.MimeType">
+            <summary>
+            文件 MIME 类型（如 "application/pdf", "image/png"）
+            </summary>
+            <example>application/pdf</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileRecord.UploadTime">
+            <summary>
+            上传时间（UTC 时间）
+            </summary>
+            <example>2025-09-15T12:30:00Z</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileRecord.Uploader">
+            <summary>
+            上传者用户名
+            </summary>
+            <example>admin</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileRecord.ETag">
+            <summary>
+            文件的 ETag（MinIO/S3 生成的哈希，用于文件完整性校验）
+            </summary>
+            <example>5d41402abc4b2a76b9719d911017c592</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileRecord.FileTags">
+            <summary>
+            文件关联的标签（多对多关系：FileRecord - FileTag - Tag）
+            </summary>
+        </member>
+        <member name="T:MinioWebBackend.Models.Tag">
+            <summary>
+            标签表实体（映射数据库表 tags）
+            </summary>
+            <remarks>
+            用于对文件进行分类或标记。
+            一个标签可以关联多个文件，一个文件也可以有多个标签。
+            </remarks>
+        </member>
+        <member name="P:MinioWebBackend.Models.Tag.Id">
+            <summary>
+            标签唯一 ID（主键，自增）
+            </summary>
+            <example>1</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.Tag.Name">
+            <summary>
+            标签名称（唯一，区分大小写与否可由数据库约束决定）
+            </summary>
+            <example>财务报表</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.Tag.FileTags">
+            <summary>
+            标签与文件的关联（多对多关系）
+            </summary>
+        </member>
+        <member name="T:MinioWebBackend.Models.FileTag">
+            <summary>
+            文件-标签关联表实体（多对多关系映射表 file_tags）
+            </summary>
+            <remarks>
+            代表一个文件与一个标签的对应关系。
+            主键通常是 (FileId, TagId) 复合键。
+            </remarks>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileTag.FileId">
+            <summary>
+            文件 ID（外键，指向 file_info 表）
+            </summary>
+            <example>101</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileTag.FileRecord">
+            <summary>
+            文件实体（导航属性）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileTag.TagId">
+            <summary>
+            标签 ID（外键，指向 tags 表）
+            </summary>
+            <example>5</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileTag.Tag">
+            <summary>
+            标签实体（导航属性）
+            </summary>
+        </member>
+        <member name="T:MinioWebBackend.Models.CreateTagDto">
+            <summary>
+            创建标签 DTO（供前端调用时使用）
+            </summary>
+            <remarks>
+            用于新增标签的输入参数。
+            </remarks>
+        </member>
+        <member name="P:MinioWebBackend.Models.CreateTagDto.Name">
+            <summary>
+            标签名称
+            </summary>
+            <example>项目文档</example>
+        </member>
+        <member name="T:MinioWebBackend.Models.OperationLog">
+            <summary>
+            文件操作日志表实体（记录用户对文件的操作）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.OperationLog.Id">
+            <summary>
+            日志 ID（主键，自增）
+            </summary>
+            <example>1001</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.OperationLog.UserName">
+            <summary>
+            用户名（执行操作的用户）
+            </summary>
+            <example>admin</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.OperationLog.OperationType">
+            <summary>
+            操作类型（Upload / Delete / Download / Edit）
+            </summary>
+            <example>Upload</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.OperationLog.FileName">
+            <summary>
+            文件名（涉及的文件名称）
+            </summary>
+            <example>report2024.xlsx</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.OperationLog.Bucket">
+            <summary>
+            存储桶名称
+            </summary>
+            <example>documents</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.OperationLog.Timestamp">
+            <summary>
+            操作时间（UTC 时间）
+            </summary>
+            <example>2025-09-15T08:30:00Z</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.OperationLog.Status">
+            <summary>
+            操作状态（Success / Fail）
+            </summary>
+            <example>Success</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.OperationLog.Message">
+            <summary>
+            额外信息（失败原因、操作描述等）
+            </summary>
+            <example>文件已存在，跳过上传</example>
+        </member>
+        <member name="T:MinioWebBackend.Models.EditFileDto">
+            <summary>
+            文件编辑请求 DTO
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.EditFileDto.Id">
+            <summary>
+            文件 ID
+            </summary>
+            <example>2001</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.EditFileDto.FileName">
+            <summary>
+            新的文件名
+            </summary>
+            <example>new_report2024.xlsx</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.EditFileDto.Tags">
+            <summary>
+            新的标签列表（覆盖原有标签）
+            </summary>
+            <example>["财务", "年度报告"]</example>
+        </member>
+        <member name="T:MinioWebBackend.Models.FileUploadDto">
+            <summary>
+            文件上传请求 DTO
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileUploadDto.File">
+            <summary>
+            上传的文件
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileUploadDto.Username">
+            <summary>
+            上传者用户名
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.FileUploadDto.Tags">
+            <summary>
+            文件标签（JSON 数组字符串）
+            ⚠ 必须是 JSON 数组格式，例如：["合同","PDF"]
+            </summary>
+        </member>
+        <member name="T:MinioWebBackend.Models.User">
+            <summary>
+            系统用户表
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Models.User.Id">
+            <summary>
+            用户唯一 ID（主键，自增）
+            </summary>
+            <example>1</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.User.Username">
+            <summary>
+            登录账号（唯一）
+            </summary>
+            <example>admin</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.User.PasswordHash">
+            <summary>
+            加密后的密码（不要存明文）
+            </summary>
+            <example>$2a$11$A8G7...</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.User.Role">
+            <summary>
+            用户角色（Admin / User）
+            </summary>
+            <example>Admin</example>
+        </member>
+        <member name="P:MinioWebBackend.Models.User.LastLogin">
+            <summary>
+            上次登录时间（可为空）
+            </summary>
+            <example>2025-09-14T12:30:00Z</example>
+        </member>
         <member name="P:MinioWebBackend.Models.SerilogLog.Id">
             <summary>
             自增主键（与OperationLogs的Id类型一致）
@@ -343,58 +1221,135 @@
             <summary>
             给指定文件添加标签
             </summary>
+            <remarks>
+            请求示例：
+            ```json
+            [1, 2, 3]
+            ```
+            表示给文件添加标签 ID 为 1、2、3 的标签。
+            </remarks>
             <param name="fileId">文件 ID</param>
             <param name="tagIds">标签 ID 列表</param>
+            <response code="200">标签添加成功</response>
+            <response code="404">文件或标签不存在</response>
         </member>
         <member name="M:FileTagController.GetFilesByTag(System.String)">
             <summary>
             根据单个标签名查询文件
             </summary>
+            <remarks>
+            请求示例：
+            ```
+            GET /api/files/tag/合同
+            ```
+            返回示例：
+            ```
+            {"items":[{"id":3,"storedFileName":"admin_20250915185746791_0b3be68b1dda4662a06eb4d52004b521","originalFileName":"1.pptx","bucketname":"my-bucket","relativePath":"admin_20250915185746791_0b3be68b1dda4662a06eb4d52004b521","absolutePath":"/my-bucket/admin_20250915185746791_0b3be68b1dda4662a06eb4d52004b521","fileSize":1842987,"mimeType":"application/vnd.openxmlformats-officedocument.presentationml.presentation","uploadTime":"2025-09-15T18:57:47.1643764","uploader":"admin","eTag":"","tags":["1"]},{"id":1,"storedFileName":"admin_20250915175010541_520dff1b76134536ae80e67b7f5e3843","originalFileName":"TODO.txt","bucketname":"my-bucket","relativePath":"admin_20250915175010541_520dff1b76134536ae80e67b7f5e3843","absolutePath":"/my-bucket/admin_20250915175010541_520dff1b76134536ae80e67b7f5e3843","fileSize":105,"mimeType":"text/plain","uploadTime":"2025-09-15T17:50:10.6489212","uploader":"admin","eTag":"","tags":["1"]}],"totalCount":2}
+            ```
+            </remarks>
             <param name="tagName">标签名称</param>
+            <response code="200">返回匹配的文件列表和数量</response>
+            <response code="404">没有找到文件</response>
         </member>
         <member name="M:FileTagController.GetFilesByTags(System.String[],System.Boolean)">
-            <summary>
-            根据多个标签名查询文件，可选择匹配所有标签或任意标签
-            </summary>
-            <param name="tagNames">标签名称数组</param>
-            <param name="matchAll">是否匹配所有标签，true=全部匹配，false=任意匹配</param>
-        </member>
-        <member name="M:FileTagController.GetTagsByFile(System.Int32)">
-            <summary>
-            获取指定文件的所有标签
-            </summary>
-            <param name="fileId">文件 ID</param>
+             <summary>
+             根据多个标签名查询文件，可选择匹配所有标签或任意标签
+             </summary>
+             <remarks>
+             请求示例：
+             ```
+            GET /api/files/tags?tagNames=合同&amp;tagNames=PDF&amp;matchAll=true
+             ```
+             返回示例：
+             ```
+             {"items":[{"id":3,"storedFileName":"admin_20250915185746791_0b3be68b1dda4662a06eb4d52004b521","originalFileName":"1.pptx","bucketname":"my-bucket","relativePath":"admin_20250915185746791_0b3be68b1dda4662a06eb4d52004b521","absolutePath":"/my-bucket/admin_20250915185746791_0b3be68b1dda4662a06eb4d52004b521","fileSize":1842987,"mimeType":"application/vnd.openxmlformats-officedocument.presentationml.presentation","uploadTime":"2025-09-15T18:57:47.1643764","uploader":"admin","eTag":"","tags":["1"]},{"id":1,"storedFileName":"admin_20250915175010541_520dff1b76134536ae80e67b7f5e3843","originalFileName":"TODO.txt","bucketname":"my-bucket","relativePath":"admin_20250915175010541_520dff1b76134536ae80e67b7f5e3843","absolutePath":"/my-bucket/admin_20250915175010541_520dff1b76134536ae80e67b7f5e3843","fileSize":105,"mimeType":"text/plain","uploadTime":"2025-09-15T17:50:10.6489212","uploader":"admin","eTag":"","tags":["1"]}],"totalCount":2}
+             ```
+             - `matchAll = true` 表示需要同时包含所有标签  
+             - `matchAll = false` 表示只要包含任意一个标签即可
+             </remarks>
+             <param name="tagNames">标签名称数组</param>
+             <param name="matchAll">是否匹配所有标签，true=全部匹配，false=任意匹配</param>
+             <response code="200">返回匹配的文件列表和数量</response>
+             <response code="404">没有找到文件</response>
         </member>
         <member name="M:TagController.CreateTag(MinioWebBackend.Models.CreateTagDto)">
             <summary>
             创建新标签
             </summary>
+            <remarks>
+            请求示例：
+            ```json
+            {
+              "name": "合同"
+            }
+            ```
+            
+            响应示例：
+            ```json
+            {
+              "id": 1,
+              "name": "合同"
+            }
+            ```
+            </remarks>
             <param name="dto">包含标签名称的 DTO 对象</param>
             <returns>返回创建的标签对象</returns>
+            <response code="201">创建成功</response>
+            <response code="400">请求错误（如标签已存在）</response>
         </member>
         <member name="M:TagController.GetAll">
             <summary>
             获取所有标签
             </summary>
+            <remarks>
+            响应示例：
+            ```json
+            [
+              { "id": 1, "name": "合同" },
+              { "id": 2, "name": "报告" },
+              { "id": 3, "name": "PDF" }
+            ]
+            ```
+            </remarks>
             <returns>返回标签列表</returns>
+            <response code="200">返回标签列表</response>
         </member>
         <member name="M:TagController.EditFile(MinioWebBackend.Models.EditFileDto)">
             <summary>
-            修改文件信息
+            修改文件信息（例如更新文件名或标签）
             </summary>
+            <remarks>
+            请求示例：
+            ```json
+            {
+              "fileId": 101,
+              "newFileName": "新合同2025.pdf",
+              "tags": ["合同","PDF","2025"]
+            }
+            ```
+            
+            响应示例：
+            ```json
+            {
+              "message": "文件信息修改成功"
+            }
+            ```
+            </remarks>
             <param name="dto">包含文件修改信息的 DTO 对象</param>
             <returns>返回修改结果</returns>
+            <response code="200">修改成功</response>
+            <response code="400">请求错误（如文件不存在）</response>
         </member>
-        <member name="T:MinioWebApi.Migrations.AddUserTable">
+        <member name="T:MinioWebApi.Migrations.AddUserFields">
             <inheritdoc />
         </member>
-        <member name="M:MinioWebApi.Migrations.AddUserTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+        <member name="M:MinioWebApi.Migrations.AddUserFields.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
             <inheritdoc />
         </member>
-        <member name="M:MinioWebApi.Migrations.AddUserTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+        <member name="M:MinioWebApi.Migrations.AddUserFields.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
             <inheritdoc />
         </member>
-        <member name="M:MinioWebApi.Migrations.AddUserTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+        <member name="M:MinioWebApi.Migrations.AddUserFields.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
     </members>

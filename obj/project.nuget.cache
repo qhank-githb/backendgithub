@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "Dsjx79zIaSY=",
+  "dgSpecHash": "eS+4sBpnra8=",
   "success": true,
   "projectFilePath": "D:\\bolo_backend\\minio-web-backend\\MinioWebApi.csproj",
   "expectedPackageFiles": [
@@ -78,7 +78,7 @@
     "C:\\Users\\qhanlin177\\.nuget\\packages\\serilog.sinks.mssqlserver\\8.2.2\\serilog.sinks.mssqlserver.8.2.2.nupkg.sha512",
     "C:\\Users\\qhanlin177\\.nuget\\packages\\serilog.sinks.periodicbatching\\4.0.0\\serilog.sinks.periodicbatching.4.0.0.nupkg.sha512",
     "C:\\Users\\qhanlin177\\.nuget\\packages\\swashbuckle.aspnetcore\\9.0.4\\swashbuckle.aspnetcore.9.0.4.nupkg.sha512",
-    "C:\\Users\\qhanlin177\\.nuget\\packages\\swashbuckle.aspnetcore.annotations\\6.5.0\\swashbuckle.aspnetcore.annotations.6.5.0.nupkg.sha512",
+    "C:\\Users\\qhanlin177\\.nuget\\packages\\swashbuckle.aspnetcore.annotations\\6.6.2\\swashbuckle.aspnetcore.annotations.6.6.2.nupkg.sha512",
     "C:\\Users\\qhanlin177\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\9.0.4\\swashbuckle.aspnetcore.swagger.9.0.4.nupkg.sha512",
     "C:\\Users\\qhanlin177\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\9.0.4\\swashbuckle.aspnetcore.swaggergen.9.0.4.nupkg.sha512",
     "C:\\Users\\qhanlin177\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\9.0.4\\swashbuckle.aspnetcore.swaggerui.9.0.4.nupkg.sha512",

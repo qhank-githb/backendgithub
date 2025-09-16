@@ -1,13 +1,7 @@
-D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.csproj.AssemblyReference.cache
-D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.GeneratedMSBuildEditorConfig.editorconfig
-D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.AssemblyInfoInputs.cache
-D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.AssemblyInfo.cs
-D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.csproj.CoreCompileInputs.cache
-D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.MvcApplicationPartsAssemblyInfo.cs
-D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.MvcApplicationPartsAssemblyInfo.cache
 D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\appsettings.Development.json
 D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\appsettings.json
 D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\MinioWebApi.exe
+D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\MinioWebApi.xml
 D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\MinioWebApi.deps.json
 D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\MinioWebApi.runtimeconfig.json
 D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\MinioWebApi.dll
@@ -170,6 +164,13 @@ D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\runtimes\win-x86\native\Micro
 D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Diagnostics.EventLog.dll
 D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Security.Cryptography.Pkcs.dll
 D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll
+D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.csproj.AssemblyReference.cache
+D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.GeneratedMSBuildEditorConfig.editorconfig
+D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.AssemblyInfoInputs.cache
+D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.AssemblyInfo.cs
+D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.csproj.CoreCompileInputs.cache
+D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.MvcApplicationPartsAssemblyInfo.cs
+D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.MvcApplicationPartsAssemblyInfo.cache
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\staticwebassets.build.json
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\staticwebassets.development.json
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\staticwebassets\msbuild.MinioWebApi.Microsoft.AspNetCore.StaticWebAssets.props
@@ -184,4 +185,3 @@ D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\refint\MinioWebApi.dll
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.pdb
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\MinioWebApi.genruntimeconfig.cache
 D:\bolo_backend\minio-web-backend\obj\Debug\net8.0\ref\MinioWebApi.dll
-D:\bolo_backend\minio-web-backend\bin\Debug\net8.0\MinioWebApi.xml

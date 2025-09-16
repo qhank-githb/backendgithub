@@ -39,21 +39,6 @@ namespace MinioWebBackend.Controllers
         /// <summary>
         /// 按条件查询日志（支持分页）
         /// </summary>
-        /// <remarks>
-        /// 示例请求：
-        /// 
-        /// ```
-        /// GET /api/LogQuery/query?Levels=4&amp;MessageKeyword=数据库&amp;Page=1&amp;PageSize=50
-        /// ```
-        /// 
-        /// - **Levels**: 日志等级集合 (如 `4 = Warning`, `5 = Error`)
-        /// - **MessageKeyword**: 日志消息关键词
-        /// - **ExceptionKeyword**: 异常关键词
-        /// - **TimestampStart**: 起始时间 (UTC)
-        /// - **TimestampEnd**: 结束时间 (UTC)
-        /// - **Page**: 页码，从 1 开始
-        /// - **PageSize**: 每页大小
-        /// </remarks>
         /// <param name="request">日志查询参数对象，包含等级、关键词、时间范围及分页信息</param>
         /// <returns>
         /// 分页后的日志查询结果。

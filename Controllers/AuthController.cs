@@ -4,22 +4,54 @@ using Microsoft.AspNetCore.Mvc;
 using MinioWebBackend.Interfaces;
 using Serilog;
 
+
+/// <summary>
+/// 认证控制器，处理用户注册、登录、登出等身份认证相关操作
+/// </summary>
+/// <remarks>
+/// 提供用户身份管理的核心接口，包括：
+/// - 管理员创建新用户（注册）
+/// - 用户登录并获取JWT令牌
+/// - 已登录用户登出
+/// 依赖 <see cref="IAuthService"/> 处理具体业务逻辑，使用Serilog记录操作日志
+/// </remarks>
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
+    /// <summary>
+    /// 认证服务接口，用于处理用户注册、登录、令牌生成等业务逻辑
+    /// </summary>
     private readonly IAuthService _AuthService;
 
+    /// <summary>
+    /// 构造函数，注入认证服务依赖
+    /// </summary>
+    /// <param name="AuthService">认证服务实现类实例</param>
     public AuthController(IAuthService AuthService)
     {
         _AuthService = AuthService;
     }
 
     /// <summary>
-    /// 用户注册
+    /// 用户注册接口（仅管理员可访问）
     /// </summary>
+    /// <remarks>
+    /// 功能：由管理员创建新用户，支持指定用户角色<br/>
+    /// 权限：需携带管理员（Admin）角色的JWT令牌<br/>
+    /// 业务限制：
+    /// - 用户名不可重复
+    /// - 普通用户（User）不能使用"admin"作为用户名
+    /// </remarks>
+    /// <param name="request">注册请求参数，包含用户名、密码和可选角色</param>
+    /// <returns>
+    /// 成功：200 OK，返回新用户的ID、用户名和角色<br/>
+    /// 失败：400 Bad Request，返回错误消息（如用户名已存在）
+    /// </returns>
     [HttpPost("register")]
     [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(RegisterResponse), 200)]   // 成功返回
+    [ProducesResponseType(typeof(object), 400)]             // 失败返回
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
         try
@@ -27,7 +59,15 @@ public class AuthController : ControllerBase
             var user = await _AuthService.RegisterAsync(request.Username, request.Password, request.Role ?? "User");
             Log.Information("用户注册成功：{Username}", user.Username);
 
-            return Ok(new { user.Id, user.Username, user.Role });
+            // 返回 DTO
+            var response = new RegisterResponse
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Role = user.Role
+            };
+
+            return Ok(response);
         }
         catch (Exception ex)
         {
@@ -36,30 +76,62 @@ public class AuthController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// 用户登录
-    /// </summary>
-    [HttpPost("login")]
-    [AllowAnonymous]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+/// <summary>
+/// 用户登录接口（允许匿名访问）
+/// </summary>
+/// <remarks>
+/// 功能：验证用户凭据并生成JWT令牌<br/>
+/// 流程：
+/// 1. 验证用户名和密码是否匹配
+/// 2. 验证通过后更新用户最后登录时间
+/// 3. 生成有效期为2小时的JWT令牌
+/// 4. 返回令牌及用户基本信息
+/// </remarks>
+/// <param name="request">登录请求参数，包含用户名和密码</param>
+/// <returns>
+/// 成功：200 OK，返回JWT令牌、用户名、角色和最后登录时间
+/// 失败：401 Unauthorized，返回"用户名或密码错误"
+/// </returns>
+[HttpPost("login")]
+[AllowAnonymous]
+[ProducesResponseType(typeof(LoginResponse), 200)]
+[ProducesResponseType(typeof(object), 401)]
+public async Task<IActionResult> Login([FromBody] LoginRequest request)
+{
+    var user = await _AuthService.LoginAsync(request.Username, request.Password);
+    if (user == null)
     {
-        var user = await _AuthService.LoginAsync(request.Username, request.Password);
-        if (user == null)
-        {
-            Log.Warning("用户登录失败：{Username}", request.Username);
-            return Unauthorized(new { message = "用户名或密码错误" });
-        }
-
-        var token = _AuthService.GenerateJwtToken(user);
-
-        Log.Information("用户登录成功：{Username}", user.Username);
-
-        return Ok(new { token, user.Username, user.Role, user.LastLogin });
+        Log.Warning("用户登录失败：{Username}", request.Username);
+        return Unauthorized(new { message = "用户名或密码错误" });
     }
 
+    var token = _AuthService.GenerateJwtToken(user);
+
+    Log.Information("用户登录成功：{Username}", user.Username);
+
+    // 返回 DTO
+    var response = new LoginResponse
+    {
+        Token = token,
+        Username = user.Username,
+        Role = user.Role,
+        LastLogin = user.LastLogin
+    };
+
+    return Ok(response);
+}
+
     /// <summary>
-    /// 用户登出
+    /// 用户登出接口（需已认证）
     /// </summary>
+    /// <remarks>
+    /// 功能：处理用户登出逻辑（前端需自行清除本地JWT令牌）<br/>
+    /// 说明：JWT令牌为无状态，后端无法主动失效，此接口仅记录登出日志
+    /// </remarks>
+    /// <returns>
+    /// 成功：200 OK，返回"退出成功"消息<br/>
+    /// （注：若令牌无效，会被认证中间件拦截为401）
+    /// </returns>
     [HttpPost("logout")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public IActionResult Logout()
@@ -71,15 +143,87 @@ public class AuthController : ControllerBase
     }
 }
 
+/// <summary>
+/// 登录请求DTO（数据传输对象），封装用户登录时的输入参数
+/// </summary>
 public class LoginRequest
 {
+    /// <summary>
+    /// 登录用户名（必须与注册时的用户名一致）
+    /// </summary>
+    /// <example>testuser</example>
     public string Username { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 登录密码（明文，后端会与数据库中的加密密码比对）
+    /// </summary>
+    /// <example>Test@123456</example>
     public string Password { get; set; } = string.Empty;
 }
 
+/// <summary>
+/// 注册请求DTO（数据传输对象），封装用户注册时的输入参数
+/// </summary>
 public class RegisterRequest
 {
+    /// <summary>
+    /// 注册用户名（必须唯一，不允许为"admin"（普通用户角色时））
+    /// </summary>
+    /// <example>newuser</example>
     public string Username { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 注册密码（明文，后端会进行加密存储）
+    /// </summary>
+    /// <example>New@123456</example>
     public string Password { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 用户角色（可选，默认为"User"）
+    /// </summary>
+    /// <remarks>
+    /// 允许值："Admin"（管理员）、"User"（普通用户）<br/>
+    /// 仅管理员可指定"Admin"角色
+    /// </remarks>
+    /// <example>User</example>
     public string? Role { get; set; }
+}
+
+
+
+/// <summary>
+/// 用户注册返回对象
+/// </summary>
+public class RegisterResponse
+{
+    /// <summary>用户ID</summary>
+    public int Id { get; set; }
+
+    /// <summary>用户名</summary>
+    public string Username { get; set; } = string.Empty;
+
+    /// <summary>角色</summary>
+    public string Role { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// 登录返回数据
+/// </summary>
+public class LoginResponse
+{
+    /// <summary>JWT 访问令牌</summary>
+    /// <example>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</example>
+    public string Token { get; set; } = string.Empty;
+
+    /// <summary>用户名</summary>
+    /// <example>testuser</example>
+    public string Username { get; set; } = string.Empty;
+
+    /// <summary>用户角色</summary>
+    /// <example>User</example>
+    public string Role { get; set; } = string.Empty;
+
+    /// <summary>最后登录时间（UTC）</summary>
+    /// <example>2025-09-15T15:30:00Z</example>
+    public DateTime? LastLogin { get; set; }
 }
