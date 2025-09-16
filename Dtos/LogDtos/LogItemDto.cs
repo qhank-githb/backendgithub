@@ -85,22 +85,22 @@ namespace MinioWebBackend.Dtos.LogDtos
             }
         }
         
-        public static LogItemDto FromESDto(SerilogLogESDto esDto)
-        {
-            // 将字符串转换为 LogEventLevel，如果转换失败则默认 Information
-            var level = Enum.TryParse<LogEventLevel>(esDto.Level, true, out var parsedLevel)
-                ? parsedLevel
-                : LogEventLevel.Information;
+public static LogItemDto FromESDto(SerilogLogESDto esDto)
+{
+    var level = Enum.TryParse<LogEventLevel>(esDto.Level, true, out var parsedLevel)
+        ? parsedLevel
+        : LogEventLevel.Information;
 
-            return new LogItemDto
-            {
-                Level = level,
-                Message = esDto.Message,
-                Exception = esDto.Exception,
-                Timestamp = esDto.Timestamp,
-                Properties = esDto.Properties
-            };
-        }
+    return new LogItemDto
+    {
+        Level = level,
+        Message = esDto.Message,
+        Exception = esDto.Exception,
+        Timestamp = esDto.AtTimestamp,  // ✅ 使用正确的属性名
+        Properties = esDto.Fields       // ⚠️ 确保类型一致
+    };
+}
+
 
     }
 }

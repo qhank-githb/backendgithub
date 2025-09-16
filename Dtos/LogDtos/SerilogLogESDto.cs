@@ -1,8 +1,12 @@
+using Nest;
+
 public class SerilogLogESDto
 {
-    public string Level { get; set; } = string.Empty;
-    public string Message { get; set; } = string.Empty;
+    [Date(Name = "@timestamp")]
+    public DateTime AtTimestamp { get; set; }
+
+    public string Message { get; set; }
+    public string Level { get; set; }
     public string? Exception { get; set; }
-    public DateTime Timestamp { get; set; }
-    public Dictionary<string, object> Properties { get; set; } = new();
+    public Dictionary<string, object> Fields { get; set; }
 }
