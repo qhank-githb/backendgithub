@@ -25,19 +25,22 @@ namespace MinioWebBackend.Service
 
             var dtos = files.Select(MapToESDto).ToList();
 
-            var response = await _elastic.IndexManyAsync(dtos, "files");
+var response = await _elastic.IndexManyAsync(dtos, "files");
 
-            if (!response.IsValid)
-            {
-                var serverErr = response.ServerError?.Error?.Reason ?? "未知错误";
-                var debugInfo = response.DebugInformation;
-                Console.WriteLine("Elasticsearch 同步失败！");
-                Console.WriteLine($"ServerError: {serverErr}");
-                Console.WriteLine($"DebugInfo: {debugInfo}");
-                throw new Exception($"同步到 Elasticsearch 失败: {serverErr}");
-            }
+if (response.ApiCall.HttpStatusCode >= 400 || (response.Errors && response.ItemsWithErrors.Any()))
+{
+    var serverErr = response.ServerError?.Error?.Reason ?? "未知错误";
+    var debugInfo = response.DebugInformation;
+    Console.WriteLine("Elasticsearch 同步失败！");
+    Console.WriteLine($"ServerError: {serverErr}");
+    Console.WriteLine($"DebugInfo: {debugInfo}");
+    throw new Exception($"同步到 Elasticsearch 失败: {serverErr}");
+}
+else
+{
+    Console.WriteLine($"成功同步 {dtos.Count} 条文件记录到 Elasticsearch");
+}
 
-            Console.WriteLine($"成功同步 {dtos.Count} 条文件记录到 Elasticsearch");
         }
 
         private FileRecordESDto MapToESDto(FileRecord file)
