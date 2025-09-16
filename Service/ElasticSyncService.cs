@@ -25,21 +25,21 @@ namespace MinioWebBackend.Service
 
             var dtos = files.Select(MapToESDto).ToList();
 
-var response = await _elastic.IndexManyAsync(dtos, "files");
+            var response = await _elastic.IndexManyAsync(dtos, "files");
 
-if (response.ApiCall.HttpStatusCode >= 400 || (response.Errors && response.ItemsWithErrors.Any()))
-{
-    var serverErr = response.ServerError?.Error?.Reason ?? "未知错误";
-    var debugInfo = response.DebugInformation;
-    Console.WriteLine("Elasticsearch 同步失败！");
-    Console.WriteLine($"ServerError: {serverErr}");
-    Console.WriteLine($"DebugInfo: {debugInfo}");
-    throw new Exception($"同步到 Elasticsearch 失败: {serverErr}");
-}
-else
-{
-    Console.WriteLine($"成功同步 {dtos.Count} 条文件记录到 Elasticsearch");
-}
+            if (response.ApiCall.HttpStatusCode >= 400 || (response.Errors && response.ItemsWithErrors.Any()))
+            {
+                var serverErr = response.ServerError?.Error?.Reason ?? "未知错误";
+                var debugInfo = response.DebugInformation;
+                Console.WriteLine("Elasticsearch 同步失败！");
+                Console.WriteLine($"ServerError: {serverErr}");
+                Console.WriteLine($"DebugInfo: {debugInfo}");
+                throw new Exception($"同步到 Elasticsearch 失败: {serverErr}");
+            }
+            else
+            {
+                Console.WriteLine($"成功同步 {dtos.Count} 条文件记录到 Elasticsearch");
+            }
 
         }
 
@@ -59,5 +59,39 @@ else
                 Tags = file.FileTags?.Select(ft => ft.Tag?.Name ?? "").ToList() ?? new List<string>()
             };
         }
+        
+
+        public async Task IndexFileAsync(FileRecord record)
+    {
+        var dto = MapToDto(record);
+        await _elastic.IndexDocumentAsync(dto);
+    }
+
+    public async Task UpdateFileAsync(FileRecord record)
+    {
+        var dto = MapToDto(record);
+        await _elastic.IndexAsync(dto, idx => idx.Index("files"));
+    }
+
+    public async Task DeleteFileAsync(int id)
+    {
+        await _elastic.DeleteAsync<FileRecordESDto>(id, idx => idx.Index("files"));
+    }
+
+    private FileRecordESDto MapToDto(FileRecord record)
+    {
+        return new FileRecordESDto
+        {
+            Id = record.Id,
+            StoredFileName = record.StoredFileName,
+            OriginalFileName = record.OriginalFileName,
+            BucketName = record.BucketName,
+            UploadTime = record.UploadTime,
+            Uploader = record.Uploader,
+            FileSize = record.FileSize,
+            MimeType = record.MimeType,
+            Tags = record.FileTags?.Select(ft => ft.Tag!.Name).ToList()
+        };
+    }
     }
 }

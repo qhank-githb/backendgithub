@@ -26,7 +26,7 @@ var activeConfig = builder.Configuration["ActiveConfig"];
 var provider = builder.Configuration[$"Configs:{activeConfig}:DatabaseProvider"];
 var connStr = builder.Configuration[$"Configs:{activeConfig}:ConnectionStrings:DefaultConnection"];
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
 {
     if (string.Equals(provider, "MySQL", StringComparison.OrdinalIgnoreCase))
         options.UseMySql(connStr, ServerVersion.AutoDetect(connStr));
@@ -34,7 +34,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseSqlServer(connStr);
     else
         throw new Exception($"不支持的数据库类型: {provider}");
+
+    // 注册拦截器
+    var interceptor = serviceProvider.GetRequiredService<ElasticSyncInterceptor>();
+    options.AddInterceptors(interceptor);
 });
+
 
 // ==================== Swagger ====================
 builder.Services.AddEndpointsApiExplorer();
@@ -147,6 +152,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ILogQueryService, LogQueryService>();
 builder.Services.AddScoped<ElasticSearchService>();
+builder.Services.AddScoped<ElasticSyncInterceptor>();
 
 // ==================== 控制器 ====================
 builder.Services.AddControllers();
