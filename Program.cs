@@ -209,6 +209,7 @@ using (var scope = app.Services.CreateScope())
 
         var authService = serviceProvider.GetRequiredService<IAuthService>();
         await authService.InitializeAdminAccountAsync();
+                Console.WriteLine("服务已启动");
     }
     catch (Exception ex)
     {
