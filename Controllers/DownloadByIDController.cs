@@ -17,8 +17,8 @@ namespace MinioWebBackend.Controllers
     /// - 根据文件 ID 在线预览文件（Content-Disposition = inline）
     /// </remarks>
     [ApiController]
-    [Route("api/file")] // ✅ 固定访问路径，无需手动传入 bucket
-    [Authorize] // ✅ 所有接口需要身份验证（JWT）
+    [Route("api/file")] //  固定访问路径，无需手动传入 bucket
+    [Authorize] //  所有接口需要身份验证（JWT）
     public class DownloadByIDController : ControllerBase
     {
         private readonly IDownloadByIDService _downloadByIdService;

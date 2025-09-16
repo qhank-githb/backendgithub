@@ -1,3 +1,4 @@
+//获取所有bucket名
 using Amazon.S3;
 using MinioWebBackend.Interfaces;
 
