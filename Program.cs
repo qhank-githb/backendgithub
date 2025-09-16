@@ -221,7 +221,6 @@ using (var scope = app.Services.CreateScope())
     try
     {
         await elasticService.SyncAllFilesAsync();
-        Console.WriteLine("数据库文件已同步到 Elasticsearch");
     }
     catch (Exception ex)
     {

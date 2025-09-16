@@ -36,10 +36,7 @@ namespace MinioWebBackend.Service
                 Console.WriteLine($"DebugInfo: {debugInfo}");
                 throw new Exception($"同步到 Elasticsearch 失败: {serverErr}");
             }
-            else
-            {
-                Console.WriteLine($"成功同步 {dtos.Count} 条文件记录到 Elasticsearch");
-            }
+
 
         }
 
