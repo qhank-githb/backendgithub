@@ -49,11 +49,11 @@ public class AppDbContext : DbContext
             .HasIndex(l => l.Timestamp)
             .HasDatabaseName("IX_SerilogLogs_Timestamp");
 
-        // ✅ 注册 SQL Server JSON_VALUE 函数
-        modelBuilder
-            .HasDbFunction(typeof(SqlServerJsonFunctions)
-                .GetMethod(nameof(SqlServerJsonFunctions.JsonValue))!)
-            .HasName("JSON_VALUE")
-            .IsBuiltIn();
+        // // ✅ 注册 SQL Server JSON_VALUE 函数
+        // modelBuilder
+        //     .HasDbFunction(typeof(SqlServerJsonFunctions)
+        //         .GetMethod(nameof(SqlServerJsonFunctions.JsonValue))!)
+        //     .HasName("JSON_VALUE")
+        //     .IsBuiltIn();
     }
 }
