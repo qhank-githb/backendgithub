@@ -5098,6 +5098,7 @@
   "projectFileDependencyGroups": {
     "net8.0": [
       "AWSSDK.S3 >= 3.7.3.11",
+      "Elasticsearch.Net >= 7.17.5",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 8.0.2",
       "Microsoft.AspNetCore.OpenApi >= 8.0.18",
       "Microsoft.Data.SqlClient >= 6.0.2",
@@ -5169,6 +5170,10 @@
           "AWSSDK.S3": {
             "target": "Package",
             "version": "[3.7.3.11, )"
+          },
+          "Elasticsearch.Net": {
+            "target": "Package",
+            "version": "[7.17.5, )"
           },
           "Microsoft.AspNetCore.Authentication.JwtBearer": {
             "target": "Package",

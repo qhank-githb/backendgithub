@@ -14,11 +14,8 @@ using Serilog;
 using Serilog.Sinks.Elasticsearch;
 using MinioWebBackend.Filters;
 using MinioWebBackend.Serilog;
-using Microsoft.OpenApi.Models; // 引入包含 EFCoreSinkExtensions 的命名空间
-using Swashbuckle.AspNetCore.SwaggerGen;
-
-
-
+using Microsoft.OpenApi.Models;
+using Nest;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,27 +23,19 @@ builder.WebHost.UseUrls("http://0.0.0.0:5000");
 
 // ==================== 数据库配置 ====================
 var activeConfig = builder.Configuration["ActiveConfig"];
-
-// 从对应配置块里拿 provider 和 connStr
 var provider = builder.Configuration[$"Configs:{activeConfig}:DatabaseProvider"];
 var connStr = builder.Configuration[$"Configs:{activeConfig}:ConnectionStrings:DefaultConnection"];
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     if (string.Equals(provider, "MySQL", StringComparison.OrdinalIgnoreCase))
-    {
         options.UseMySql(connStr, ServerVersion.AutoDetect(connStr));
-    }
     else if (string.Equals(provider, "SqlServer", StringComparison.OrdinalIgnoreCase))
-    {
         options.UseSqlServer(connStr);
-    }
     else
-    {
         throw new Exception($"不支持的数据库类型: {provider}");
-    }
 });
-// ==================== Swagger ====================
+
 // ==================== Swagger ====================
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -58,46 +47,31 @@ builder.Services.AddSwaggerGen(c =>
         Description = "MinIO 文件管理 API（含认证、上传、标签等）"
     });
 
-    // 读取 XML 注释文件（确保文件名与 .csproj 一致）
     var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlFilePath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
     if (File.Exists(xmlFilePath))
-    {
         c.IncludeXmlComments(xmlFilePath, includeControllerXmlComments: true);
-    }
-
     else
-    {
-        // 调试用：如果 XML 文件不存在，输出警告（方便排查）
         Console.WriteLine($"警告：未找到 XML 注释文件，路径：{xmlFilePath}");
-    }
 
-    // 保留其他必要配置（如文件上传过滤器、JWT 等）
     c.OperationFilter<FileUploadOperationFilter>();
     c.EnableAnnotations();
 });
-
-
-
 
 // ==================== CORS ====================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
-    {
-            policy
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .WithExposedHeaders("Content-Disposition");
-
-    });
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .WithExposedHeaders("Content-Disposition"));
 });
 
 // ==================== MinIO ====================
 builder.Services.Configure<MinioOptions>(builder.Configuration.GetSection("Minio"));
-
-builder.Services.AddSingleton<IAmazonS3>(sp => {
+builder.Services.AddSingleton<IAmazonS3>(sp =>
+{
     var minioOptions = sp.GetRequiredService<IOptions<MinioOptions>>().Value;
     var creds = new BasicAWSCredentials(minioOptions.AccessKey, minioOptions.SecretKey);
     var config = new AmazonS3Config
@@ -107,10 +81,19 @@ builder.Services.AddSingleton<IAmazonS3>(sp => {
     };
     return new AmazonS3Client(creds, config);
 });
-
 builder.Services.AddSingleton<TransferUtility>(sp =>
-    new TransferUtility(sp.GetRequiredService<IAmazonS3>())
-);
+    new TransferUtility(sp.GetRequiredService<IAmazonS3>()));
+
+// ==================== Elasticsearch ====================
+builder.Services.AddSingleton<IElasticClient>(sp =>
+{
+    var settings = new ConnectionSettings(new Uri("http://192.168.150.93:9200"))
+                   .DefaultIndex("files");
+    return new ElasticClient(settings);
+});
+
+builder.Services.AddScoped<ElasticSyncService>();
+
 
 // ==================== Serilog ====================
 builder.Host.UseSerilog((context, services, loggerConfig) =>
@@ -130,30 +113,20 @@ builder.Host.UseSerilog((context, services, loggerConfig) =>
             retainedFileCountLimit: 14
         )
         .WriteTo.EFCore(scopeFactory)
-        // 异步写 Elasticsearch
-        .WriteTo.Async(a => a.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://localhost:9200"))
+        .WriteTo.Async(a => a.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://192.168.150.93:9200"))
         {
             AutoRegisterTemplate = true,
-            IndexFormat = "myapp-logs-{0:yyyy.MM.dd}", // 每天一个索引
+            IndexFormat = "myapp-logs-{0:yyyy.MM.dd}",
             NumberOfReplicas = 1,
             NumberOfShards = 2
         }));
 });
 
-
-
 // ==================== 上传限制 ====================
-builder.WebHost.ConfigureKestrel(opts =>
-{
-    opts.Limits.MaxRequestBodySize = 524_288_000; // 500MB
-});
+builder.WebHost.ConfigureKestrel(opts => opts.Limits.MaxRequestBodySize = 524_288_000);
+builder.Services.Configure<FormOptions>(opts => opts.MultipartBodyLengthLimit = 524_288_000);
 
-builder.Services.Configure<FormOptions>(opts =>
-{
-    opts.MultipartBodyLengthLimit = 524_288_000; // 500MB
-});
-
-// ==================== 注册业务服务 ====================
+// ==================== 业务服务 ====================
 builder.Services.AddScoped<IBucketService, BucketService>();
 builder.Services.AddScoped<IQueryService, QueryService>();
 builder.Services.AddScoped<IUploadService, UploadService>();
@@ -163,8 +136,7 @@ builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IFileTagService, FileTagService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<ILogQueryService, LogQueryService>(); // 新增：日志查询服务
-
+builder.Services.AddScoped<ILogQueryService, LogQueryService>();
 
 // ==================== 控制器 ====================
 builder.Services.AddControllers();
@@ -173,7 +145,6 @@ builder.Services.AddControllers();
 var jwtSecretKey = "MySuperSecretKeyForJWTToken_32BytesOrMore!";
 var issuer = "my_app_issuer";
 var audience = "my_app_audience";
-
 
 builder.Services.AddAuthentication(options =>
 {
@@ -200,72 +171,57 @@ builder.Services.AddAuthentication(options =>
             if (ctx.Exception is SecurityTokenExpiredException)
             {
                 var token = ctx.Request.Headers["Authorization"].ToString();
-                Log.Warning("JWT Token 已过期: {Token}", token);
+                Serilog.Log.Warning("JWT Token 已过期: {Token}", token);
             }
             return Task.CompletedTask;
         }
     };
 });
 
-
 var app = builder.Build();
 
+// ==================== 数据库初始化 ====================
 using (var scope = app.Services.CreateScope())
 {
     var serviceProvider = scope.ServiceProvider;
-    
+
     try
     {
-        // 确保数据库已创建（如果使用Code First迁移，可替换为数据库迁移逻辑）
         var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
-        await dbContext.Database.EnsureCreatedAsync(); // 创建数据库和表（首次运行时）
-        
-        // 触发管理员账号初始化
+        await dbContext.Database.MigrateAsync();
+
         var authService = serviceProvider.GetRequiredService<IAuthService>();
-        await authService.InitializeAdminAccountAsync(); // 调用初始化方法
+        await authService.InitializeAdminAccountAsync();
     }
     catch (Exception ex)
     {
-        // 记录初始化失败的日志
         var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "应用启动时初始化管理员账号失败");
     }
+    var elasticService = scope.ServiceProvider.GetRequiredService<ElasticSyncService>();
+    try
+    {
+        await elasticService.SyncAllFilesAsync();
+        Console.WriteLine("数据库文件已同步到 Elasticsearch");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"同步失败: {ex.Message}");
+    }
 }
 
-
-
-// ==================== 确保数据库存在 ====================
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();  // 没有表就建表
-    Console.WriteLine("数据库存在，服务已启动");
-}
-
-
-// ==================== 中间件顺序 ====================
-// 1. Swagger 中间件（仅开发环境建议启用，生产环境可注释）
+// ==================== 中间件 ====================
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-    c.RoutePrefix = "swagger"; 
+    c.RoutePrefix = "swagger";
 });
 
-// 2. CORS 中间件（必须在 UseRouting 之前）
 app.UseCors("AllowAll");
-
-// 3. 路由中间件（启用路由匹配）
 app.UseRouting();
-
-// 4. 认证中间件（验证用户身份，必须在 UseAuthorization 之前）
 app.UseAuthentication();
-
-// 5. 授权中间件（处理 [Authorize] 特性，必须在 UseRouting 之后、MapControllers 之前）
-app.UseAuthorization(); // ⚠️ 之前缺失的关键中间件
-
-// 6. 控制器映射（必须在 UseAuthorization 之后）
+app.UseAuthorization();
 app.MapControllers();
 
-// 启动应用
 app.Run();

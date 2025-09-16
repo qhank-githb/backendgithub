@@ -32,12 +32,11 @@
             用户注册接口（仅管理员可访问）
             </summary>
             <remarks>
-            功能：由管理员创建新用户，支持指定用户角色（默认普通用户）<br/>
+            功能：由管理员创建新用户，支持指定用户角色<br/>
             权限：需携带管理员（Admin）角色的JWT令牌<br/>
             业务限制：
             - 用户名不可重复
             - 普通用户（User）不能使用"admin"作为用户名
-            - 若未指定角色，默认创建普通用户（User）
             </remarks>
             <param name="request">注册请求参数，包含用户名、密码和可选角色</param>
             <returns>
@@ -299,6 +298,20 @@
         <member name="P:MinioWebBackend.Controllers.DownloadFileResponse.Base64Content">
             <summary>文件内容 Base64 编码字符串</summary>
         </member>
+        <member name="M:MinioWebBackend.Controllers.ElasticSearchController.SearchFiles(MinioWebBackend.Dtos.LogDtos.FileSearchDto)">
+            <summary>
+            查询文件（Elasticsearch）
+            </summary>
+            <remarks>
+            支持按 Id、文件名、上传者、存储桶、标签查询，支持分页。
+            标签支持 MatchAll（必须包含所有）和 MatchAny（包含任意一个）。
+            </remarks>
+            <param name="dto">查询条件 DTO</param>
+            <returns>
+            - Items: 文件记录列表  
+            - TotalCount: 总记录数
+            </returns>
+        </member>
         <member name="T:MinioWebBackend.Controllers.FileDownloadController">
             <summary>
             文件批量下载控制器（需登录访问）
@@ -473,6 +486,56 @@
             分页后的日志查询结果。
             返回 <see cref="T:MinioWebBackend.Dtos.LogDtos.LogQueryResponse"/>，包含日志条目集合、总记录数和分页信息。
             </returns>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.FileRecordESDto.Id">
+            <summary>
+            文件唯一 ID
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.FileRecordESDto.OriginalFileName">
+            <summary>
+            上传时的原始文件名（用户上传的文件名）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.FileRecordESDto.StoredFileName">
+            <summary>
+            存储时的系统文件名（用于 MinIO/S3 Key）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.FileRecordESDto.BucketName">
+            <summary>
+            文件所属存储桶
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.FileRecordESDto.Uploader">
+            <summary>
+            上传者用户名
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.FileRecordESDto.UploadTime">
+            <summary>
+            上传时间
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.FileRecordESDto.FileSize">
+            <summary>
+            文件大小（字节）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.FileRecordESDto.MimeType">
+            <summary>
+            文件类型（MIME）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.FileRecordESDto.ETag">
+            <summary>
+            文件 ETag（哈希标识）
+            </summary>
+        </member>
+        <member name="P:MinioWebBackend.Dtos.LogDtos.FileRecordESDto.Tags">
+            <summary>
+            文件标签
+            </summary>
         </member>
         <member name="T:MinioWebBackend.Dtos.LogDtos.LogItemDto">
             <summary>
@@ -1339,18 +1402,6 @@
             <returns>返回修改结果</returns>
             <response code="200">修改成功</response>
             <response code="400">请求错误（如文件不存在）</response>
-        </member>
-        <member name="T:MinioWebApi.Migrations.AddUserFields">
-            <inheritdoc />
-        </member>
-        <member name="M:MinioWebApi.Migrations.AddUserFields.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:MinioWebApi.Migrations.AddUserFields.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:MinioWebApi.Migrations.AddUserFields.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
-            <inheritdoc />
         </member>
     </members>
 </doc>
