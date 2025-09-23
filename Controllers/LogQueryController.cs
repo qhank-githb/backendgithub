@@ -27,7 +27,7 @@ namespace MinioWebBackend.Controllers
     /// </remarks>
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     public class LogQueryController : ControllerBase
     {
         private readonly ILogQueryService _logQueryService;

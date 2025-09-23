@@ -15,7 +15,7 @@ namespace MinioWebBackend.Controllers
     /// </remarks>
     [ApiController]
     [Route("api/file")]
-    [Authorize] // ✅ 所有接口需要身份验证（JWT）
+    //[Authorize] // ✅ 所有接口需要身份验证（JWT）
     public class FileDownloadController : ControllerBase
     {
         private readonly IDownloadService _idownloadService;

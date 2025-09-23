@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/tags")]
-[Authorize] 
+//[Authorize] 
 public class TagController : ControllerBase
 {
     private readonly ITagService _tagService;

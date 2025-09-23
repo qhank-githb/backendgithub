@@ -49,7 +49,7 @@ public class AuthController : ControllerBase
     /// 失败：400 Bad Request，返回错误消息（如用户名已存在）
     /// </returns>
     [HttpPost("register")]
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(RegisterResponse), 200)]   // 成功返回
     [ProducesResponseType(typeof(object), 400)]             // 失败返回
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
@@ -133,7 +133,7 @@ public async Task<IActionResult> Login([FromBody] LoginRequest request)
     /// （注：若令牌无效，会被认证中间件拦截为401）
     /// </returns>
     [HttpPost("logout")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public IActionResult Logout()
     {
         var username = User.Identity?.Name ?? "Unknown";

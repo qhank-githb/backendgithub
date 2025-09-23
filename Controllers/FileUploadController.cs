@@ -9,7 +9,7 @@ namespace MinioWebBackend.Controllers
 {
     [ApiController]
     [Route("api/{bucketName}/[controller]")]
-    [Authorize] 
+    //[Authorize] 
     public class FileUploadController : ControllerBase
     {
         private readonly IUploadService _iUploadService;

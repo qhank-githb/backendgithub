@@ -18,7 +18,7 @@ namespace MinioWebBackend.Controllers
     /// </remarks>
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // ✅ 默认所有接口需登录（JWT）
+    //[Authorize] // ✅ 默认所有接口需登录（JWT）
     public class FileQueryController : ControllerBase
     {
         private readonly IQueryService _iQueryService;
@@ -83,7 +83,7 @@ namespace MinioWebBackend.Controllers
         /// <returns>分页结果，包含文件列表和总数</returns>
         /// <response code="200">查询成功</response>
         [HttpGet("query")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<FileQueryResult>> QueryFiles(
             [FromQuery] int? id,
             [FromQuery] string? uploader,

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/files")]
-[Authorize] 
+//[Authorize] 
 public class FileTagController : ControllerBase
 {
     private readonly IFileTagService _fileTagService;
