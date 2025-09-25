@@ -37,34 +37,45 @@ public class FileTagService : IFileTagService
             .ToListAsync();
     }
 
-    public async Task<List<FileRecord>> GetFilesByTagsAsync(List<string> tagNames, bool matchAll)
-{
-    if (tagNames == null || tagNames.Count == 0)
-        return new List<FileRecord>();
+        public async Task<List<FileRecord>> GetFilesByTagsAsync(List<string> tagNames, bool matchAll)
+        {
+            if (tagNames == null || tagNames.Count == 0)
+                return new List<FileRecord>();
 
-    // 找出 tag ids
-    var tagIds = await _context.Tags
-        .Where(t => tagNames.Contains(t.Name))
-        .Select(t => t.Id)
-        .ToListAsync();
+            // 找出 tag ids
+            var tagIds = await _context.Tags
+                .Where(t => tagNames.Contains(t.Name))
+                .Select(t => t.Id)
+                .ToListAsync();
 
-    if (!tagIds.Any()) return new List<FileRecord>();
+            if (!tagIds.Any()) return new List<FileRecord>();
 
-    var query = _context.FileTags.Where(ft => tagIds.Contains(ft.TagId));
+            IQueryable<int> fileIdsQuery;
 
-    if (matchAll)
-    {
-        // 必须包含所有 tag
-        query = query.GroupBy(ft => ft.FileId)
-                     .Where(g => g.Select(ft => ft.TagId).Distinct().Count() == tagIds.Count)
-                     .SelectMany(g => g);
-    }
+            if (matchAll)
+            {
+                // 必须包含所有 tag
+                fileIdsQuery = _context.FileTags
+                    .Where(ft => tagIds.Contains(ft.TagId))
+                    .GroupBy(ft => ft.FileId)
+                    .Where(g => tagIds.All(tid => g.Any(ft => ft.TagId == tid))) // ⭐ 关键修改
+                    .Select(g => g.Key);
+            }
+            else
+            {
+                // 只要包含任意 tag
+                fileIdsQuery = _context.FileTags
+                    .Where(ft => tagIds.Contains(ft.TagId))
+                    .Select(ft => ft.FileId)
+                    .Distinct();
+            }
 
-    var fileIds = await query.Select(ft => ft.FileId).Distinct().ToListAsync();
+            var fileIds = await fileIdsQuery.ToListAsync();
 
-    return await _context.FileRecords
-        .Where(f => fileIds.Contains(f.Id))
-        .ToListAsync();
-}
+            return await _context.FileRecords
+                .Where(f => fileIds.Contains(f.Id))
+                .ToListAsync();
+        }
+
 
 }
