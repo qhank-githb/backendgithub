@@ -96,7 +96,10 @@ public async Task<List<FileWithTagsDto>> GetFilesByTagsAsync(List<string> tagNam
             MimeType = f.MimeType,
             UploadTime = f.UploadTime,
             Uploader = f.Uploader,
-            Tags = f.FileTags.Select(ft => ft.Tag.Name).ToList()
+             Tags = f.FileTags == null 
+            ? new List<string>() 
+            // 对 ft.Tag 做 null 检查：如果 Tag 为 null，返回空字符串（或其他默认值）
+            : f.FileTags.Select(ft => ft.Tag != null ? ft.Tag.Name : string.Empty).ToList()
         })
         .ToListAsync();
 }
