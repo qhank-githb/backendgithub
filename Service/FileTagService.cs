@@ -84,6 +84,7 @@ public async Task<List<FileRecord>> GetFilesByTagsAsync(List<string> tagNames, b
     // 查询文件表
     return await _context.FileRecords
         .Where(f => fileIds.Contains(f.Id))
+        .Include(f => f.FileTags)
         .ToListAsync();
 }
 
