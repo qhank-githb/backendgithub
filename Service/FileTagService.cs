@@ -37,10 +37,10 @@ public class FileTagService : IFileTagService
             .ToListAsync();
     }
 
-public async Task<List<FileRecord>> GetFilesByTagsAsync(List<string> tagNames, bool matchAll)
+public async Task<List<FileWithTagsDto>> GetFilesByTagsAsync(List<string> tagNames, bool matchAll)
 {
     if (tagNames == null || tagNames.Count == 0)
-        return new List<FileRecord>();
+        return new List<FileWithTagsDto>();
 
     // 找出 tag ids
     var tagIds = await _context.Tags
@@ -48,7 +48,7 @@ public async Task<List<FileRecord>> GetFilesByTagsAsync(List<string> tagNames, b
         .Select(t => t.Id)
         .ToListAsync();
 
-    if (!tagIds.Any()) return new List<FileRecord>();
+    if (!tagIds.Any()) return new List<FileWithTagsDto>();
 
     List<int> fileIds;
 
@@ -69,7 +69,7 @@ public async Task<List<FileRecord>> GetFilesByTagsAsync(List<string> tagNames, b
         fileIds = groups
             .Where(g => tagIds.All(tid => g.TagIds.Contains(tid)))
             .Select(g => g.FileId)
-            .ToList(); // ⚠️ 注意这里是 ToList()，不是 ToListAsync()
+            .ToList();
     }
     else
     {
@@ -81,12 +81,26 @@ public async Task<List<FileRecord>> GetFilesByTagsAsync(List<string> tagNames, b
             .ToListAsync();
     }
 
-    // 查询文件表
+    // ✅ 查询文件并直接投影成 DTO，只包含 Tag.Name
     return await _context.FileRecords
         .Where(f => fileIds.Contains(f.Id))
-        .Include(f => f.FileTags)
+        .Select(f => new FileWithTagsDto
+        {
+            Id = f.Id,
+            OriginalFileName = f.OriginalFileName,
+            StoredFileName = f.StoredFileName,
+            BucketName = f.BucketName,
+            RelativePath = f.RelativePath,
+            AbsolutePath = f.AbsolutePath,
+            FileSize = f.FileSize,
+            MimeType = f.MimeType,
+            UploadTime = f.UploadTime,
+            Uploader = f.Uploader,
+            Tags = f.FileTags.Select(ft => ft.Tag.Name).ToList()
+        })
         .ToListAsync();
 }
+
 
 
 
