@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -389,6 +390,7 @@ public class FileQueryResult
         /// <summary>
         /// 文件实体（导航属性）
         /// </summary>
+        [JsonIgnore]
         public FileRecord? FileRecord { get; set; }
 
         /// <summary>
