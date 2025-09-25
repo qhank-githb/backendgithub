@@ -37,53 +37,56 @@ public class FileTagService : IFileTagService
             .ToListAsync();
     }
 
-        public async Task<List<FileRecord>> GetFilesByTagsAsync(List<string> tagNames, bool matchAll)
-        {
-            if (tagNames == null || tagNames.Count == 0)
-                return new List<FileRecord>();
+public async Task<List<FileRecord>> GetFilesByTagsAsync(List<string> tagNames, bool matchAll)
+{
+    if (tagNames == null || tagNames.Count == 0)
+        return new List<FileRecord>();
 
-            // 找出 tag ids
-            var tagIds = await _context.Tags
-                .Where(t => tagNames.Contains(t.Name))
-                .Select(t => t.Id)
-                .ToListAsync();
+    // 找出 tag ids
+    var tagIds = await _context.Tags
+        .Where(t => tagNames.Contains(t.Name))
+        .Select(t => t.Id)
+        .ToListAsync();
 
-            if (!tagIds.Any()) return new List<FileRecord>();
+    if (!tagIds.Any()) return new List<FileRecord>();
 
-            IQueryable<int> fileIdsQuery;
+    List<int> fileIds;
 
-        if (matchAll)
-        {
-            var groups = await _context.FileTags
-                .Where(ft => tagIds.Contains(ft.TagId))
-                .GroupBy(ft => ft.FileId)
-                .Select(g => new
-                {
-                    FileId = g.Key,
-                    TagIds = g.Select(ft => ft.TagId).Distinct().ToList()
-                })
-                .ToListAsync();
+    if (matchAll)
+    {
+        // 第一步：数据库查询，取出分组和对应的标签集合
+        var groups = await _context.FileTags
+            .Where(ft => tagIds.Contains(ft.TagId))
+            .GroupBy(ft => ft.FileId)
+            .Select(g => new
+            {
+                FileId = g.Key,
+                TagIds = g.Select(ft => ft.TagId).Distinct().ToList()
+            })
+            .ToListAsync();
 
-            fileIdsQuery = groups
-                .Where(g => tagIds.All(tid => g.TagIds.Contains(tid)))
-                .Select(g => g.FileId)
-                .AsQueryable();
-        }
-        else
-        {
-            fileIdsQuery = _context.FileTags
-                .Where(ft => tagIds.Contains(ft.TagId))
-                .Select(ft => ft.FileId)
-                .Distinct();
+        // 第二步：在内存里过滤
+        fileIds = groups
+            .Where(g => tagIds.All(tid => g.TagIds.Contains(tid)))
+            .Select(g => g.FileId)
+            .ToList(); // ⚠️ 注意这里是 ToList()，不是 ToListAsync()
+    }
+    else
+    {
+        // 任意匹配
+        fileIds = await _context.FileTags
+            .Where(ft => tagIds.Contains(ft.TagId))
+            .Select(ft => ft.FileId)
+            .Distinct()
+            .ToListAsync();
+    }
+
+    // 查询文件表
+    return await _context.FileRecords
+        .Where(f => fileIds.Contains(f.Id))
+        .ToListAsync();
 }
 
-
-            var fileIds = await fileIdsQuery.ToListAsync();
-
-            return await _context.FileRecords
-                .Where(f => fileIds.Contains(f.Id))
-                .ToListAsync();
-        }
 
 
 }
