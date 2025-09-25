@@ -76,11 +76,14 @@ public class TagController : ControllerBase
     /// <remarks>
     /// 请求示例：
     /// ```json
-    /// {
-    ///   "fileId": 101,
-    ///   "newFileName": "新合同2025.pdf",
-    ///   "tags": ["合同","PDF","2025"]
-    /// }
+    ///{
+    ///"id": 15,
+    ///"fileName": "测试.docx",
+    ///"tags": [
+    ///     "PPTX",
+    ///     "PDF"
+    ///         ]
+    ///}
     /// ```
     /// 
     /// 响应示例：
