@@ -52,23 +52,31 @@ public class FileTagService : IFileTagService
 
             IQueryable<int> fileIdsQuery;
 
-            if (matchAll)
-            {
-                // 必须包含所有 tag
-                fileIdsQuery = _context.FileTags
-                    .Where(ft => tagIds.Contains(ft.TagId))
-                    .GroupBy(ft => ft.FileId)
-                    .Where(g => tagIds.All(tid => g.Any(ft => ft.TagId == tid))) // ⭐ 关键修改
-                    .Select(g => g.Key);
-            }
-            else
-            {
-                // 只要包含任意 tag
-                fileIdsQuery = _context.FileTags
-                    .Where(ft => tagIds.Contains(ft.TagId))
-                    .Select(ft => ft.FileId)
-                    .Distinct();
-            }
+        if (matchAll)
+        {
+            var groups = await _context.FileTags
+                .Where(ft => tagIds.Contains(ft.TagId))
+                .GroupBy(ft => ft.FileId)
+                .Select(g => new
+                {
+                    FileId = g.Key,
+                    TagIds = g.Select(ft => ft.TagId).Distinct().ToList()
+                })
+                .ToListAsync();
+
+            fileIdsQuery = groups
+                .Where(g => tagIds.All(tid => g.TagIds.Contains(tid)))
+                .Select(g => g.FileId)
+                .AsQueryable();
+        }
+        else
+        {
+            fileIdsQuery = _context.FileTags
+                .Where(ft => tagIds.Contains(ft.TagId))
+                .Select(ft => ft.FileId)
+                .Distinct();
+}
+
 
             var fileIds = await fileIdsQuery.ToListAsync();
 
