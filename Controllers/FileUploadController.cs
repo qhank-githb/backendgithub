@@ -31,7 +31,7 @@ namespace MinioWebBackend.Controllers
         /// Form 表单参数:
         /// ```text
         /// file: 要上传的文件 (IFormFile)
-        /// username: 上传者用户名 (string)
+        /// username: 上传者用户名 (string)，在此接口测试无法传入用户名，暂时设置为"unknown"，正式使用时应该同请求传入
         /// description: 文件描述信息，可选 (string)
         /// tags: 文件标签列表，可选，多值可用逗号分隔 (string)
         /// ```
@@ -45,7 +45,7 @@ namespace MinioWebBackend.Controllers
         /// | 字段名   | 类型       | 必填 | 描述                                        | 示例                     |
         /// |----------|-----------|------|-------------------------------------------|-------------------------|
         /// | file     | IFormFile | 是   | 要上传的文件                                | example.pdf             |
-        /// | username | string    | 是   | 上传者用户名                                | testUser                |
+        /// | username | string    | 是   | 上传者用户名 在此接口测试无法传入用户名，暂时设置为"unknown"，正式使用时应该同请求传入                                | testUser                |
         /// | tags     | string    | 否   | 文件标签（JSON 数组字符串），例如：["合同","PDF"] | ["合同","PDF"]           |
         /// ```
         /// </remarks>
