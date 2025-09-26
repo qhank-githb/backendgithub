@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MinioWebApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+31307a87c3d09f66b2e55307212173a4ba7041d4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3d623e3def9fc3133ef1e9dc7fe79d1412ceed57")]
 [assembly: System.Reflection.AssemblyProductAttribute("MinioWebApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MinioWebApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

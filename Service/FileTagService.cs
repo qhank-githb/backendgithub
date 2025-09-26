@@ -1,6 +1,7 @@
 using MinioWebBackend.Interfaces;
 using MinioWebBackend.Models;
 using Microsoft.EntityFrameworkCore;
+using MinioWebBackend.Dtos.LogDtos;
 
 
 public class FileTagService : IFileTagService
@@ -20,40 +21,30 @@ public class FileTagService : IFileTagService
         await _context.SaveChangesAsync();
     }
 
-public async Task<List<FileRecord>> GetFilesByTagAsync(string tagName)
-{
-    return await _context.FileRecords
-        .Where(f => f.FileTags != null && f.FileTags.Any(ft => ft.Tag!.Name == tagName))
-        .Select(f => new FileRecord
+        public async Task<List<FileRecordESDto>> GetFilesByTagAsync(string tagName)
         {
-            Id = f.Id,
-            StoredFileName = f.StoredFileName,
-            OriginalFileName = f.OriginalFileName,
-            BucketName = f.BucketName,
-            RelativePath = f.RelativePath,
-            AbsolutePath = f.AbsolutePath,
-            FileSize = f.FileSize,
-            MimeType = f.MimeType,
-            UploadTime = f.UploadTime,
-            Uploader = f.Uploader,
-            ETag = f.ETag,
-
-            // ✅ 如果 FileTags 为空，则投影成空集合，而不是 null
-            FileTags = (f.FileTags ?? new List<FileTag>())
-                .Select(ft => new FileTag
+            return await _context.FileRecords
+                .Where(f => f.FileTags.Any(ft => ft.Tag!.Name == tagName))
+                .Select(f => new FileRecordESDto
                 {
-                    FileId = ft.FileId,
-                    TagId = ft.TagId,
-                    Tag = ft.Tag == null ? null : new Tag
-                    {
-                        Id = ft.Tag.Id,
-                        Name = ft.Tag.Name
-                    }
+                    Id = f.Id,
+                    StoredFileName = f.StoredFileName,
+                    OriginalFileName = f.OriginalFileName,
+                    BucketName = f.BucketName,
+                    Uploader = f.Uploader,
+                    UploadTime = f.UploadTime,
+                    FileSize = f.FileSize,
+                    MimeType = f.MimeType,
+                    ETag = f.ETag,
+                    Tags = f.FileTags
+                        .Where(ft => ft.Tag != null)
+                        .Select(ft => ft.Tag!.Name)
+                        .ToList()
                 })
-                .ToList()
-        })
-        .ToListAsync();
-}
+                .ToListAsync();
+        }
+
+
 
 
 
