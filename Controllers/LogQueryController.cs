@@ -56,6 +56,9 @@ namespace MinioWebBackend.Controllers
         /// - PropertyFilters：JSON 属性过滤，如 fields.ActionName="Login"
         /// - PageIndex / PageSize：分页信息
         /// </param>
+        /// <remarks>
+        /// /api/LogQuery/query?Levels=Warning&amp;MessageKeyword=错误&amp;PropertyFilters[Username]=admin&amp;PropertyFilters[Error]=用户名已存在&amp;PageIndex=1&amp;PageSize=10
+        /// </remarks>
         /// <returns>
         /// 返回 <see cref="LogQueryResponse"/>：
         /// - Logs：符合条件的日志列表（每条日志为 <see cref="LogItemDto"/>）

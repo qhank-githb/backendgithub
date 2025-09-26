@@ -20,14 +20,42 @@ public class FileTagService : IFileTagService
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<FileRecord>> GetFilesByTagAsync(string tagName)
-    {
-        return await _context.FileTags
-            .Join(_context.Tags, ft => ft.TagId, t => t.Id, (ft, t) => new { ft, t })
-            .Where(x => x.t.Name == tagName)
-            .Join(_context.FileRecords, x => x.ft.FileId, f => f.Id, (x, f) => f)
-            .ToListAsync();
-    }
+public async Task<List<FileRecord>> GetFilesByTagAsync(string tagName)
+{
+    return await _context.FileRecords
+        .Where(f => f.FileTags != null && f.FileTags.Any(ft => ft.Tag!.Name == tagName))
+        .Select(f => new FileRecord
+        {
+            Id = f.Id,
+            StoredFileName = f.StoredFileName,
+            OriginalFileName = f.OriginalFileName,
+            BucketName = f.BucketName,
+            RelativePath = f.RelativePath,
+            AbsolutePath = f.AbsolutePath,
+            FileSize = f.FileSize,
+            MimeType = f.MimeType,
+            UploadTime = f.UploadTime,
+            Uploader = f.Uploader,
+            ETag = f.ETag,
+
+            // ✅ 如果 FileTags 为空，则投影成空集合，而不是 null
+            FileTags = (f.FileTags ?? new List<FileTag>())
+                .Select(ft => new FileTag
+                {
+                    FileId = ft.FileId,
+                    TagId = ft.TagId,
+                    Tag = ft.Tag == null ? null : new Tag
+                    {
+                        Id = ft.Tag.Id,
+                        Name = ft.Tag.Name
+                    }
+                })
+                .ToList()
+        })
+        .ToListAsync();
+}
+
+
 
     public async Task<List<Tag>> GetTagsByFileAsync(int fileId)
     {

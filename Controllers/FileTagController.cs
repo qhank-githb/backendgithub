@@ -19,26 +19,7 @@ public class FileTagController : ControllerBase
         _dbContext = dbcontext;
     }
 
-    /// <summary>
-    /// 给指定文件添加标签
-    /// </summary>
-    /// <remarks>
-    /// 请求示例：
-    /// ```json
-    /// [1, 2, 3]
-    /// ```
-    /// 表示给文件添加标签 ID 为 1、2、3 的标签。
-    /// </remarks>
-    /// <param name="fileId">文件 ID</param>
-    /// <param name="tagIds">标签 ID 列表</param>
-    /// <response code="200">标签添加成功</response>
-    /// <response code="404">文件或标签不存在</response>
-    // [HttpPost("{fileId}/tags")]
-    // public async Task<IActionResult> AddTagsToFile(int fileId, [FromBody] List<int> tagIds)
-    // {
-    //     await _fileTagService.AddTagsToFileAsync(fileId, tagIds);
-    //     return Ok(new { Message = "Tags added successfully." });
-    // }
+
 
     /// <summary>
     /// 根据单个标签名查询文件
