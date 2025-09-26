@@ -191,19 +191,6 @@ public async Task<IActionResult> PreviewById([FromQuery] int id)
         }
     }
     
-    public class DownloadFileResponse
-{
-    /// <summary>文件名称</summary>
-    public string FileName { get; set; } = string.Empty;
 
-    /// <summary>MIME 类型</summary>
-    public string MimeType { get; set; } = "application/octet-stream";
-
-    /// <summary>文件大小（字节）</summary>
-    public long Size { get; set; }
-
-    /// <summary>文件内容 Base64 编码字符串</summary>
-    public string Base64Content { get; set; } = string.Empty;
-}
 }
 
