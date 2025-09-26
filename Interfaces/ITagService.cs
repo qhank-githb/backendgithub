@@ -1,3 +1,4 @@
+using MinioWebBackend.Dtos.LogDtos;
 using MinioWebBackend.Models;
 
 namespace MinioWebBackend.Interfaces
@@ -6,7 +7,7 @@ namespace MinioWebBackend.Interfaces
     {
         Task<Tag> CreateTagAsync(string name);
 
-        Task<List<Tag>> GetAllTagsAsync();
+        Task<List<TagDto>> GetAllTagsAsync();
 
         Task EditFileAsync(EditFileDto dto);
     }

@@ -4,6 +4,7 @@ using MinioWebBackend.Interfaces;
 using MinioWebBackend.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using MinioWebBackend.Dtos.LogDtos;
 
 
 
@@ -50,10 +51,17 @@ namespace MinioWebBackend.Service
         }
 
 
-        public async Task<List<Tag>> GetAllTagsAsync()
+       public async Task<List<TagDto>> GetAllTagsAsync()
         {
-            return await _context.Tags.ToListAsync();
+            return await _context.Tags
+                .Select(t => new TagDto
+                {
+                    Id = t.Id,
+                    Name = t.Name
+                })
+                .ToListAsync();
         }
+
 
 
 

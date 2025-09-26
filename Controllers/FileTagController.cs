@@ -27,11 +27,28 @@ public class FileTagController : ControllerBase
     /// <remarks>
     /// 请求示例：
     /// ```
-    /// GET /api/files/tag/合同
+    /// GET /api/files/tag/测试
     /// ```
     /// 返回示例：
     /// ```
-    /// {"items":[{"id":3,"storedFileName":"admin_20250915185746791_0b3be68b1dda4662a06eb4d52004b521","originalFileName":"1.pptx","bucketname":"my-bucket","relativePath":"admin_20250915185746791_0b3be68b1dda4662a06eb4d52004b521","absolutePath":"/my-bucket/admin_20250915185746791_0b3be68b1dda4662a06eb4d52004b521","fileSize":1842987,"mimeType":"application/vnd.openxmlformats-officedocument.presentationml.presentation","uploadTime":"2025-09-15T18:57:47.1643764","uploader":"admin","eTag":"","tags":["1"]},{"id":1,"storedFileName":"admin_20250915175010541_520dff1b76134536ae80e67b7f5e3843","originalFileName":"TODO.txt","bucketname":"my-bucket","relativePath":"admin_20250915175010541_520dff1b76134536ae80e67b7f5e3843","absolutePath":"/my-bucket/admin_20250915175010541_520dff1b76134536ae80e67b7f5e3843","fileSize":105,"mimeType":"text/plain","uploadTime":"2025-09-15T17:50:10.6489212","uploader":"admin","eTag":"","tags":["1"]}],"totalCount":2}
+    /// [{
+    ///     "id": 18,
+    ///     "originalFileName": "测试docx.docx",
+    ///     "storedFileName": "admin_20250925181323165_ede2ddf0e09e4f2e8343741b5a9f30f1",
+    ///     "bucketName": "my-bucket",
+    ///     "uploader": "admin",
+    ///     "uploadTime": "2025-09-25T18:13:23.362577",
+    ///     "fileSize": 13555,
+    ///     "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ///     "eTag": "\"3327a5262d1956c3d969057a87574be5-1\"",
+    ///   "tags": [
+    ///       "压缩文件",
+    ///       "xlxs",
+    ///       "测试",
+    ///       "图片",
+    ///       "合同"
+    ///     ]
+    ///   }]
     /// ```
     /// </remarks>
     /// <param name="tagName">标签名称</param>
@@ -56,7 +73,24 @@ public class FileTagController : ControllerBase
     /// ```
     /// 返回示例：
     /// ```
-    /// {"items":[{"id":3,"storedFileName":"admin_20250915185746791_0b3be68b1dda4662a06eb4d52004b521","originalFileName":"1.pptx","bucketname":"my-bucket","relativePath":"admin_20250915185746791_0b3be68b1dda4662a06eb4d52004b521","absolutePath":"/my-bucket/admin_20250915185746791_0b3be68b1dda4662a06eb4d52004b521","fileSize":1842987,"mimeType":"application/vnd.openxmlformats-officedocument.presentationml.presentation","uploadTime":"2025-09-15T18:57:47.1643764","uploader":"admin","eTag":"","tags":["1"]},{"id":1,"storedFileName":"admin_20250915175010541_520dff1b76134536ae80e67b7f5e3843","originalFileName":"TODO.txt","bucketname":"my-bucket","relativePath":"admin_20250915175010541_520dff1b76134536ae80e67b7f5e3843","absolutePath":"/my-bucket/admin_20250915175010541_520dff1b76134536ae80e67b7f5e3843","fileSize":105,"mimeType":"text/plain","uploadTime":"2025-09-15T17:50:10.6489212","uploader":"admin","eTag":"","tags":["1"]}],"totalCount":2}
+    /// [{
+    ///     "id": 18,
+    ///     "originalFileName": "测试docx.docx",
+    ///     "storedFileName": "admin_20250925181323165_ede2ddf0e09e4f2e8343741b5a9f30f1",
+    ///     "bucketName": "my-bucket",
+    ///     "uploader": "admin",
+    ///     "uploadTime": "2025-09-25T18:13:23.362577",
+    ///     "fileSize": 13555,
+    ///     "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ///     "eTag": "\"3327a5262d1956c3d969057a87574be5-1\"",
+    ///   "tags": [
+    ///       "压缩文件",
+    ///       "xlxs",
+    ///       "测试",
+    ///       "图片",
+    ///       "合同"
+    ///     ]
+    ///   }]
     /// ```
     /// - `matchAll = true` 表示需要同时包含所有标签  
     /// - `matchAll = false` 表示只要包含任意一个标签即可

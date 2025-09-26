@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MinioWebBackend.Interfaces;
 using MinioWebBackend.Models;
 using Microsoft.AspNetCore.Authorization;
+using MinioWebBackend.Dtos.LogDtos;
 
 [ApiController]
 [Route("api/tags")]
@@ -40,7 +41,8 @@ public class TagController : ControllerBase
         try
         {
             var tag = await _tagService.CreateTagAsync(dto.Name);
-            return CreatedAtAction(nameof(GetAll), new { id = tag.Id }, tag);
+            var tagDto = new TagDto { Id = tag.Id, Name = tag.Name };
+        return CreatedAtAction(nameof(GetAll), new { id = tag.Id }, tagDto);
         }
         catch (Exception ex)
         {
