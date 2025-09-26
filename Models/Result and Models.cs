@@ -496,20 +496,20 @@ namespace MinioWebBackend.Models
         /// <summary>
         /// 文件 ID
         /// </summary>
-        /// <example>2001</example>
+        /// <example>15</example>
         [Required]
         public int Id { get; set; }
 
         /// <summary>
         /// 新的文件名
         /// </summary>
-        /// <example>new_report2024.xlsx</example>
+        /// <example>测试.docx</example>
         public string FileName { get; set; } = string.Empty;
 
         /// <summary>
         /// 新的标签列表（覆盖原有标签）
         /// </summary>
-        /// <example>["财务", "年度报告"]</example>
+        /// <example>["PPTX","PDF"]</example>
         public List<string>? Tags { get; set; }
     }
 
