@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MinioWebBackend.Dtos.AuthDTOs;
 using MinioWebBackend.Interfaces;
 using Serilog;
 
@@ -141,89 +142,4 @@ public async Task<IActionResult> Login([FromBody] LoginRequest request)
 
         return Ok(new { message = "退出成功" });
     }
-}
-
-/// <summary>
-/// 登录请求DTO（数据传输对象），封装用户登录时的输入参数
-/// </summary>
-public class LoginRequest
-{
-    /// <summary>
-    /// 登录用户名（必须与注册时的用户名一致）
-    /// </summary>
-    /// <example>testuser</example>
-    public string Username { get; set; } = string.Empty;
-
-    /// <summary>
-    /// 登录密码（明文，后端会与数据库中的加密密码比对）
-    /// </summary>
-    /// <example>Test@123456</example>
-    public string Password { get; set; } = string.Empty;
-}
-
-/// <summary>
-/// 注册请求DTO（数据传输对象），封装用户注册时的输入参数
-/// </summary>
-public class RegisterRequest
-{
-    /// <summary>
-    /// 注册用户名（必须唯一，不允许为"admin"（普通用户角色时））
-    /// </summary>
-    /// <example>newuser</example>
-    public string Username { get; set; } = string.Empty;
-
-    /// <summary>
-    /// 注册密码（明文，后端会进行加密存储）
-    /// </summary>
-    /// <example>New@123456</example>
-    public string Password { get; set; } = string.Empty;
-
-    /// <summary>
-    /// 用户角色（可选，默认为"User"）
-    /// </summary>
-    /// <remarks>
-    /// 允许值："Admin"（管理员）、"User"（普通用户）<br/>
-    /// 仅管理员可指定"Admin"角色
-    /// </remarks>
-    /// <example>User</example>
-    public string? Role { get; set; }
-}
-
-
-
-/// <summary>
-/// 用户注册返回对象
-/// </summary>
-public class RegisterResponse
-{
-    /// <summary>用户ID</summary>
-    public int Id { get; set; }
-
-    /// <summary>用户名</summary>
-    public string Username { get; set; } = string.Empty;
-
-    /// <summary>角色</summary>
-    public string Role { get; set; } = string.Empty;
-}
-
-/// <summary>
-/// 登录返回数据
-/// </summary>
-public class LoginResponse
-{
-    /// <summary>JWT 访问令牌</summary>
-    /// <example>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</example>
-    public string Token { get; set; } = string.Empty;
-
-    /// <summary>用户名</summary>
-    /// <example>testuser</example>
-    public string Username { get; set; } = string.Empty;
-
-    /// <summary>用户角色</summary>
-    /// <example>User</example>
-    public string Role { get; set; } = string.Empty;
-
-    /// <summary>最后登录时间（UTC）</summary>
-    /// <example>2025-09-15T15:30:00Z</example>
-    public DateTime? LastLogin { get; set; }
 }
