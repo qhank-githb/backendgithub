@@ -547,11 +547,6 @@
             单条日志的DTO（数据传输对象），用于展示日志的详细信息
             </summary>
         </member>
-        <member name="P:MinioWebBackend.Dtos.LogDtos.LogItemDto.Id">
-            <summary>
-            日志记录的唯一标识（自增ID）
-            </summary>
-        </member>
         <member name="P:MinioWebBackend.Dtos.LogDtos.LogItemDto.Level">
             <summary>
             日志级别（如 Verbose、Debug、Information、Warning、Error、Fatal 等）
@@ -560,11 +555,6 @@
         <member name="P:MinioWebBackend.Dtos.LogDtos.LogItemDto.Message">
             <summary>
             日志的具体消息内容
-            </summary>
-        </member>
-        <member name="P:MinioWebBackend.Dtos.LogDtos.LogItemDto.Exception">
-            <summary>
-            异常信息（如果存在），否则为 null
             </summary>
         </member>
         <member name="P:MinioWebBackend.Dtos.LogDtos.LogItemDto.Properties">
@@ -1280,22 +1270,6 @@
             查询bucket是否存在，否则创建新bucket
             </summary>
         </member>
-        <member name="M:FileTagController.AddTagsToFile(System.Int32,System.Collections.Generic.List{System.Int32})">
-            <summary>
-            给指定文件添加标签
-            </summary>
-            <remarks>
-            请求示例：
-            ```json
-            [1, 2, 3]
-            ```
-            表示给文件添加标签 ID 为 1、2、3 的标签。
-            </remarks>
-            <param name="fileId">文件 ID</param>
-            <param name="tagIds">标签 ID 列表</param>
-            <response code="200">标签添加成功</response>
-            <response code="404">文件或标签不存在</response>
-        </member>
         <member name="M:FileTagController.GetFilesByTag(System.String)">
             <summary>
             根据单个标签名查询文件
@@ -1378,30 +1352,33 @@
             <response code="200">返回标签列表</response>
         </member>
         <member name="M:TagController.EditFile(MinioWebBackend.Models.EditFileDto)">
-            <summary>
-            修改文件信息（例如更新文件名或标签）
-            </summary>
-            <remarks>
-            请求示例：
-            ```json
+             <summary>
+             修改文件信息（例如更新文件名或标签）
+             </summary>
+             <remarks>
+             请求示例：
+             ```json
             {
-              "fileId": 101,
-              "newFileName": "新合同2025.pdf",
-              "tags": ["合同","PDF","2025"]
+            "id": 15,
+            "fileName": "测试.docx",
+            "tags": [
+                 "PPTX",
+                 "PDF"
+                     ]
             }
-            ```
-            
-            响应示例：
-            ```json
-            {
-              "message": "文件信息修改成功"
-            }
-            ```
-            </remarks>
-            <param name="dto">包含文件修改信息的 DTO 对象</param>
-            <returns>返回修改结果</returns>
-            <response code="200">修改成功</response>
-            <response code="400">请求错误（如文件不存在）</response>
+             ```
+             
+             响应示例：
+             ```json
+             {
+               "message": "文件信息修改成功"
+             }
+             ```
+             </remarks>
+             <param name="dto">包含文件修改信息的 DTO 对象</param>
+             <returns>返回修改结果</returns>
+             <response code="200">修改成功</response>
+             <response code="400">请求错误（如文件不存在）</response>
         </member>
     </members>
 </doc>

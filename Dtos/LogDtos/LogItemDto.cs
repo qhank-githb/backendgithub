@@ -12,10 +12,7 @@ namespace MinioWebBackend.Dtos.LogDtos
     /// </summary>
     public class LogItemDto
     {
-        /// <summary>
-        /// 日志记录的唯一标识（自增ID）
-        /// </summary>
-        public long Id { get; set; }
+
 
         /// <summary>
         /// 日志级别（如 Verbose、Debug、Information、Warning、Error、Fatal 等）
@@ -28,10 +25,6 @@ namespace MinioWebBackend.Dtos.LogDtos
         /// </summary>
         public string Message { get; set; } = string.Empty;
 
-        /// <summary>
-        /// 异常信息（如果存在），否则为 null
-        /// </summary>
-        public string? Exception { get; set; }
 
         /// <summary>
         /// 日志的结构化属性（键值对集合），包含额外的上下文信息
@@ -52,10 +45,8 @@ namespace MinioWebBackend.Dtos.LogDtos
         {
             return new LogItemDto
             {
-                Id = log.Id,
                 Level = ParseLogLevel(log.Level),
                 Message = log.Message,
-                Exception = log.Exception,
                 Properties = ParseProperties(log.Properties),
                 Timestamp = log.Timestamp
             };
@@ -95,7 +86,6 @@ public static LogItemDto FromESDto(SerilogLogESDto esDto)
     {
         Level = level,
         Message = esDto.Message ?? string.Empty,
-        Exception = esDto.Exception,
         Timestamp = esDto.AtTimestamp,  // ✅ 使用正确的属性名
         Properties = esDto.Fields  ?? new Dictionary<string, object>()      // ⚠️ 确保类型一致
     };
