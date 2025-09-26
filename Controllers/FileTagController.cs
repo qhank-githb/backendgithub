@@ -33,12 +33,12 @@ public class FileTagController : ControllerBase
     /// <param name="tagIds">标签 ID 列表</param>
     /// <response code="200">标签添加成功</response>
     /// <response code="404">文件或标签不存在</response>
-    [HttpPost("{fileId}/tags")]
-    public async Task<IActionResult> AddTagsToFile(int fileId, [FromBody] List<int> tagIds)
-    {
-        await _fileTagService.AddTagsToFileAsync(fileId, tagIds);
-        return Ok(new { Message = "Tags added successfully." });
-    }
+    // [HttpPost("{fileId}/tags")]
+    // public async Task<IActionResult> AddTagsToFile(int fileId, [FromBody] List<int> tagIds)
+    // {
+    //     await _fileTagService.AddTagsToFileAsync(fileId, tagIds);
+    //     return Ok(new { Message = "Tags added successfully." });
+    // }
 
     /// <summary>
     /// 根据单个标签名查询文件
