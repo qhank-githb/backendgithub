@@ -78,11 +78,14 @@ namespace MinioWebBackend.Controllers
             if (dto.File == null)
                 return BadRequest("请选择上传文件");
 
-            if (string.IsNullOrEmpty(dto.Username))
-                return BadRequest("缺少用户名");
+            if (string.IsNullOrEmpty(dto.Username))//为了测试接口暂时写成测试用户
+            {
+                dto.Username = "unknown";
+                Console.WriteLine("缺少用户名，设置为unknown。正式使用时应同请求一起传入");
+            }
 
             // 解析 tags
-            List<string> tagList = new List<string>();
+                List<string> tagList = new List<string>();
             if (!string.IsNullOrEmpty(dto.Tags))
             {
                 try
