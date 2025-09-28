@@ -924,36 +924,6 @@
             </summary>
             <example>2025-09-15T12:30:00Z</example>
         </member>
-        <member name="M:MinioWebBackend.Interfaces.IAuthService.RegisterAsync(System.String,System.String,System.String)">
-            <summary>
-            注册用户
-            </summary>
-        </member>
-        <member name="M:MinioWebBackend.Interfaces.IAuthService.LoginAsync(System.String,System.String)">
-            <summary>
-            用户登录
-            </summary>
-        </member>
-        <member name="M:MinioWebBackend.Interfaces.IAuthService.GenerateJwtToken(MinioWebBackend.Models.User)">
-            <summary>
-            生成JWT令牌
-            </summary>
-        </member>
-        <member name="M:MinioWebBackend.Interfaces.IAuthService.InitializeAdminAccountAsync">
-            <summary>
-            初始化管理员账号
-            </summary>
-        </member>
-        <member name="T:MinioWebBackend.Interfaces.ILogQueryService">
-            <summary>
-            日志查询服务接口
-            </summary>
-        </member>
-        <member name="M:MinioWebBackend.Interfaces.ILogQueryService.QueryLogsAsync(MinioWebBackend.Dtos.LogDtos.LogQueryRequest)">
-            <summary>
-            按条件查询日志
-            </summary>
-        </member>
         <member name="T:MinioWebBackend.Models.FileRecord">
             <summary>
             文件记录表实体（映射数据库表 file_info）
@@ -1214,6 +1184,36 @@
             </summary>
             <param name="context">当前 HttpContext</param>
             <returns>用户名，如果未登录返回 null</returns>
+        </member>
+        <member name="M:MinioWebBackend.Interfaces.IAuthService.RegisterAsync(System.String,System.String,System.String)">
+            <summary>
+            注册用户
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Interfaces.IAuthService.LoginAsync(System.String,System.String)">
+            <summary>
+            用户登录
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Interfaces.IAuthService.GenerateJwtToken(MinioWebBackend.Models.User)">
+            <summary>
+            生成JWT令牌
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Interfaces.IAuthService.InitializeAdminAccountAsync">
+            <summary>
+            初始化管理员账号
+            </summary>
+        </member>
+        <member name="T:MinioWebBackend.Interfaces.ILogQueryService">
+            <summary>
+            日志查询服务接口
+            </summary>
+        </member>
+        <member name="M:MinioWebBackend.Interfaces.ILogQueryService.QueryLogsAsync(MinioWebBackend.Dtos.LogDtos.LogQueryRequest)">
+            <summary>
+            按条件查询日志
+            </summary>
         </member>
         <member name="T:MinioWebBackend.Serilog.EFCoreSink">
             <summary>
