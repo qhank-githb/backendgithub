@@ -4,6 +4,7 @@ using MinioWebBackend.Interfaces;
 using System.IO.Compression;
 using Microsoft.Extensions.Options;
 using MinioWebBackend.Options;
+using MinioWebBackend.Dtos.FileInfoDTOs;
 using Serilog;
 
 

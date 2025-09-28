@@ -1,3 +1,4 @@
+using MinioWebBackend.Dtos.EditFileDTOs;
 using MinioWebBackend.Dtos.LogDtos;
 using MinioWebBackend.Models;
 

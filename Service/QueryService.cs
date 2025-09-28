@@ -1,6 +1,7 @@
 using MinioWebBackend.Models;
 using MinioWebBackend.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using MinioWebBackend.Dtos.FileInfoDTOs;
 
 
 namespace MinioWebBackend.Service

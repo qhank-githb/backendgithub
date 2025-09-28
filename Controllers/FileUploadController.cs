@@ -4,6 +4,7 @@ using MinioWebBackend.Models;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Swashbuckle.AspNetCore.Annotations;
+using MinioWebBackend.Dtos.UploadDTOs;
 
 namespace MinioWebBackend.Controllers
 {

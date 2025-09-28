@@ -3,6 +3,7 @@
 using Amazon.S3;
 using MinioWebBackend.Models;
 using MinioWebBackend.Interfaces;
+using MinioWebBackend.Dtos.FileInfoDTOs;
 
 
 namespace MinioWebBackend.Service

@@ -1,8 +1,8 @@
 using MinioWebBackend.Interfaces;
 using MinioWebBackend.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MinioWebBackend.Dtos.QuertDTOs;
+using MinioWebBackend.Dtos.FileInfoDTOs;
 
 namespace MinioWebBackend.Controllers
 {

@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using MinioWebBackend.Dtos.LogDtos;
+using MinioWebBackend.Dtos.TagDTOs;
 using MinioWebBackend.Interfaces;
 using MinioWebBackend.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
 
 
 [ApiController]
@@ -11,12 +11,10 @@ using Microsoft.AspNetCore.Authorization;
 public class FileTagController : ControllerBase
 {
     private readonly IFileTagService _fileTagService;
-    private readonly AppDbContext _dbContext;
 
-    public FileTagController(IFileTagService fileTagService, AppDbContext dbcontext)
+    public FileTagController(IFileTagService fileTagService)
     {
         _fileTagService = fileTagService;
-        _dbContext = dbcontext;
     }
 
 
@@ -55,7 +53,7 @@ public class FileTagController : ControllerBase
     /// <response code="200">返回匹配的文件列表和数量</response>
     /// <response code="404">没有找到文件</response>
     [HttpGet("tag/{tagName}")]
-    public async Task<IActionResult> GetFilesByTag(string tagName)
+    public async Task<ActionResult<List<FileRecordESDto>>> GetFilesByTag(string tagName)
     {
         var files = await _fileTagService.GetFilesByTagAsync(tagName);
         if (files == null || files.Count == 0)
@@ -100,7 +98,7 @@ public class FileTagController : ControllerBase
     /// <response code="200">返回匹配的文件列表和数量</response>
     /// <response code="404">没有找到文件</response>
     [HttpGet("tags")]
-    public async Task<IActionResult> GetFilesByTags([FromQuery] string[] tagNames, [FromQuery] bool matchAll = false)
+    public async Task<ActionResult<List<FileWithTagsDto>>>  GetFilesByTags([FromQuery] string[] tagNames, [FromQuery] bool matchAll = false)
     {
         var files = await _fileTagService.GetFilesByTagsAsync(tagNames.ToList(), matchAll);
         if (files == null || files.Count == 0)
@@ -108,34 +106,5 @@ public class FileTagController : ControllerBase
         return Ok(files);
     }
 
-    // / <summary>
-    // / 获取指定文件的所有标签
-    // / </summary>
-    // / <remarks>
-    // / 请求示例：
-    // / ```
-    // / GET /api/files/file/123
-    // / ```
-    // / 响应示例：
-    // / ```json
-    // / [
-    // /   { "id": 1, "name": "合同" },
-    // /   { "id": 2, "name": "PDF" }
-    // / ]
-    // / ```
-    // / </remarks>
-    // / <param name="fileId">文件 ID</param>
-    // / <response code="200">返回该文件的标签列表</response>
-    // / <response code="404">没有找到标签</response>
-    // [HttpGet("file/{fileId}")]
-    // public async Task<ActionResult<List<Tag>>> GetTagsByFile(int fileId)
-    // {
-    //     var tags = await _fileTagService.GetTagsByFileAsync(fileId);
-    //     if (tags == null || tags.Count == 0)
-    //     {
-    //         return NotFound($"No tags found for fileId {fileId}.");
-    //     }
 
-    //     return Ok(tags);
-    // }
 }

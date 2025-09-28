@@ -1,4 +1,5 @@
 using MinioWebBackend.Dtos.LogDtos;
+using MinioWebBackend.Dtos.TagDTOs;
 using MinioWebBackend.Models;
 
 namespace MinioWebBackend.Interfaces

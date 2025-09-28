@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using MinioWebBackend.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 
 namespace MinioWebBackend.Controllers
 {

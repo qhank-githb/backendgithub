@@ -1,3 +1,4 @@
+using MinioWebBackend.Dtos.UploadDTOs;
 using MinioWebBackend.Models;
 
 namespace MinioWebBackend.Interfaces

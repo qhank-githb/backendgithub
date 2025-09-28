@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using MinioWebBackend.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Swashbuckle.AspNetCore.Annotations;
 using MinioWebBackend.Models;
 using Amazon.S3;
 using Amazon.S3.Model;
+using MinioWebBackend.Dtos.FileInfoDTOs;
 
 namespace MinioWebBackend.Controllers
 {

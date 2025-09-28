@@ -1,12 +1,8 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using MinioWebBackend.Dtos.LogDtos;
 using MinioWebBackend.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
-using System;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace MinioWebBackend.Controllers
 {

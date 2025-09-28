@@ -3,6 +3,8 @@ using MinioWebBackend.Interfaces;
 using MinioWebBackend.Models;
 using Microsoft.AspNetCore.Authorization;
 using MinioWebBackend.Dtos.LogDtos;
+using MinioWebBackend.Dtos.TagDTOs;
+using MinioWebBackend.Dtos.EditFileDTOs;
 
 [ApiController]
 [Route("api/tags")]

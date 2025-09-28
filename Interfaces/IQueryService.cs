@@ -1,4 +1,5 @@
 using MinioWebBackend.Models;
+using MinioWebBackend.Dtos.FileInfoDTOs;
 
 namespace MinioWebBackend.Interfaces
 {

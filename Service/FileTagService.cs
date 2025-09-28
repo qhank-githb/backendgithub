@@ -2,6 +2,7 @@ using MinioWebBackend.Interfaces;
 using MinioWebBackend.Models;
 using Microsoft.EntityFrameworkCore;
 using MinioWebBackend.Dtos.LogDtos;
+using MinioWebBackend.Dtos.TagDTOs;
 
 
 public class FileTagService : IFileTagService

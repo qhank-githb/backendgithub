@@ -6,6 +6,8 @@ using Microsoft.Extensions.Options;
 using MinioWebBackend.Options;
 using Serilog;
 using Microsoft.EntityFrameworkCore;
+using MinioWebBackend.Dtos.UploadDTOs;
+using MinioWebBackend.Dtos.FileInfoDTOs;
 
 
 namespace MinioWebBackend.Service

@@ -5,6 +5,7 @@ using MinioWebBackend.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using MinioWebBackend.Dtos.LogDtos;
+using MinioWebBackend.Dtos.EditFileDTOs;
 
 
 
